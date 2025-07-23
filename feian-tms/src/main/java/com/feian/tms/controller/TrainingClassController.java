@@ -1,0 +1,196 @@
+package com.feian.tms.controller;
+
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.tms.common.R;
+import com.feian.tms.domain.TrainingClass;
+import com.feian.tms.dto.query.TrainingClassQuery;
+import com.feian.tms.dto.request.IdRequest;
+import com.feian.tms.dto.request.TrainingClassRequest;
+import com.feian.tms.dto.response.TrainingClassResponse;
+import com.feian.tms.excel.TrainingClassExcel;
+import com.feian.tms.service.TrainingClassService;
+import com.feian.tms.utils.EasyExcelUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+/**
+ * 培训班次管理Controller
+ * 
+ * @author feian
+ * @date 2025-01-23
+ */
+@RestController
+@RequestMapping("/api/tms/trainingClass")
+@RequiredArgsConstructor
+@Tag(name = "培训班次管理", description = "培训班次管理相关接口")
+public class TrainingClassController {
+    
+    private final TrainingClassService trainingClassService;
+
+    /**
+     * 查询培训班次管理列表
+     */
+    @PostMapping("/list")
+    @Operation(summary = "查询培训班次管理列表", description = "根据查询条件分页查询培训班次列表")
+    public R<Page<TrainingClassResponse>> list(@RequestBody TrainingClassQuery query) {
+        Page<TrainingClass> page = new Page<>(query.getPageNum(), query.getPageSize());
+        
+        // 构建查询条件
+        var queryWrapper = trainingClassService.lambdaQuery()
+                .like(query.getClassCode() != null, TrainingClass::getClassCode, query.getClassCode())
+                .like(query.getClassName() != null, TrainingClass::getClassName, query.getClassName())
+                .eq(query.getTrainingPlanId() != null, TrainingClass::getTrainingPlanId, query.getTrainingPlanId())
+                .eq(query.getMachineTypeId() != null, TrainingClass::getMachineTypeId, query.getMachineTypeId())
+                .eq(query.getMajorId() != null, TrainingClass::getMajorId, query.getMajorId())
+                .eq(query.getTrainingAbilityId() != null, TrainingClass::getTrainingAbilityId, query.getTrainingAbilityId())
+                .ge(query.getPlanStartTime() != null, TrainingClass::getPlanStartTime, query.getPlanStartTime())
+                .le(query.getPlanEndTime() != null, TrainingClass::getPlanEndTime, query.getPlanEndTime())
+                .eq(query.getPrimaryInstructorId() != null, TrainingClass::getPrimaryInstructorId, query.getPrimaryInstructorId())
+                .eq(query.getStatus() != null, TrainingClass::getStatus, query.getStatus())
+                .orderByDesc(TrainingClass::getCreateTime);
+        
+        Page<TrainingClass> result = queryWrapper.page(page);
+        
+        // 转换为响应对象
+        Page<TrainingClassResponse> responsePage = new Page<>();
+        BeanUtils.copyProperties(result, responsePage);
+        
+        var responseList = result.getRecords().stream()
+                .map(entity -> {
+                    TrainingClassResponse response = new TrainingClassResponse();
+                    BeanUtils.copyProperties(entity, response);
+                    return response;
+                })
+                .toList();
+        
+        responsePage.setRecords(responseList);
+        return R.success(responsePage);
+    }
+
+    /**
+     * 获取培训班次管理详细信息
+     */
+    @PostMapping("/detail")
+    @Operation(summary = "获取培训班次详细信息", description = "根据ID获取培训班次详细信息")
+    public R<TrainingClassResponse> detail(@Valid @RequestBody IdRequest request) {
+        TrainingClass entity = trainingClassService.getById(request.getId());
+        if (entity == null) {
+            return R.fail("培训班次信息不存在");
+        }
+        
+        TrainingClassResponse response = new TrainingClassResponse();
+        BeanUtils.copyProperties(entity, response);
+        return R.success(response);
+    }
+
+    /**
+     * 新增培训班次管理
+     */
+    @PostMapping("/create")
+    @Operation(summary = "新增培训班次", description = "创建新的培训班次信息")
+    public R<TrainingClassResponse> create(@Valid @RequestBody TrainingClassRequest request) {
+        TrainingClass entity = new TrainingClass();
+        BeanUtils.copyProperties(request, entity);
+        
+        boolean result = trainingClassService.save(entity);
+        if (result) {
+            TrainingClassResponse response = new TrainingClassResponse();
+            BeanUtils.copyProperties(entity, response);
+            return R.success(response);
+        }
+        return R.fail("新增培训班次失败");
+    }
+
+    /**
+     * 修改培训班次管理
+     */
+    @PostMapping("/update")
+    @Operation(summary = "修改培训班次", description = "更新现有培训班次信息")
+    public R<TrainingClassResponse> update(@Valid @RequestBody TrainingClassRequest request) {
+        if (request.getTrainingClassId() == null) {
+            return R.fail("培训班次ID不能为空");
+        }
+        
+        TrainingClass entity = new TrainingClass();
+        BeanUtils.copyProperties(request, entity);
+        
+        boolean result = trainingClassService.updateById(entity);
+        if (result) {
+            TrainingClassResponse response = new TrainingClassResponse();
+            BeanUtils.copyProperties(entity, response);
+            return R.success(response);
+        }
+        return R.fail("更新培训班次失败");
+    }
+
+    /**
+     * 删除培训班次管理
+     */
+    @PostMapping("/delete")
+    @Operation(summary = "删除培训班次", description = "根据ID删除培训班次信息")
+    public R<Void> delete(@Valid @RequestBody IdRequest request) {
+        boolean result = trainingClassService.removeById(request.getId());
+        if (result) {
+            return R.success();
+        }
+        return R.fail("删除培训班次失败");
+    }
+
+    /**
+     * 导出培训班次管理列表（使用EasyExcel）
+     */
+    @PostMapping("/export")
+    @Operation(summary = "导出培训班次列表", description = "根据查询条件导出培训班次列表到Excel")
+    public void export(HttpServletResponse response, @RequestBody TrainingClassQuery query) {
+        // 查询所有数据（不分页）
+        var queryWrapper = trainingClassService.lambdaQuery()
+                .like(query.getClassCode() != null, TrainingClass::getClassCode, query.getClassCode())
+                .like(query.getClassName() != null, TrainingClass::getClassName, query.getClassName())
+                .eq(query.getTrainingPlanId() != null, TrainingClass::getTrainingPlanId, query.getTrainingPlanId())
+                .eq(query.getMachineTypeId() != null, TrainingClass::getMachineTypeId, query.getMachineTypeId())
+                .eq(query.getMajorId() != null, TrainingClass::getMajorId, query.getMajorId())
+                .eq(query.getTrainingAbilityId() != null, TrainingClass::getTrainingAbilityId, query.getTrainingAbilityId())
+                .ge(query.getPlanStartTime() != null, TrainingClass::getPlanStartTime, query.getPlanStartTime())
+                .le(query.getPlanEndTime() != null, TrainingClass::getPlanEndTime, query.getPlanEndTime())
+                .eq(query.getPrimaryInstructorId() != null, TrainingClass::getPrimaryInstructorId, query.getPrimaryInstructorId())
+                .eq(query.getStatus() != null, TrainingClass::getStatus, query.getStatus())
+                .orderByDesc(TrainingClass::getCreateTime);
+        
+        List<TrainingClass> list = queryWrapper.list();
+        
+        // 转换为导出对象
+        List<TrainingClassExcel> excelList = list.stream()
+                .map(entity -> {
+                    TrainingClassExcel excel = new TrainingClassExcel();
+                    BeanUtils.copyProperties(entity, excel);
+                    // 转换状态显示文本
+                    excel.setStatusName(convertStatus(entity.getStatus()));
+                    return excel;
+                })
+                .toList();
+        
+        // 使用EasyExcel导出
+        EasyExcelUtil.exportExcel(response, "培训班次管理", "培训班次列表", TrainingClassExcel.class, excelList);
+    }
+
+    /**
+     * 转换状态枚举
+     */
+    private String convertStatus(String status) {
+        if (status == null) return "";
+        return switch (status) {
+            case "0" -> "待开班";
+            case "1" -> "培训中";
+            case "2" -> "已结班";
+            case "3" -> "已取消";
+            default -> "";
+        };
+    }
+}

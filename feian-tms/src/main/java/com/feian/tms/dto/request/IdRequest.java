@@ -18,4 +18,9 @@ public class IdRequest {
     @Schema(description = "主键ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "ID不能为空")
     private Long id;
+    
+    // Explicit getter method for controller compatibility
+    public Long getId() {
+        return id;
+    }
 }

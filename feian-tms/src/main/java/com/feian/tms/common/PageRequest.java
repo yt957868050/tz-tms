@@ -61,23 +61,23 @@ public class PageRequest<T> {
          */
         @Schema(description = "排序方式", allowableValues = {"ASC", "DESC"}, defaultValue = "ASC")
         private String order = "ASC";
+        
+        public String getFieldName() {
+            return fieldName;
+        }
+        
+        public void setFieldName(String fieldName) {
+            this.fieldName = fieldName;
+        }
+        
+        public String getOrder() {
+            return order;
+        }
+        
+        public void setOrder(String order) {
+            this.order = order;
+        }
     }
 
-    /**
-     * 转换为Spring Data JPA分页对象
-     *
-     * @return Spring Data JPA分页对象
-     */
-    public org.springframework.data.domain.Pageable toPageable() {
-        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.unsorted();
-        if (sortField != null && !sortField.isEmpty()) {
-            org.springframework.data.domain.Sort.Order[] orders = sortField.stream()
-                    .map(s -> "DESC".equalsIgnoreCase(s.getOrder()) 
-                            ? org.springframework.data.domain.Sort.Order.desc(s.getFieldName())
-                            : org.springframework.data.domain.Sort.Order.asc(s.getFieldName()))
-                    .toArray(org.springframework.data.domain.Sort.Order[]::new);
-            sort = org.springframework.data.domain.Sort.by(orders);
-        }
-        return org.springframework.data.domain.PageRequest.of(pageNum - 1, pageSize, sort);
-    }
+
 }

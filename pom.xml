@@ -5,12 +5,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	
     <groupId>com.feian</groupId>
-    <artifactId>ruoyi</artifactId>
+    <artifactId>tms-parent</artifactId>
     <version>3.9.0</version>
 
-    <name>ruoyi</name>
-    <url>http://www.ruoyi.vip</url>
-    <description>若依管理系统</description>
+    <name>tms</name>
+    <description>教学管理系统</description>
     
     <properties>
         <ruoyi.version>3.9.0</ruoyi.version>

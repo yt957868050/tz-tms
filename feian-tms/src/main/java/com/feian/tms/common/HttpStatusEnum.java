@@ -48,6 +48,14 @@ public enum HttpStatusEnum {
         this.code = code;
         this.message = message;
     }
+    
+    public int getCode() {
+        return code;
+    }
+    
+    public String getMessage() {
+        return message;
+    }
 
     /**
      * 根据状态码获取枚举

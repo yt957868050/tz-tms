@@ -1,7 +1,9 @@
 package com.feian.tms.dto.query;
 
+import com.feian.tms.common.PageRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 机型管理查询对象
@@ -10,8 +12,9 @@ import lombok.Data;
  * @date 2025-01-23
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "机型管理查询对象")
-public class MachineTypeQuery {
+public class MachineTypeQuery extends PageRequest<MachineTypeQuery> {
     
     @Schema(description = "机型名称", example = "Bell-206")
     private String machineTypeName;
@@ -21,10 +24,4 @@ public class MachineTypeQuery {
 
     @Schema(description = "状态（0正常 1停用）", example = "0", allowableValues = {"0", "1"})
     private String status;
-
-    @Schema(description = "页码", example = "1", defaultValue = "1")
-    private Integer pageNum = 1;
-
-    @Schema(description = "页面大小", example = "10", defaultValue = "10")
-    private Integer pageSize = 10;
 }

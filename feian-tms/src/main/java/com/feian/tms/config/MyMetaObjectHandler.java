@@ -14,9 +14,10 @@ import java.util.Date;
  * @author feian
  * @date 2025-01-23
  */
-@Slf4j
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
+    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MyMetaObjectHandler.class);
 
     /**
      * 插入时自动填充
