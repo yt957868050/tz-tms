@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-    <groupId>com.ruoyi</groupId>
+    <groupId>com.feian</groupId>
     <artifactId>ruoyi</artifactId>
     <version>3.9.0</version>
 
@@ -27,6 +27,7 @@
         <oshi.version>6.8.1</oshi.version>
         <commons.io.version>2.19.0</commons.io.version>
         <poi.version>4.1.2</poi.version>
+        <easyexcel.version>4.0.3</easyexcel.version>
         <velocity.version>2.3</velocity.version>
         <jwt.version>0.9.1</jwt.version>
         <mysql.version>8.2.0</mysql.version>
@@ -133,6 +134,13 @@
                 <version>${poi.version}</version>
             </dependency>
 
+            <!-- EasyExcel -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+            </dependency>
+
             <!-- velocity代码生成使用模板 -->
             <dependency>
                 <groupId>org.apache.velocity</groupId>
@@ -163,36 +171,43 @@
 
             <!-- 定时任务-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-quartz</artifactId>
+                <groupId>com.feian</groupId>
+                <artifactId>feian-quartz</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 代码生成-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-generator</artifactId>
+                <groupId>com.feian</groupId>
+                <artifactId>feian-generator</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 核心模块-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-framework</artifactId>
+                <groupId>com.feian</groupId>
+                <artifactId>feian-framework</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 系统模块-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-system</artifactId>
+                <groupId>com.feian</groupId>
+                <artifactId>feian-system</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 通用工具-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-common</artifactId>
+                <groupId>com.feian</groupId>
+                <artifactId>feian-common</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
+            <!-- TMS运输管理模块-->
+            <dependency>
+                <groupId>com.feian</groupId>
+                <artifactId>feian-tms</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
@@ -200,12 +215,13 @@
     </dependencyManagement>
 
     <modules>
-        <module>ruoyi-admin</module>
-        <module>ruoyi-framework</module>
-        <module>ruoyi-system</module>
-        <module>ruoyi-quartz</module>
-        <module>ruoyi-generator</module>
-        <module>ruoyi-common</module>
+        <module>feian-admin</module>
+        <module>feian-framework</module>
+        <module>feian-system</module>
+        <module>feian-quartz</module>
+        <module>feian-generator</module>
+        <module>feian-common</module>
+        <module>feian-tms</module>
     </modules>
     <packaging>pom</packaging>
 
