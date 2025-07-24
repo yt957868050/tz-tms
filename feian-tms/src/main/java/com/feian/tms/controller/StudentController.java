@@ -1,7 +1,8 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.common.annotation.DataScope;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Student;
 import com.feian.tms.common.PageRequest;
@@ -48,13 +49,15 @@ public class StudentController {
     @PostMapping("/list")
     @Operation(summary = "查询学员信息列表", description = "根据查询条件分页查询学员信息列表")
     @DataScope(enableMachineTypeFilter = true, studentAlias = "s")
-    public R<Page<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest) {
-        Page<Student> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
+    public R<PageInfo<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         
         StudentRequest query = pageRequest.getQuery();
         if (query == null) {
             query = new StudentRequest();
         }
+        
         // 构建查询条件
         var queryWrapper = studentService.lambdaQuery()
                 .like(query.getStudentName() != null, Student::getStudentName, query.getStudentName())
@@ -69,13 +72,10 @@ public class StudentController {
                 .eq(query.getStatus() != null, Student::getStatus, query.getStatus())
                 .orderByDesc(Student::getCreateTime);
         
-        Page<Student> result = queryWrapper.page(page);
+        List<Student> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<StudentResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     StudentResponse response = new StudentResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -87,7 +87,6 @@ public class StudentController {
                                 StudentResponse.MachineTypeInfo info = new StudentResponse.MachineTypeInfo();
                                 info.setMachineTypeId(mt.getMachineTypeId());
                                 info.setMachineTypeName(mt.getMachineTypeName());
-                                // TODO: 需要查询是否为主要机型
                                 info.setIsPrimary(mt.getMachineTypeId().equals(entity.getPrimaryMachineTypeId()));
                                 return info;
                             })
@@ -106,8 +105,8 @@ public class StudentController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**

@@ -24,6 +24,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateBy"      column="update_by"       />
         <result property="updateTime"    column="update_time"     />
         <result property="remark"        column="remark"          />
+        <result property="studentId"     column="student_id"      />
+        <result property="instructorId"  column="instructor_id"   />
+        <result property="currentMachineTypeId"   column="current_machine_type_id"   />
+        <result property="currentMachineTypeName" column="current_machine_type_name" />
         <association property="dept"     javaType="SysDept"         resultMap="deptResult" />
         <collection  property="roles"    javaType="java.util.List"  resultMap="RoleResult" />
     </resultMap>
@@ -48,7 +52,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 	
 	<sql id="selectUserVo">
-        select u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.avatar, u.phonenumber, u.password, u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.pwd_update_date, u.create_by, u.create_time, u.remark, 
+        select u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.avatar, u.phonenumber, u.password, u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.pwd_update_date, u.create_by, u.create_time, u.remark, u.student_id, u.instructor_id, u.current_machine_type_id, u.current_machine_type_name,
         d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.status as dept_status,
         r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status as role_status
         from sys_user u
@@ -219,5 +223,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			#{userId}
         </foreach> 
  	</delete>
+
+	<update id="updateUserCurrentMachineType">
+		update sys_user set current_machine_type_id = #{currentMachineTypeId} where user_id = #{userId}
+	</update>
 	
 </mapper> 

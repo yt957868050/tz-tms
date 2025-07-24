@@ -392,10 +392,22 @@ public R<Page<DepartmentResponse>> getDepartments(@RequestParam String name) {
 @Tag(name = "部门管理", description = "部门管理相关接口")
 public class DepartmentController {
     
-    // 查询列表
+    // 查询列表 - 使用PageHelper分页
     @PostMapping("/list")
-    public R<Page<DepartmentResponse>> list(@RequestBody DepartmentQuery query) {
-        return R.success(service.list(query));
+    public R<PageInfo<DepartmentResponse>> list(@RequestBody PageRequest<DepartmentQuery> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        // 查询数据
+        List<Department> list = service.list(pageRequest.getQuery());
+        
+        // 转换为响应对象
+        List<DepartmentResponse> responseList = list.stream()
+            .map(this::convertToResponse)
+            .toList();
+        
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
     
     // 获取详情
@@ -468,3 +480,4 @@ public interface DepartmentMapper extends MPJBaseMapper<Department> {
 - Documented key business modules, system features, and coding standards for the helicopter training management system
 - Provided detailed explanations of backend and frontend architectures, project structure, and API design principles
 - Added to-memorize content on May 25, 2024
+- Memorized: to memorize

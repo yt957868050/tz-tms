@@ -1,7 +1,9 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.domain.MachineType;
 import com.feian.tms.dto.query.MachineTypeQuery;
 import com.feian.tms.dto.request.IdRequest;
@@ -39,8 +41,14 @@ public class MachineTypeController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询机型管理列表", description = "根据查询条件分页查询机型列表")
-    public R<Page<MachineTypeResponse>> list(@RequestBody MachineTypeQuery query) {
-        Page<MachineType> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<PageInfo<MachineTypeResponse>> list(@RequestBody PageRequest<MachineTypeQuery> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        MachineTypeQuery query = pageRequest.getQuery();
+        if (query == null) {
+            query = new MachineTypeQuery();
+        }
         
         // 构建查询条件
         var queryWrapper = machineTypeService.lambdaQuery()
@@ -50,13 +58,10 @@ public class MachineTypeController {
                 .orderByAsc(MachineType::getOrderNum)
                 .orderByDesc(MachineType::getCreateTime);
         
-        Page<MachineType> result = queryWrapper.page(page);
+        List<MachineType> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<MachineTypeResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     MachineTypeResponse response = new MachineTypeResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -64,8 +69,8 @@ public class MachineTypeController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**

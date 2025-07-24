@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Courseware;
@@ -15,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -38,19 +40,20 @@ public class CoursewareController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询课件管理列表", description = "根据查询条件分页查询课件列表")
-    public R<Page<CoursewareResponse>> list(@RequestBody PageRequest<CoursewareRequest> pageQuery) {
-        Page<Courseware> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+    public R<PageInfo<CoursewareResponse>> list(@RequestBody PageRequest<CoursewareRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
 
-        CoursewareRequest query = pageQuery.getQuery();
+        CoursewareRequest query = pageRequest.getQuery();
         if (query == null) {
             query = new CoursewareRequest();
         }
 
         // 使用service的新方法，包含关联查询
-        Page<CoursewareResponse> result = coursewareService.selectCoursewarePage(page, query);
+        List<CoursewareResponse> list = coursewareService.selectCoursewareList(query);
         
         // 为每个课件查询关联的文件
-        result.getRecords().forEach(response -> {
+        list.forEach(response -> {
             var files = coursewareFileService.lambdaQuery()
                     .eq(CoursewareFile::getCoursewareId, response.getCoursewareId())
                     .eq(CoursewareFile::getStatus, "0")
@@ -59,7 +62,8 @@ public class CoursewareController {
             response.setFiles(files);
         });
 
-        return R.success(result);
+        // 返回分页信息
+        return R.success(new PageInfo<>(list));
     }
 
     /**

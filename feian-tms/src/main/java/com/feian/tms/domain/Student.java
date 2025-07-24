@@ -70,6 +70,10 @@ public class Student extends BaseEntity {
     @Excel(name = "入职时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date hireDate;
 
+    /** 入学时间 */
+    @Excel(name = "入学时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date enrollmentDate;
+
     /** 主要机型ID */
     @Excel(name = "主要机型ID")
     private Long primaryMachineTypeId;
@@ -99,4 +103,8 @@ public class Student extends BaseEntity {
 
     /** 主要专业名称 */
     private String primaryMajorName;
+
+
+
+
 }

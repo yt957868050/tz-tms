@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingAbility;
@@ -40,11 +41,15 @@ public class TrainingAbilityController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训能力列表", description = "根据查询条件分页查询培训能力列表")
-    public R<Page<TrainingAbilityResponse>> list(@RequestBody PageRequest<TrainingAbilityRequest> pageQuery) {
-        Page<TrainingAbility> page = new Page<>(pageQuery.getPageNum() ,
-                pageQuery.getPageSize());
+    public R<PageInfo<TrainingAbilityResponse>> list(@RequestBody PageRequest<TrainingAbilityRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
 
-        TrainingAbilityRequest query = pageQuery.getQuery();
+        TrainingAbilityRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new TrainingAbilityRequest();
+        }
+        
         // 构建查询条件
         var queryWrapper = trainingAbilityService.lambdaQuery()
                 .like(query.getAbilityName() != null, TrainingAbility::getAbilityName, query.getAbilityName())
@@ -52,13 +57,10 @@ public class TrainingAbilityController {
                 .eq(query.getStatus() != null, TrainingAbility::getStatus, query.getStatus())
                 .orderByAsc(TrainingAbility::getTrainingAbilityId);
         
-        Page<TrainingAbility> result = queryWrapper.page(page);
+        List<TrainingAbility> list = queryWrapper.list();
         
         // 转换为响应对象  
-        Page<TrainingAbilityResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     TrainingAbilityResponse response = new TrainingAbilityResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -66,8 +68,8 @@ public class TrainingAbilityController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**

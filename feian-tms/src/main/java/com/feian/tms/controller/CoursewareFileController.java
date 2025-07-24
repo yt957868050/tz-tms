@@ -1,9 +1,11 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.CoursewareFile;
 import com.feian.tms.dto.query.CoursewareFileQuery;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CoursewareFileRequest;
 import com.feian.tms.dto.response.CoursewareFileResponse;
@@ -39,8 +41,13 @@ public class CoursewareFileController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询课件文件管理列表", description = "根据查询条件分页查询课件文件列表")
-    public R<Page<CoursewareFileResponse>> list(@RequestBody CoursewareFileQuery query) {
-        Page<CoursewareFile> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<PageInfo<CoursewareFileResponse>> list(@RequestBody PageRequest<CoursewareFileQuery> pageRequest) {
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        CoursewareFileQuery query = pageRequest.getQuery();
+        if (query == null) {
+            query = new CoursewareFileQuery();
+        }
         
         // 构建查询条件
         var queryWrapper = coursewareFileService.lambdaQuery()
@@ -52,13 +59,10 @@ public class CoursewareFileController {
                 .orderByAsc(CoursewareFile::getOrderNum)
                 .orderByDesc(CoursewareFile::getCreateTime);
         
-        Page<CoursewareFile> result = queryWrapper.page(page);
+        List<CoursewareFile> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<CoursewareFileResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     CoursewareFileResponse response = new CoursewareFileResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -66,8 +70,7 @@ public class CoursewareFileController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**

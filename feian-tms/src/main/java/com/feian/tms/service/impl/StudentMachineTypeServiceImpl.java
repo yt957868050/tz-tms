@@ -12,6 +12,7 @@ import com.feian.tms.mapper.MachineTypeMapper;
 import com.feian.tms.mapper.StudentMapper;
 import com.feian.tms.mapper.StudentMachineTypeMapper;
 import com.feian.tms.service.IStudentMachineTypeService;
+import com.feian.system.mapper.SysUserMapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class StudentMachineTypeServiceImpl extends MPJBaseServiceImpl<StudentMac
     private final MachineTypeMapper machineTypeMapper;
     private final StudentMapper studentMapper;
     private final InstructorMapper instructorMapper;
+    private final SysUserMapper sysUserMapper;
 
     @Override
     public List<MachineType> getAvailableMachineTypesByStudentId(Long studentId) {
@@ -154,7 +156,20 @@ public class StudentMachineTypeServiceImpl extends MPJBaseServiceImpl<StudentMac
         StudentMachineType update2 = new StudentMachineType();
         update2.setIsPrimary("1");
         
-        return studentMachineTypeMapper.update(update2, wrapper2) > 0;
+        boolean result = studentMachineTypeMapper.update(update2, wrapper2) > 0;
+        
+        if (result) {
+            // 更新学员表中的主要机型ID
+            Student student = new Student();
+            student.setStudentId(studentId);
+            student.setPrimaryMachineTypeId(machineTypeId);
+            studentMapper.updateById(student);
+            
+            // 同时更新sys_user表中的current_machine_type_id
+            updateUserCurrentMachineType(studentId, machineTypeId);
+        }
+        
+        return result;
     }
 
     @Override
@@ -169,6 +184,30 @@ public class StudentMachineTypeServiceImpl extends MPJBaseServiceImpl<StudentMac
             addStudentMachineType(studentId, machineTypeId, isPrimary);
         }
         
+        // 更新学员表中的主要机型ID
+        Student student = new Student();
+        student.setStudentId(studentId);
+        student.setPrimaryMachineTypeId(primaryMachineTypeId);
+        studentMapper.updateById(student);
+        
+        // 同时更新sys_user表中的current_machine_type_id
+        updateUserCurrentMachineType(studentId, primaryMachineTypeId);
+        
         return true;
+    }
+    
+    /**
+     * 更新用户表中的当前机型ID
+     */
+    private void updateUserCurrentMachineType(Long studentId, Long machineTypeId) {
+        // 根据studentId查找对应的用户
+        LambdaQueryWrapper<Student> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Student::getStudentId, studentId);
+        Student student = studentMapper.selectOne(wrapper);
+        
+        if (student != null && student.getUserId() != null) {
+            // 使用新增的方法更新sys_user表的current_machine_type_id
+            sysUserMapper.updateUserCurrentMachineType(student.getUserId(), machineTypeId);
+        }
     }
 }

@@ -124,4 +124,13 @@ public interface SysUserMapper
      * @return 结果
      */
     public SysUser checkEmailUnique(String email);
+
+    /**
+     * 更新用户当前机型ID
+     * 
+     * @param userId 用户ID
+     * @param currentMachineTypeId 当前机型ID
+     * @return 结果
+     */
+    public int updateUserCurrentMachineType(@Param("userId") Long userId, @Param("currentMachineTypeId") Long currentMachineTypeId);
 }

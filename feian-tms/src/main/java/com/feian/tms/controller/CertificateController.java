@@ -1,9 +1,11 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Certificate;
 import com.feian.tms.dto.query.CertificateQuery;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CertificateRequest;
 import com.feian.tms.dto.response.CertificateResponse;
@@ -39,8 +41,13 @@ public class CertificateController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询证书管理列表", description = "根据查询条件分页查询证书列表")
-    public R<Page<CertificateResponse>> list(@RequestBody CertificateQuery query) {
-        Page<Certificate> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<PageInfo<CertificateResponse>> list(@RequestBody PageRequest<CertificateQuery> pageRequest) {
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        CertificateQuery query = pageRequest.getQuery();
+        if (query == null) {
+            query = new CertificateQuery();
+        }
         
         // 构建查询条件
         var queryWrapper = certificateService.lambdaQuery()
@@ -58,13 +65,10 @@ public class CertificateController {
                 .eq(query.getCertificateStatus() != null, Certificate::getCertificateStatus, query.getCertificateStatus())
                 .orderByDesc(Certificate::getCreateTime);
         
-        Page<Certificate> result = queryWrapper.page(page);
+        List<Certificate> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<CertificateResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     CertificateResponse response = new CertificateResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -72,8 +76,7 @@ public class CertificateController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**

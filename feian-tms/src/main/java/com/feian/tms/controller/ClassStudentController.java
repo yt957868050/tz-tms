@@ -1,9 +1,11 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.ClassStudent;
 import com.feian.tms.dto.query.ClassStudentQuery;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.ClassStudentRequest;
 import com.feian.tms.dto.response.ClassStudentResponse;
@@ -39,8 +41,13 @@ public class ClassStudentController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询班次学员关联列表", description = "根据查询条件分页查询班次学员关联列表")
-    public R<Page<ClassStudentResponse>> list(@RequestBody ClassStudentQuery query) {
-        Page<ClassStudent> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<PageInfo<ClassStudentResponse>> list(@RequestBody PageRequest<ClassStudentQuery> pageRequest) {
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        ClassStudentQuery query = pageRequest.getQuery();
+        if (query == null) {
+            query = new ClassStudentQuery();
+        }
         
         // 构建查询条件
         var queryWrapper = classStudentService.lambdaQuery()
@@ -50,13 +57,10 @@ public class ClassStudentController {
                 .eq(query.getStudentStatus() != null, ClassStudent::getStudentStatus, query.getStudentStatus())
                 .orderByDesc(ClassStudent::getEnrollTime);
         
-        Page<ClassStudent> result = queryWrapper.page(page);
+        List<ClassStudent> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<ClassStudentResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     ClassStudentResponse response = new ClassStudentResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -64,8 +68,7 @@ public class ClassStudentController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**

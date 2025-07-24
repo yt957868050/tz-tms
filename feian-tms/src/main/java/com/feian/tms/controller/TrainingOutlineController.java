@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingOutline;
 import com.feian.tms.common.PageRequest;
@@ -47,16 +48,19 @@ public class TrainingOutlineController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训大纲列表", description = "根据查询条件分页查询培训大纲列表")
-    public R<Page<TrainingOutlineResponse>> list(@RequestBody PageRequest<TrainingOutlineRequest> pageRequest) {
-        Page<TrainingOutline> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
+    public R<PageInfo<TrainingOutlineResponse>> list(@RequestBody PageRequest<TrainingOutlineRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         
         TrainingOutlineRequest query = pageRequest.getQuery();
         if (query == null) {
             query = new TrainingOutlineRequest();
         }
         
-        Page<TrainingOutlineResponse> result = trainingOutlineService.selectTrainingOutlinePage(page, query);
-        return R.success(result);
+        List<TrainingOutlineResponse> list = trainingOutlineService.selectTrainingOutlineList(query);
+        
+        // 返回分页信息
+        return R.success(new PageInfo<>(list));
     }
 
     /**
