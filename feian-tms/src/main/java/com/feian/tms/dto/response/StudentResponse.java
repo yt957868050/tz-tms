@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 学员信息响应对象
@@ -86,4 +87,23 @@ public class StudentResponse {
 
     @Schema(description = "备注", example = "备注信息")
     private String remark;
+
+    @Schema(description = "关联的机型列表")
+    private List<MachineTypeInfo> machineTypes;
+    
+    /**
+     * 机型信息对象
+     */
+    @Data
+    @Schema(description = "机型信息")
+    public static class MachineTypeInfo {
+        @Schema(description = "机型ID")
+        private Long machineTypeId;
+        
+        @Schema(description = "机型名称")
+        private String machineTypeName;
+        
+        @Schema(description = "是否为主要机型")
+        private Boolean isPrimary;
+    }
 }

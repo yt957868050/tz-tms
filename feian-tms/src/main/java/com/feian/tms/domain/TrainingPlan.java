@@ -10,13 +10,12 @@ import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
- * 培训计划管理对象 tms_training_plan
+ * 培训计划对象 tms_training_plan
  * 
  * @author feian
- * @date 2025-01-23
+ * @date 2025-01-24
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -24,17 +23,17 @@ import java.util.List;
 public class TrainingPlan extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    /** 培训计划ID */
+    /** 计划ID */
     @TableId(type = IdType.AUTO)
-    private Long trainingPlanId;
+    private Long planId;
 
-    /** 培训计划名称 */
-    @Excel(name = "培训计划名称")
-    private String trainingPlanName;
+    /** 计划编号 */
+    @Excel(name = "计划编号")
+    private String planCode;
 
-    /** 培训计划编号 */
-    @Excel(name = "培训计划编号")
-    private String trainingPlanCode;
+    /** 计划名称 */
+    @Excel(name = "计划名称")
+    private String planName;
 
     /** 机型ID */
     @Excel(name = "机型ID")
@@ -48,34 +47,51 @@ public class TrainingPlan extends BaseEntity {
     @Excel(name = "培训能力ID")
     private Long trainingAbilityId;
 
-    /** 计划开始时间 */
-    @Excel(name = "计划开始时间", width = 30, dateFormat = "yyyy-MM-dd")
-    private Date planStartTime;
+    /** 开始时间 */
+    @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date startDate;
 
-    /** 计划结束时间 */
-    @Excel(name = "计划结束时间", width = 30, dateFormat = "yyyy-MM-dd")
-    private Date planEndTime;
+    /** 结束时间 */
+    @Excel(name = "结束时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date endDate;
 
-    /** 总理论学时 */
-    @Excel(name = "总理论学时")
-    private BigDecimal totalTheoryHours;
+    /** 总培训时长 */
+    @Excel(name = "总培训时长")
+    private BigDecimal totalHours;
 
-    /** 总实践学时 */
-    @Excel(name = "总实践学时")
-    private BigDecimal totalPracticeHours;
+    /** 理论时长 */
+    @Excel(name = "理论时长")
+    private BigDecimal theoryHours;
 
-    /** 计划人数 */
-    @Excel(name = "计划人数")
-    private Integer planStudentCount;
+    /** 实践时长 */
+    @Excel(name = "实践时长")
+    private BigDecimal practiceHours;
 
-    /** 培训计划描述 */
-    @Excel(name = "培训计划描述")
-    private String trainingPlanDesc;
+    /** 计划状态（0草稿 1执行中 2已完成 3已取消） */
+    @Excel(name = "计划状态", readConverterExp = "0=草稿,1=执行中,2=已完成,3=已取消")
+    private String planStatus;
 
-    /** 状态（0草稿 1待审核 2已审核 3执行中 4已完成 5已取消） */
-    @Excel(name = "状态", readConverterExp = "0=草稿,1=待审核,2=已审核,3=执行中,4=已完成,5=已取消")
+    /** 是否已生成课表（0否 1是） */
+    @Excel(name = "课表生成状态", readConverterExp = "0=未生成,1=已生成")
+    private String scheduleGenerated;
+
+    /** 班次课程表名称 */
+    @Excel(name = "班次课程表名称")
+    private String classScheduleName;
+
+    /** 教学进度安排表名称 */
+    @Excel(name = "教学进度安排表名称")
+    private String teachingScheduleName;
+
+    /** 机型实作培训项目清单名称 */
+    @Excel(name = "实作项目清单名称")
+    private String practicalProjectListName;
+
+    /** 状态（0正常 1停用） */
+    @Excel(name = "状态", readConverterExp = "0=正常,1=停用")
     private String status;
 
+    // 关联显示字段
     /** 机型名称 */
     private String machineTypeName;
 
@@ -84,7 +100,4 @@ public class TrainingPlan extends BaseEntity {
 
     /** 培训能力名称 */
     private String trainingAbilityName;
-
-    /** 培训计划明细列表 */
-    private List<TrainingPlanDetail> trainingPlanDetailList;
 }

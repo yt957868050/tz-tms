@@ -3,7 +3,7 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingPlanDetail;
-import com.feian.tms.dto.query.TrainingPlanDetailQuery;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.TrainingPlanDetailRequest;
 import com.feian.tms.dto.response.TrainingPlanDetailResponse;
@@ -39,9 +39,13 @@ public class TrainingPlanDetailController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训计划明细管理列表", description = "根据查询条件分页查询培训计划明细列表")
-    public R<Page<TrainingPlanDetailResponse>> list(@RequestBody TrainingPlanDetailQuery query) {
-        Page<TrainingPlanDetail> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<Page<TrainingPlanDetailResponse>> list(@RequestBody PageRequest<TrainingPlanDetailRequest> pageRequest) {
+        Page<TrainingPlanDetail> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         
+        TrainingPlanDetailRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new TrainingPlanDetailRequest();
+        }
         // 构建查询条件
         var queryWrapper = trainingPlanDetailService.lambdaQuery()
                 .eq(query.getTrainingPlanId() != null, TrainingPlanDetail::getTrainingPlanId, query.getTrainingPlanId())
@@ -142,7 +146,7 @@ public class TrainingPlanDetailController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出培训计划明细列表", description = "根据查询条件导出培训计划明细列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody TrainingPlanDetailQuery query) {
+    public void export(HttpServletResponse response, @RequestBody TrainingPlanDetailRequest query) {
         // 查询所有数据（不分页）
         var queryWrapper = trainingPlanDetailService.lambdaQuery()
                 .eq(query.getTrainingPlanId() != null, TrainingPlanDetail::getTrainingPlanId, query.getTrainingPlanId())

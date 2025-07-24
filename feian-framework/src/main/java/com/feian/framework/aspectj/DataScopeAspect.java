@@ -56,6 +56,11 @@ public class DataScopeAspect
      */
     public static final String DATA_SCOPE = "dataScope";
 
+    /**
+     * 机型数据权限过滤关键字
+     */
+    public static final String MACHINE_TYPE_SCOPE = "machineTypeScope";
+
     @Before("@annotation(controllerDataScope)")
     public void doBefore(JoinPoint point, DataScope controllerDataScope) throws Throwable
     {
@@ -75,6 +80,11 @@ public class DataScopeAspect
             {
                 String permission = StringUtils.defaultIfEmpty(controllerDataScope.permission(), PermissionContextHolder.getContext());
                 dataScopeFilter(joinPoint, currentUser, controllerDataScope.deptAlias(), controllerDataScope.userAlias(), permission);
+                
+                // 处理机型数据权限过滤
+                if (controllerDataScope.enableMachineTypeFilter()) {
+                    machineTypeScopeFilter(joinPoint, currentUser, controllerDataScope.machineTypeAlias(), controllerDataScope.studentAlias());
+                }
             }
         }
     }
@@ -170,6 +180,53 @@ public class DataScopeAspect
     }
 
     /**
+     * 机型数据权限过滤
+     *
+     * @param joinPoint 切点
+     * @param user 用户
+     * @param machineTypeAlias 机型表别名
+     * @param studentAlias 学员表别名
+     */
+    public static void machineTypeScopeFilter(JoinPoint joinPoint, SysUser user, String machineTypeAlias, String studentAlias)
+    {
+        Long currentMachineTypeId = user.getCurrentMachineTypeId();
+        if (currentMachineTypeId == null) {
+            // 如果用户没有选择机型，不显示任何数据
+            Object params = joinPoint.getArgs()[0];
+            if (StringUtils.isNotNull(params) && params instanceof BaseEntity)
+            {
+                BaseEntity baseEntity = (BaseEntity) params;
+                baseEntity.getParams().put(MACHINE_TYPE_SCOPE, " AND 1 = 0 ");
+            }
+            return;
+        }
+
+        StringBuilder sqlString = new StringBuilder();
+        
+        // 根据用户选择的机型过滤数据
+        if (StringUtils.isNotBlank(machineTypeAlias)) {
+            // 直接根据机型表过滤
+            sqlString.append(StringUtils.format(" AND {}.machine_type_id = {} ", machineTypeAlias, currentMachineTypeId));
+        } else if (StringUtils.isNotBlank(studentAlias)) {
+            // 通过学员机型关联表过滤
+            sqlString.append(StringUtils.format(" AND {}.student_id IN ( SELECT student_id FROM tms_student_machine_type WHERE machine_type_id = {} AND status = '0' ) ", studentAlias, currentMachineTypeId));
+        } else {
+            // 默认通过primary_machine_type_id字段过滤
+            sqlString.append(StringUtils.format(" AND primary_machine_type_id = {} ", currentMachineTypeId));
+        }
+
+        if (StringUtils.isNotBlank(sqlString.toString()))
+        {
+            Object params = joinPoint.getArgs()[0];
+            if (StringUtils.isNotNull(params) && params instanceof BaseEntity)
+            {
+                BaseEntity baseEntity = (BaseEntity) params;
+                baseEntity.getParams().put(MACHINE_TYPE_SCOPE, sqlString.toString());
+            }
+        }
+    }
+
+    /**
      * 拼接权限sql前先清空params.dataScope参数防止注入
      */
     private void clearDataScope(final JoinPoint joinPoint)
@@ -179,6 +236,7 @@ public class DataScopeAspect
         {
             BaseEntity baseEntity = (BaseEntity) params;
             baseEntity.getParams().put(DATA_SCOPE, "");
+            baseEntity.getParams().put(MACHINE_TYPE_SCOPE, "");
         }
     }
 }

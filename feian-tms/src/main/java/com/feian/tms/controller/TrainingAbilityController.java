@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingAbility;
 import com.feian.tms.dto.query.TrainingAbilityQuery;
@@ -27,7 +28,7 @@ import java.util.List;
  * @date 2025-01-23
  */
 @RestController
-@RequestMapping("/api/tms/trainingAbility")
+@RequestMapping("/api/tms/training-ability")
 @RequiredArgsConstructor
 @Tag(name = "培训能力管理", description = "培训能力管理相关接口")
 public class TrainingAbilityController {
@@ -35,25 +36,25 @@ public class TrainingAbilityController {
     private final TrainingAbilityService trainingAbilityService;
 
     /**
-     * 查询培训能力管理列表
+     * 查询培训能力列表
      */
     @PostMapping("/list")
-    @Operation(summary = "查询培训能力管理列表", description = "根据查询条件分页查询培训能力列表")
-    public R<Page<TrainingAbilityResponse>> list(@RequestBody TrainingAbilityQuery query) {
-        Page<TrainingAbility> page = new Page<>(query.getPageNum(), query.getPageSize());
-        
+    @Operation(summary = "查询培训能力列表", description = "根据查询条件分页查询培训能力列表")
+    public R<Page<TrainingAbilityResponse>> list(@RequestBody PageRequest<TrainingAbilityRequest> pageQuery) {
+        Page<TrainingAbility> page = new Page<>(pageQuery.getPageNum() ,
+                pageQuery.getPageSize());
+
+        TrainingAbilityRequest query = pageQuery.getQuery();
         // 构建查询条件
         var queryWrapper = trainingAbilityService.lambdaQuery()
-                .like(query.getTrainingAbilityName() != null, TrainingAbility::getTrainingAbilityName, query.getTrainingAbilityName())
-                .like(query.getTrainingAbilityCode() != null, TrainingAbility::getTrainingAbilityCode, query.getTrainingAbilityCode())
-                .eq(query.getAbilityType() != null, TrainingAbility::getAbilityType, query.getAbilityType())
+                .like(query.getAbilityName() != null, TrainingAbility::getAbilityName, query.getAbilityName())
+                .like(query.getAbilityCode() != null, TrainingAbility::getAbilityCode, query.getAbilityCode())
                 .eq(query.getStatus() != null, TrainingAbility::getStatus, query.getStatus())
-                .orderByAsc(TrainingAbility::getOrderNum)
-                .orderByDesc(TrainingAbility::getCreateTime);
+                .orderByAsc(TrainingAbility::getTrainingAbilityId);
         
         Page<TrainingAbility> result = queryWrapper.page(page);
         
-        // 转换为响应对象
+        // 转换为响应对象  
         Page<TrainingAbilityResponse> responsePage = new Page<>();
         BeanUtils.copyProperties(result, responsePage);
         
@@ -146,11 +147,10 @@ public class TrainingAbilityController {
     public void export(HttpServletResponse response, @RequestBody TrainingAbilityQuery query) {
         // 查询所有数据（不分页）
         var queryWrapper = trainingAbilityService.lambdaQuery()
-                .like(query.getTrainingAbilityName() != null, TrainingAbility::getTrainingAbilityName, query.getTrainingAbilityName())
-                .like(query.getTrainingAbilityCode() != null, TrainingAbility::getTrainingAbilityCode, query.getTrainingAbilityCode())
-                .eq(query.getAbilityType() != null, TrainingAbility::getAbilityType, query.getAbilityType())
+                .like(query.getTrainingAbilityName() != null, TrainingAbility::getAbilityName, query.getTrainingAbilityName())
+                .like(query.getTrainingAbilityCode() != null, TrainingAbility::getAbilityCode, query.getTrainingAbilityCode())
+                .eq(query.getAbilityType() != null, TrainingAbility::getTrainingAbilityId, query.getAbilityType())
                 .eq(query.getStatus() != null, TrainingAbility::getStatus, query.getStatus())
-                .orderByAsc(TrainingAbility::getOrderNum)
                 .orderByDesc(TrainingAbility::getCreateTime);
         
         List<TrainingAbility> list = queryWrapper.list();
@@ -161,7 +161,6 @@ public class TrainingAbilityController {
                     TrainingAbilityExcel excel = new TrainingAbilityExcel();
                     BeanUtils.copyProperties(entity, excel);
                     // 转换枚举值为中文显示
-                    excel.setAbilityTypeName(convertAbilityType(entity.getAbilityType()));
                     excel.setStatusName("0".equals(entity.getStatus()) ? "正常" : "停用");
                     return excel;
                 })

@@ -8,11 +8,13 @@ import com.feian.tms.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
+
 /**
- * 培训能力管理对象 tms_training_ability
+ * 培训能力对象 tms_training_ability
  * 
  * @author feian
- * @date 2025-01-23
+ * @date 2025-01-24
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -24,27 +26,27 @@ public class TrainingAbility extends BaseEntity {
     @TableId(type = IdType.AUTO)
     private Long trainingAbilityId;
 
-    /** 培训能力名称 */
-    @Excel(name = "培训能力名称")
-    private String trainingAbilityName;
+    /** 能力编码 */
+    @Excel(name = "能力编码")
+    private String abilityCode;
 
-    /** 培训能力代码 */
-    @Excel(name = "培训能力代码")  
-    private String trainingAbilityCode;
+    /** 能力名称 */
+    @Excel(name = "能力名称")
+    private String abilityName;
 
-    /** 培训能力类型（1培训 2复训 3恢复考试） */
-    @Excel(name = "培训能力类型", readConverterExp = "1=培训,2=复训,3=恢复考试")
-    private String abilityType;
+    /** 能力描述 */
+    @Excel(name = "能力描述")
+    private String abilityDesc;
 
-    /** 培训能力描述 */
-    @Excel(name = "培训能力描述")
-    private String trainingAbilityDesc;
+    /** 每日培训时长 */
+    @Excel(name = "每日培训时长")
+    private BigDecimal dailyHours;
+
+    /** 建议培训天数 */
+    @Excel(name = "建议培训天数")
+    private Integer totalDays;
 
     /** 状态（0正常 1停用） */
     @Excel(name = "状态", readConverterExp = "0=正常,1=停用")
     private String status;
-
-    /** 排序 */
-    @Excel(name = "排序")
-    private Integer orderNum;
 }

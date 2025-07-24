@@ -90,6 +90,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.feian</groupId>
+            <artifactId>feian-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.feian</groupId>
+            <artifactId>feian-framework</artifactId>
+        </dependency>
 
     </dependencies>
 

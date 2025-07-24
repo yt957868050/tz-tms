@@ -56,6 +56,9 @@ public class CoursewareRequest {
     /** 课程要求 */
     private String courseRequirement;
 
+    /** 培训类型（1理论 2实践） */
+    private String trainingType;
+
     /** 状态（0正常 1停用） */
     private String status;
 

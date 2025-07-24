@@ -27,6 +27,21 @@ public @interface DataScope
     public String userAlias() default "";
 
     /**
+     * 机型表的别名（TMS模块专用）
+     */
+    public String machineTypeAlias() default "";
+
+    /**
+     * 学员表的别名（TMS模块专用）
+     */
+    public String studentAlias() default "";
+
+    /**
+     * 是否启用机型数据权限过滤
+     */
+    public boolean enableMachineTypeFilter() default false;
+
+    /**
      * 权限字符（用于多个角色匹配符合要求的权限）默认根据权限注解@ss获取，多个权限用逗号分隔开来
      */
     public String permission() default "";

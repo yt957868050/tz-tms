@@ -3,7 +3,7 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.StudentAbility;
-import com.feian.tms.dto.query.StudentAbilityQuery;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.StudentAbilityRequest;
 import com.feian.tms.dto.response.StudentAbilityResponse;
@@ -39,9 +39,13 @@ public class StudentAbilityController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询学员学习能力列表", description = "根据查询条件分页查询学员学习能力列表")
-    public R<Page<StudentAbilityResponse>> list(@RequestBody StudentAbilityQuery query) {
-        Page<StudentAbility> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<Page<StudentAbilityResponse>> list(@RequestBody PageRequest<StudentAbilityRequest> pageRequest) {
+        Page<StudentAbility> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         
+        StudentAbilityRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new StudentAbilityRequest();
+        }
         // 构建查询条件
         var queryWrapper = studentAbilityService.lambdaQuery()
                 .eq(query.getStudentId() != null, StudentAbility::getStudentId, query.getStudentId())
@@ -148,7 +152,7 @@ public class StudentAbilityController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出学员学习能力列表", description = "根据查询条件导出学员学习能力列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody StudentAbilityQuery query) {
+    public void export(HttpServletResponse response, @RequestBody StudentAbilityRequest query) {
         // 查询所有数据（不分页）
         var queryWrapper = studentAbilityService.lambdaQuery()
                 .eq(query.getStudentId() != null, StudentAbility::getStudentId, query.getStudentId())

@@ -26,6 +26,10 @@ public class Student extends BaseEntity {
     @TableId(type = IdType.AUTO)
     private Long studentId;
 
+    /** 关联的用户ID */
+    @Excel(name = "用户ID")
+    private Long userId;
+
     /** 学员工号 */
     @Excel(name = "学员工号")
     private String studentCode;

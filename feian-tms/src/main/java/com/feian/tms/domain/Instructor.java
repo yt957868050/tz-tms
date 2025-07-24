@@ -99,6 +99,9 @@ public class Instructor extends BaseEntity {
     @Excel(name = "状态", readConverterExp = "0=正常,1=停用")
     private String status;
 
+    /**用户id **/
+    private Long userId;
+
     /** 教员授课能力列表 */
     private List<InstructorAbility> instructorAbilityList;
 }
