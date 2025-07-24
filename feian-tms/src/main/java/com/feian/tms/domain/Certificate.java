@@ -6,8 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.feian.common.annotation.Excel;
 import com.feian.tms.common.BaseEntity;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.Date;
 
@@ -18,6 +17,9 @@ import java.util.Date;
  * @date 2025-01-23
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @TableName("tms_certificate")
 public class Certificate extends BaseEntity {
@@ -99,6 +101,14 @@ public class Certificate extends BaseEntity {
     @Excel(name = "作废时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date voidTime;
 
+    /** 创建时间 */
+    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+
+    /** 更新时间 */
+    @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
+
     /** 学员姓名 */
     private String studentName;
 
@@ -113,4 +123,13 @@ public class Certificate extends BaseEntity {
 
     /** 培训能力名称 */
     private String trainingAbilityName;
+
+    /** 证书描述 */
+    private String certificateDescription;
+
+    /** 备注 */
+    private String remark;
+
+
+
 }

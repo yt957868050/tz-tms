@@ -97,17 +97,42 @@ public class CertificateController {
      */
     @PostMapping("/create")
     @Operation(summary = "新增证书", description = "创建新的证书信息")
-    public R<CertificateResponse> create(@Valid @RequestBody CertificateRequest request) {
-        Certificate entity = new Certificate();
-        BeanUtils.copyProperties(request, entity);
-        
-        boolean result = certificateService.save(entity);
-        if (result) {
-            CertificateResponse response = new CertificateResponse();
-            BeanUtils.copyProperties(entity, response);
-            return R.success(response);
-        }
-        return R.fail("新增证书失败");
+    public R create( @RequestBody CertificateRequest request) {
+        Long trainingClassId=1L;
+        Certificate entity =Certificate.builder()
+                .certificateDescription(request.getCertificateDescription())
+                .certificateCode(request.getCertificateNumber())
+                .certificateType(request.getCertificateType())
+                .issueDate(request.getIssueDate())
+                .voidTime(request.getExpiryDate())
+                .issueOrganization(request.getIssuingAuthority())
+                .machineTypeId(request.getMachineTypeId())
+                .majorId(request.getMajorId())
+                .remark(request.getRemark())
+                .certificateStatus(request.getStatus())
+                .studentId(request.getStudentId())
+                .trainingClassId(trainingClassId)
+                .trainingAbilityId(trainingClassId)
+                .createTime(request.getIssueDate())
+                .updateTime(request.getIssueDate())
+                .certificateName("01证书")
+
+
+
+                .build();
+        certificateService.saveCertificate(entity);
+        return R.success();
+
+//        Certificate entity = new Certificate();
+//        BeanUtils.copyProperties(request, entity);
+//
+//        boolean result = certificateService.save(entity);
+//        if (result) {
+//            CertificateResponse response = new CertificateResponse();
+//            BeanUtils.copyProperties(entity, response);
+//            return R.success(response);
+//        }
+//        return R.fail("新增证书失败");
     }
 
     /**
