@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	
     <groupId>com.feian</groupId>
-    <artifactId>tms-parent</artifactId>
+    <artifactId>ruoyi</artifactId>
     <version>3.9.0</version>
 
     <name>tms</name>

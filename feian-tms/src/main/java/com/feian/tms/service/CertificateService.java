@@ -1,6 +1,7 @@
 package com.feian.tms.service;
 
 import com.feian.tms.domain.Certificate;
+import com.feian.tms.dto.request.CertificateRequest;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -11,4 +12,7 @@ import com.github.yulichang.base.MPJBaseService;
  */
 public interface CertificateService extends MPJBaseService<Certificate> {
 
+
+
+    void saveCertificate(Certificate entity);
 }

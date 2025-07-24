@@ -1,5 +1,6 @@
 package com.feian.tms.dto.request;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +23,7 @@ public class CertificateRequest {
 
     @Schema(description = "证书编号", example = "CERT2024001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "证书编号不能为空")
-    private String certificateCode;
+    private String certificateNumber;
 
     @Schema(description = "证书名称", example = "Bell-206飞行员培训证书", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "证书名称不能为空")
@@ -61,10 +62,10 @@ public class CertificateRequest {
 
     @Schema(description = "有效期结束", example = "2026-06-30", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "有效期结束不能为空")
-    private Date validUntil;
+    private Date expiryDate;
 
     @Schema(description = "颁发机构", example = "飞行培训中心")
-    private String issueOrganization;
+    private String issuingAuthority;
 
     @Schema(description = "签发人", example = "张主任")
     private String issuer;
@@ -76,7 +77,7 @@ public class CertificateRequest {
     private String certificateFilePath;
 
     @Schema(description = "证书状态", example = "0", allowableValues = {"0", "1", "2", "3"})
-    private String certificateStatus;
+    private String status;
 
     @Schema(description = "作废原因", example = "证书错误")
     private String voidReason;
@@ -86,4 +87,7 @@ public class CertificateRequest {
 
     @Schema(description = "备注", example = "备注信息")
     private String remark;
+
+    @Schema(description = "证书描述", example = "该证书用于证明学员完成Bell-206直升机培训。")
+    private String certificateDescription;
 }
