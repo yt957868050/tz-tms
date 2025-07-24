@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingRecord;
 import com.feian.tms.common.PageRequest;
@@ -9,6 +10,10 @@ import com.feian.tms.dto.request.TrainingRecordRequest;
 import com.feian.tms.dto.response.TrainingRecordResponse;
 import com.feian.tms.excel.TrainingRecordExcel;
 import com.feian.tms.service.TrainingRecordService;
+import com.feian.tms.service.StudentService;
+import com.feian.tms.service.TrainingClassService;
+import com.feian.tms.service.CoursewareService;
+import com.feian.tms.service.InstructorService;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -33,14 +38,19 @@ import java.util.List;
 public class TrainingRecordController {
     
     private final TrainingRecordService trainingRecordService;
+    private final StudentService studentService;
+    private final TrainingClassService trainingClassService;
+    private final CoursewareService coursewareService;
+    private final InstructorService instructorService;
 
     /**
      * 查询培训记录列表
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训记录列表", description = "根据查询条件分页查询培训记录列表")
-    public R<Page<TrainingRecordResponse>> list(@RequestBody PageRequest<TrainingRecordRequest> pageRequest) {
-        Page<TrainingRecord> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
+    public R<PageInfo<TrainingRecordResponse>> list(@RequestBody PageRequest<TrainingRecordRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         
         TrainingRecordRequest query = pageRequest.getQuery();
         if (query == null) {
@@ -58,22 +68,50 @@ public class TrainingRecordController {
                 .eq(query.getTrainingEffect() != null, TrainingRecord::getTrainingEffect, query.getTrainingEffect())
                 .orderByDesc(TrainingRecord::getTrainingDate);
         
-        Page<TrainingRecord> result = queryWrapper.page(page);
+        List<TrainingRecord> list = queryWrapper.list();
         
-        // 转换为响应对象
-        Page<TrainingRecordResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        // 转换为响应对象并填充关联字段
+        var responseList = list.stream()
                 .map(entity -> {
                     TrainingRecordResponse response = new TrainingRecordResponse();
                     BeanUtils.copyProperties(entity, response);
+                    
+                    // 填充关联字段
+                    if (entity.getStudentId() != null) {
+                        var student = studentService.getById(entity.getStudentId());
+                        if (student != null) {
+                            response.setStudentName(student.getStudentName());
+                            response.setStudentCode(student.getStudentCode());
+                        }
+                    }
+                    
+                    if (entity.getTrainingClassId() != null) {
+                        var trainingClass = trainingClassService.getById(entity.getTrainingClassId());
+                        if (trainingClass != null) {
+                            response.setClassName(trainingClass.getClassName());
+                        }
+                    }
+                    
+                    if (entity.getCoursewareId() != null) {
+                        var courseware = coursewareService.getById(entity.getCoursewareId());
+                        if (courseware != null) {
+                            response.setCourseName(courseware.getCourseName());
+                        }
+                    }
+                    
+                    if (entity.getInstructorId() != null) {
+                        var instructor = instructorService.getById(entity.getInstructorId());
+                        if (instructor != null) {
+                            response.setInstructorName(instructor.getInstructorName());
+                        }
+                    }
+                    
                     return response;
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**
@@ -89,6 +127,37 @@ public class TrainingRecordController {
         
         TrainingRecordResponse response = new TrainingRecordResponse();
         BeanUtils.copyProperties(entity, response);
+        
+        // 填充关联字段
+        if (entity.getStudentId() != null) {
+            var student = studentService.getById(entity.getStudentId());
+            if (student != null) {
+                response.setStudentName(student.getStudentName());
+                response.setStudentCode(student.getStudentCode());
+            }
+        }
+        
+        if (entity.getTrainingClassId() != null) {
+            var trainingClass = trainingClassService.getById(entity.getTrainingClassId());
+            if (trainingClass != null) {
+                response.setClassName(trainingClass.getClassName());
+            }
+        }
+        
+        if (entity.getCoursewareId() != null) {
+            var courseware = coursewareService.getById(entity.getCoursewareId());
+            if (courseware != null) {
+                response.setCourseName(courseware.getCourseName());
+            }
+        }
+        
+        if (entity.getInstructorId() != null) {
+            var instructor = instructorService.getById(entity.getInstructorId());
+            if (instructor != null) {
+                response.setInstructorName(instructor.getInstructorName());
+            }
+        }
+        
         return R.success(response);
     }
 

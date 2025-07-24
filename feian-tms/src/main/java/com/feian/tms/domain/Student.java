@@ -99,9 +99,11 @@ public class Student extends BaseEntity {
     private String status;
 
     /** 主要机型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String primaryMachineTypeName;
 
     /** 主要专业名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String primaryMajorName;
 
 

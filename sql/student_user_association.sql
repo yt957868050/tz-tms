@@ -98,12 +98,12 @@ INSERT IGNORE INTO tms_training_class (
 ('EC135差异培训班', 'EC135-2024-03', 3, 1, 3, '2024-08-01', '2024-08-15', 6, '0', 'admin', NOW(), 'EC135机型差异培训');
 
 -- 11. 创建班次学员关联
-INSERT IGNORE INTO tms_class_student (class_id, student_id, enrollment_date, status, create_by, create_time) VALUES
-(1, 1, '2024-05-15', '0', 'admin', NOW()),  -- 张三参加AS350培训
-(1, 3, '2024-05-16', '0', 'admin', NOW()),  -- 王五参加AS350培训
-(2, 2, '2024-06-20', '0', 'admin', NOW()),  -- 李四参加R44复训
-(2, 5, '2024-06-21', '0', 'admin', NOW()),  -- 孙七参加R44复训
-(3, 4, '2024-07-25', '0', 'admin', NOW());  -- 赵六参加EC135差异培训
+INSERT IGNORE INTO tms_class_student (training_class_id, student_id, enroll_time, student_status, create_by, create_time, update_time) VALUES
+(1, 1, '2024-05-15 09:00:00', '0', 'admin', NOW(), NOW()),  -- 张三参加AS350培训
+(1, 3, '2024-05-16 09:00:00', '0', 'admin', NOW(), NOW()),  -- 王五参加AS350培训
+(2, 2, '2024-06-20 09:00:00', '0', 'admin', NOW(), NOW()),  -- 李四参加R44复训
+(2, 5, '2024-06-21 09:00:00', '0', 'admin', NOW(), NOW()),  -- 孙七参加R44复训
+(3, 4, '2024-07-25 09:00:00', '0', 'admin', NOW(), NOW());  -- 赵六参加EC135差异培训
 
 -- 12. 创建一些课件测试数据
 INSERT IGNORE INTO tms_courseware (

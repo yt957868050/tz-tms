@@ -103,5 +103,6 @@ public class Instructor extends BaseEntity {
     private Long userId;
 
     /** 教员授课能力列表 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private List<InstructorAbility> instructorAbilityList;
 }

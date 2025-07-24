@@ -4,10 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.domain.TrainingOutline;
+import com.feian.tms.domain.MachineType;
+import com.feian.tms.domain.Major;
+import com.feian.tms.domain.TrainingAbility;
 import com.feian.tms.dto.request.TrainingOutlineRequest;
 import com.feian.tms.dto.response.TrainingOutlineResponse;
 import com.feian.tms.mapper.TrainingOutlineMapper;
 import com.feian.tms.service.TrainingOutlineService;
+import com.feian.tms.service.MachineTypeService;
+import com.feian.tms.service.MajorService;
+import com.feian.tms.service.TrainingAbilityService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +34,9 @@ import java.util.stream.Collectors;
 public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutlineMapper, TrainingOutline> implements TrainingOutlineService {
 
     private final TrainingOutlineMapper trainingOutlineMapper;
+    private final MachineTypeService machineTypeService;
+    private final MajorService majorService;
+    private final TrainingAbilityService trainingAbilityService;
 
     @Override
     public Page<TrainingOutlineResponse> selectTrainingOutlinePage(Page<TrainingOutline> page, TrainingOutlineRequest request) {
@@ -119,10 +128,7 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
         TrainingOutline outline = new TrainingOutline();
         BeanUtils.copyProperties(request, outline);
         
-        // 计算总课时
-        BigDecimal theoryHours = request.getTheoryHours() != null ? request.getTheoryHours() : BigDecimal.ZERO;
-        BigDecimal practicalHours = request.getPracticalHours() != null ? request.getPracticalHours() : BigDecimal.ZERO;
-        outline.setTotalHours(theoryHours.add(practicalHours));
+        // 总课时由数据库自动计算，不需要手动设置
         
         // 保存实体
         boolean result = this.save(outline);
@@ -137,10 +143,7 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
         TrainingOutline outline = new TrainingOutline();
         BeanUtils.copyProperties(request, outline);
         
-        // 计算总课时
-        BigDecimal theoryHours = request.getTheoryHours() != null ? request.getTheoryHours() : BigDecimal.ZERO;
-        BigDecimal practicalHours = request.getPracticalHours() != null ? request.getPracticalHours() : BigDecimal.ZERO;
-        outline.setTotalHours(theoryHours.add(practicalHours));
+        // 总课时由数据库自动计算，不需要手动设置
         
         // 更新实体
         boolean result = this.updateById(outline);
@@ -197,8 +200,27 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
         TrainingOutlineResponse response = new TrainingOutlineResponse();
         BeanUtils.copyProperties(outline, response);
         
-        // TODO: 这里可以添加关联查询来获取机型名称、专业名称、培训能力名称
-        // 现在先返回基本信息，可以后续优化为联表查询
+        // 关联查询获取机型、专业、培训能力名称
+        if (outline.getMachineTypeId() != null) {
+            MachineType machineType = machineTypeService.getById(outline.getMachineTypeId());
+            if (machineType != null) {
+                response.setMachineTypeName(machineType.getMachineTypeName());
+            }
+        }
+        
+        if (outline.getMajorId() != null) {
+            Major major = majorService.getById(outline.getMajorId());
+            if (major != null) {
+                response.setMajorName(major.getMajorName());
+            }
+        }
+        
+        if (outline.getTrainingAbilityId() != null) {
+            TrainingAbility trainingAbility = trainingAbilityService.getById(outline.getTrainingAbilityId());
+            if (trainingAbility != null) {
+                response.setTrainingAbilityName(trainingAbility.getAbilityName());
+            }
+        }
         
         return response;
     }

@@ -93,11 +93,14 @@ public class TrainingPlan extends BaseEntity {
 
     // 关联显示字段
     /** 机型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String machineTypeName;
 
     /** 专业名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String majorName;
 
     /** 培训能力名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingAbilityName;
 }

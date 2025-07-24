@@ -88,6 +88,12 @@ public class StudentController {
                                 info.setMachineTypeId(mt.getMachineTypeId());
                                 info.setMachineTypeName(mt.getMachineTypeName());
                                 info.setIsPrimary(mt.getMachineTypeId().equals(entity.getPrimaryMachineTypeId()));
+                                
+                                // 设置主要机型名称
+                                if (info.getIsPrimary()) {
+                                    response.setPrimaryMachineTypeName(mt.getMachineTypeName());
+                                }
+                                
                                 return info;
                             })
                             .toList();
@@ -122,6 +128,34 @@ public class StudentController {
         
         StudentResponse response = new StudentResponse();
         BeanUtils.copyProperties(entity, response);
+        
+        // 添加机型信息
+        List<MachineType> machineTypes = studentMachineTypeService.getAvailableMachineTypesByStudentId(entity.getStudentId());
+        List<StudentResponse.MachineTypeInfo> machineTypeInfos = machineTypes.stream()
+                .map(mt -> {
+                    StudentResponse.MachineTypeInfo info = new StudentResponse.MachineTypeInfo();
+                    info.setMachineTypeId(mt.getMachineTypeId());
+                    info.setMachineTypeName(mt.getMachineTypeName());
+                    info.setIsPrimary(mt.getMachineTypeId().equals(entity.getPrimaryMachineTypeId()));
+                    
+                    // 设置主要机型名称
+                    if (info.getIsPrimary()) {
+                        response.setPrimaryMachineTypeName(mt.getMachineTypeName());
+                    }
+                    
+                    return info;
+                })
+                .toList();
+        response.setMachineTypes(machineTypeInfos);
+        
+        // 添加专业名称
+        if (entity.getPrimaryMajorId() != null) {
+            Major major = majorService.getById(entity.getPrimaryMajorId());
+            if (major != null) {
+                response.setPrimaryMajorName(major.getMajorName());
+            }
+        }
+        
         return R.success(response);
     }
 

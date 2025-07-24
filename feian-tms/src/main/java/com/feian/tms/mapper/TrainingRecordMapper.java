@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
  * 培训记录Mapper接口
  * 
  * @author feian
- * @date 2025-01-23
+ * @date 2025-01-24
  */
 @Mapper
 public interface TrainingRecordMapper extends MPJBaseMapper<TrainingRecord> {

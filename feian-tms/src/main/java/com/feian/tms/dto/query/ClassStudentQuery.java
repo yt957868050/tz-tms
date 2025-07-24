@@ -1,9 +1,7 @@
 package com.feian.tms.dto.query;
 
-import com.feian.tms.common.PageRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -14,9 +12,8 @@ import java.util.Date;
  * @date 2025-01-23
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Schema(description = "班次学员关联查询对象")
-public class ClassStudentQuery extends PageRequest<ClassStudentQuery> {
+public class ClassStudentQuery {
     
     @Schema(description = "培训班次ID", example = "1")
     private Long trainingClassId;

@@ -76,11 +76,14 @@ public class TrainingPlanSchedule extends BaseEntity {
 
     // 关联显示字段
     /** 计划名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String planName;
 
     /** 课件名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String coursewareName;
 
     /** 教员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String instructorName;
 }

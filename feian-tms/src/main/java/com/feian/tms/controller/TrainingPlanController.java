@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;  
+import jakarta.validation.Valid;  
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * @date 2025-01-24
  */
 @RestController
-@RequestMapping("/api/tms/training-plan")
+@RequestMapping("/api/tms/trainingPlan")
 @RequiredArgsConstructor
 @Tag(name = "培训计划管理", description = "培训计划管理相关接口")
 public class TrainingPlanController {
@@ -89,6 +89,28 @@ public class TrainingPlanController {
                 .map(entity -> {
                     TrainingPlanResponse response = new TrainingPlanResponse();
                     BeanUtils.copyProperties(entity, response);
+                    
+                    // 设置关联字段名称
+                    if (entity.getMachineTypeId() != null) {
+                        var machineType = machineTypeService.getById(entity.getMachineTypeId());
+                        if (machineType != null) {
+                            response.setMachineTypeName(machineType.getMachineTypeName());
+                        }
+                    }
+                    
+                    if (entity.getMajorId() != null) {
+                        var major = majorService.getById(entity.getMajorId());
+                        if (major != null) {
+                            response.setMajorName(major.getMajorName());
+                        }
+                    }
+                    
+                    if (entity.getTrainingAbilityId() != null) {
+                        var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+                        if (trainingAbility != null) {
+                            response.setTrainingAbilityName(trainingAbility.getAbilityName());
+                        }
+                    }
                     
                     // 设置状态名称
                     response.setPlanStatusName(convertPlanStatus(entity.getPlanStatus()));
@@ -144,6 +166,28 @@ public class TrainingPlanController {
         
         TrainingPlanResponse response = new TrainingPlanResponse();
         BeanUtils.copyProperties(entity, response);
+        
+        // 设置关联字段名称
+        if (entity.getMachineTypeId() != null) {
+            var machineType = machineTypeService.getById(entity.getMachineTypeId());
+            if (machineType != null) {
+                response.setMachineTypeName(machineType.getMachineTypeName());
+            }
+        }
+        
+        if (entity.getMajorId() != null) {
+            var major = majorService.getById(entity.getMajorId());
+            if (major != null) {
+                response.setMajorName(major.getMajorName());
+            }
+        }
+        
+        if (entity.getTrainingAbilityId() != null) {
+            var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+            if (trainingAbility != null) {
+                response.setTrainingAbilityName(trainingAbility.getAbilityName());
+            }
+        }
         
         // 查询关联教员信息
         var instructors = trainingPlanInstructorService.lambdaQuery()

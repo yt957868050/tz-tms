@@ -46,8 +46,10 @@ public class TrainingPlanInstructor extends BaseEntity {
 
     // 关联显示字段
     /** 教员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String instructorName;
 
     /** 计划名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String planName;
 }

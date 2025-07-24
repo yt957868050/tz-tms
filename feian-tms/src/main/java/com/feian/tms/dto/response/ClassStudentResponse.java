@@ -7,59 +7,74 @@ import java.util.Date;
 
 /**
  * 班次学员关联响应对象
- * 
+ *
  * @author feian
- * @date 2025-01-23
+ * @date 2025-01-24
  */
 @Data
 @Schema(description = "班次学员关联响应对象")
 public class ClassStudentResponse {
-    
-    @Schema(description = "班次学员关联ID", example = "1")
+
+    @Schema(description = "班次学员关联ID")
     private Long classStudentId;
 
-    @Schema(description = "培训班次ID", example = "1")
+    @Schema(description = "培训班次ID")
     private Long trainingClassId;
 
-    @Schema(description = "学员ID", example = "1")
-    private Long studentId;
-
-    @Schema(description = "报名时间", example = "2024-01-01 10:00:00")
-    private Date enrollTime;
-
-    @Schema(description = "学员状态（0待开班 1培训中 2已结业 3已退班 4请假中）", example = "0")
-    private String studentStatus;
-
-    @Schema(description = "退班原因", example = "个人原因")
-    private String withdrawReason;
-
-    @Schema(description = "退班时间", example = "2024-02-01 10:00:00")
-    private Date withdrawTime;
-
-    @Schema(description = "班次编号", example = "CLASS2024001")
+    @Schema(description = "班次编号")
     private String classCode;
 
-    @Schema(description = "班次名称", example = "第一期培训班")
+    @Schema(description = "班次名称")
     private String className;
 
-    @Schema(description = "学员姓名", example = "张三")
-    private String studentName;
+    @Schema(description = "学员ID")
+    private Long studentId;
 
-    @Schema(description = "学员工号", example = "S001")
+    @Schema(description = "学员编号")
     private String studentCode;
 
-    @Schema(description = "创建者", example = "admin")
+    @Schema(description = "学员姓名")
+    private String studentName;
+
+    @Schema(description = "学员身份证号")
+    private String idCard;
+
+    @Schema(description = "学员手机号")
+    private String phoneNumber;
+
+    @Schema(description = "主要机型名称")
+    private String primaryMachineTypeName;
+
+    @Schema(description = "主要专业名称")
+    private String primaryMajorName;
+
+    @Schema(description = "报名时间")
+    private Date enrollTime;
+
+    @Schema(description = "学员状态（0正常 1请假 2退课 3毕业）")
+    private String studentStatus;
+
+    @Schema(description = "学员状态名称")
+    private String studentStatusName;
+
+    @Schema(description = "退课原因")
+    private String withdrawReason;
+
+    @Schema(description = "退课时间")
+    private Date withdrawTime;
+
+    @Schema(description = "创建者")
     private String createBy;
 
-    @Schema(description = "创建时间", example = "2024-01-01 10:00:00")
+    @Schema(description = "创建时间")
     private Date createTime;
 
-    @Schema(description = "更新者", example = "admin")
+    @Schema(description = "更新者")
     private String updateBy;
 
-    @Schema(description = "更新时间", example = "2024-01-01 10:00:00")
+    @Schema(description = "更新时间")
     private Date updateTime;
 
-    @Schema(description = "备注", example = "备注信息")
+    @Schema(description = "备注")
     private String remark;
 }

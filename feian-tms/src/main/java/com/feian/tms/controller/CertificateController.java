@@ -11,6 +11,11 @@ import com.feian.tms.dto.request.CertificateRequest;
 import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.excel.CertificateExcel;
 import com.feian.tms.service.CertificateService;
+import com.feian.tms.service.StudentService;
+import com.feian.tms.service.TrainingClassService;
+import com.feian.tms.service.MachineTypeService;
+import com.feian.tms.service.MajorService;
+import com.feian.tms.service.TrainingAbilityService;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +40,11 @@ import java.util.List;
 public class CertificateController {
     
     private final CertificateService certificateService;
+    private final StudentService studentService;
+    private final TrainingClassService trainingClassService;
+    private final MachineTypeService machineTypeService;
+    private final MajorService majorService;
+    private final TrainingAbilityService trainingAbilityService;
 
     /**
      * 查询证书管理列表
@@ -72,6 +82,43 @@ public class CertificateController {
                 .map(entity -> {
                     CertificateResponse response = new CertificateResponse();
                     BeanUtils.copyProperties(entity, response);
+                    
+                    // 设置关联字段名称
+                    if (entity.getStudentId() != null) {
+                        var student = studentService.getById(entity.getStudentId());
+                        if (student != null) {
+                            response.setStudentName(student.getStudentName());
+                        }
+                    }
+                    
+                    if (entity.getTrainingClassId() != null) {
+                        var trainingClass = trainingClassService.getById(entity.getTrainingClassId());
+                        if (trainingClass != null) {
+                            response.setClassName(trainingClass.getClassName());
+                        }
+                    }
+                    
+                    if (entity.getMachineTypeId() != null) {
+                        var machineType = machineTypeService.getById(entity.getMachineTypeId());
+                        if (machineType != null) {
+                            response.setMachineTypeName(machineType.getMachineTypeName());
+                        }
+                    }
+                    
+                    if (entity.getMajorId() != null) {
+                        var major = majorService.getById(entity.getMajorId());
+                        if (major != null) {
+                            response.setMajorName(major.getMajorName());
+                        }
+                    }
+                    
+                    if (entity.getTrainingAbilityId() != null) {
+                        var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+                        if (trainingAbility != null) {
+                            response.setTrainingAbilityName(trainingAbility.getAbilityName());
+                        }
+                    }
+                    
                     return response;
                 })
                 .toList();
@@ -92,6 +139,43 @@ public class CertificateController {
         
         CertificateResponse response = new CertificateResponse();
         BeanUtils.copyProperties(entity, response);
+        
+        // 设置关联字段名称
+        if (entity.getStudentId() != null) {
+            var student = studentService.getById(entity.getStudentId());
+            if (student != null) {
+                response.setStudentName(student.getStudentName());
+            }
+        }
+        
+        if (entity.getTrainingClassId() != null) {
+            var trainingClass = trainingClassService.getById(entity.getTrainingClassId());
+            if (trainingClass != null) {
+                response.setClassName(trainingClass.getClassName());
+            }
+        }
+        
+        if (entity.getMachineTypeId() != null) {
+            var machineType = machineTypeService.getById(entity.getMachineTypeId());
+            if (machineType != null) {
+                response.setMachineTypeName(machineType.getMachineTypeName());
+            }
+        }
+        
+        if (entity.getMajorId() != null) {
+            var major = majorService.getById(entity.getMajorId());
+            if (major != null) {
+                response.setMajorName(major.getMajorName());
+            }
+        }
+        
+        if (entity.getTrainingAbilityId() != null) {
+            var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+            if (trainingAbility != null) {
+                response.setTrainingAbilityName(trainingAbility.getAbilityName());
+            }
+        }
+        
         return R.success(response);
     }
 
@@ -101,27 +185,27 @@ public class CertificateController {
     @PostMapping("/create")
     @Operation(summary = "新增证书", description = "创建新的证书信息")
     public R create( @RequestBody CertificateRequest request) {
-        Long trainingClassId=1L;
         Certificate entity =Certificate.builder()
                 .certificateDescription(request.getCertificateDescription())
                 .certificateCode(request.getCertificateNumber())
+                .certificateName(request.getCertificateName())
                 .certificateType(request.getCertificateType())
                 .issueDate(request.getIssueDate())
-                .voidTime(request.getExpiryDate())
+                .validFrom(request.getValidFrom())
+                .validUntil(request.getExpiryDate())
+                .issuer(request.getIssuer())
                 .issueOrganization(request.getIssuingAuthority())
+                .templatePath(request.getTemplatePath())
+                .certificateFilePath(request.getCertificateFilePath())
                 .machineTypeId(request.getMachineTypeId())
                 .majorId(request.getMajorId())
+                .trainingAbilityId(request.getTrainingAbilityId())
                 .remark(request.getRemark())
                 .certificateStatus(request.getStatus())
                 .studentId(request.getStudentId())
-                .trainingClassId(trainingClassId)
-                .trainingAbilityId(trainingClassId)
-                .createTime(request.getIssueDate())
-                .updateTime(request.getIssueDate())
-                .certificateName("01证书")
-
-
-
+                .trainingClassId(request.getTrainingClassId())
+                .voidReason(request.getVoidReason())
+                .voidTime(request.getVoidTime())
                 .build();
         certificateService.saveCertificate(entity);
         return R.success();
@@ -148,8 +232,29 @@ public class CertificateController {
             return R.fail("证书ID不能为空");
         }
         
-        Certificate entity = new Certificate();
-        BeanUtils.copyProperties(request, entity);
+        Certificate entity = Certificate.builder()
+                .certificateId(request.getCertificateId())
+                .certificateDescription(request.getCertificateDescription())
+                .certificateCode(request.getCertificateNumber())
+                .certificateName(request.getCertificateName())
+                .certificateType(request.getCertificateType())
+                .issueDate(request.getIssueDate())
+                .validFrom(request.getValidFrom())
+                .validUntil(request.getExpiryDate())
+                .issuer(request.getIssuer())
+                .issueOrganization(request.getIssuingAuthority())
+                .templatePath(request.getTemplatePath())
+                .certificateFilePath(request.getCertificateFilePath())
+                .machineTypeId(request.getMachineTypeId())
+                .majorId(request.getMajorId())
+                .trainingAbilityId(request.getTrainingAbilityId())
+                .remark(request.getRemark())
+                .certificateStatus(request.getStatus())
+                .studentId(request.getStudentId())
+                .trainingClassId(request.getTrainingClassId())
+                .voidReason(request.getVoidReason())
+                .voidTime(request.getVoidTime())
+                .build();
         
         boolean result = certificateService.updateById(entity);
         if (result) {

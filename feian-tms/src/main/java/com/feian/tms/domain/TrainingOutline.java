@@ -1,5 +1,6 @@
 package com.feian.tms.domain;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -97,6 +98,7 @@ public class TrainingOutline extends BaseEntity {
     private BigDecimal practicalHours;
 
     /** 总课时（计算字段） */
+    @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
     @Schema(description = "总课时")
     private BigDecimal totalHours;
 

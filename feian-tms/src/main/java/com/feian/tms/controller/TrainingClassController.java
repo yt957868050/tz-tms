@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingClass;
 import com.feian.tms.common.PageRequest;
@@ -9,6 +10,11 @@ import com.feian.tms.dto.request.TrainingClassRequest;
 import com.feian.tms.dto.response.TrainingClassResponse;
 import com.feian.tms.excel.TrainingClassExcel;
 import com.feian.tms.service.TrainingClassService;
+import com.feian.tms.service.TrainingPlanService;
+import com.feian.tms.service.MachineTypeService;
+import com.feian.tms.service.MajorService;
+import com.feian.tms.service.TrainingAbilityService;
+import com.feian.tms.service.InstructorService;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,14 +39,20 @@ import java.util.List;
 public class TrainingClassController {
     
     private final TrainingClassService trainingClassService;
+    private final TrainingPlanService trainingPlanService;
+    private final MachineTypeService machineTypeService;
+    private final MajorService majorService;
+    private final TrainingAbilityService trainingAbilityService;
+    private final InstructorService instructorService;
 
     /**
      * 查询培训班次管理列表
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训班次管理列表", description = "根据查询条件分页查询培训班次列表")
-    public R<Page<TrainingClassResponse>> list(@RequestBody PageRequest<TrainingClassRequest> pageRequest) {
-        Page<TrainingClass> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
+    public R<PageInfo<TrainingClassResponse>> list(@RequestBody PageRequest<TrainingClassRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         
         TrainingClassRequest query = pageRequest.getQuery();
         if (query == null) {
@@ -60,22 +72,56 @@ public class TrainingClassController {
                 .eq(query.getStatus() != null, TrainingClass::getStatus, query.getStatus())
                 .orderByDesc(TrainingClass::getCreateTime);
         
-        Page<TrainingClass> result = queryWrapper.page(page);
+        List<TrainingClass> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<TrainingClassResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     TrainingClassResponse response = new TrainingClassResponse();
                     BeanUtils.copyProperties(entity, response);
+                    
+                    // 设置关联字段名称
+                    if (entity.getTrainingPlanId() != null) {
+                        var trainingPlan = trainingPlanService.getById(entity.getTrainingPlanId());
+                        if (trainingPlan != null) {
+                            response.setTrainingPlanName(trainingPlan.getPlanName());
+                        }
+                    }
+                    
+                    if (entity.getMachineTypeId() != null) {
+                        var machineType = machineTypeService.getById(entity.getMachineTypeId());
+                        if (machineType != null) {
+                            response.setMachineTypeName(machineType.getMachineTypeName());
+                        }
+                    }
+                    
+                    if (entity.getMajorId() != null) {
+                        var major = majorService.getById(entity.getMajorId());
+                        if (major != null) {
+                            response.setMajorName(major.getMajorName());
+                        }
+                    }
+                    
+                    if (entity.getTrainingAbilityId() != null) {
+                        var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+                        if (trainingAbility != null) {
+                            response.setTrainingAbilityName(trainingAbility.getAbilityName());
+                        }
+                    }
+                    
+                    if (entity.getPrimaryInstructorId() != null) {
+                        var instructor = instructorService.getById(entity.getPrimaryInstructorId());
+                        if (instructor != null) {
+                            response.setPrimaryInstructorName(instructor.getInstructorName());
+                        }
+                    }
+                    
                     return response;
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**
@@ -91,6 +137,43 @@ public class TrainingClassController {
         
         TrainingClassResponse response = new TrainingClassResponse();
         BeanUtils.copyProperties(entity, response);
+        
+        // 设置关联字段名称
+        if (entity.getTrainingPlanId() != null) {
+            var trainingPlan = trainingPlanService.getById(entity.getTrainingPlanId());
+            if (trainingPlan != null) {
+                response.setTrainingPlanName(trainingPlan.getPlanName());
+            }
+        }
+        
+        if (entity.getMachineTypeId() != null) {
+            var machineType = machineTypeService.getById(entity.getMachineTypeId());
+            if (machineType != null) {
+                response.setMachineTypeName(machineType.getMachineTypeName());
+            }
+        }
+        
+        if (entity.getMajorId() != null) {
+            var major = majorService.getById(entity.getMajorId());
+            if (major != null) {
+                response.setMajorName(major.getMajorName());
+            }
+        }
+        
+        if (entity.getTrainingAbilityId() != null) {
+            var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+            if (trainingAbility != null) {
+                response.setTrainingAbilityName(trainingAbility.getAbilityName());
+            }
+        }
+        
+        if (entity.getPrimaryInstructorId() != null) {
+            var instructor = instructorService.getById(entity.getPrimaryInstructorId());
+            if (instructor != null) {
+                response.setPrimaryInstructorName(instructor.getInstructorName());
+            }
+        }
+        
         return R.success(response);
     }
 

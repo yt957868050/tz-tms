@@ -8,14 +8,14 @@ import java.util.List;
 
 /**
  * 学员信息响应对象
- * 
+ *
  * @author feian
  * @date 2025-01-23
  */
 @Data
 @Schema(description = "学员信息响应对象")
 public class StudentResponse {
-    
+
     @Schema(description = "学员ID", example = "1")
     private Long studentId;
 
@@ -48,6 +48,8 @@ public class StudentResponse {
 
     @Schema(description = "入职时间", example = "2024-01-01")
     private Date hireDate;
+    @Schema(description = "入学时间", example = "2024-01-01")
+    private Date enrollmentDate;
 
     @Schema(description = "主要机型ID", example = "1")
     private Long primaryMachineTypeId;
@@ -90,7 +92,7 @@ public class StudentResponse {
 
     @Schema(description = "关联的机型列表")
     private List<MachineTypeInfo> machineTypes;
-    
+
     /**
      * 机型信息对象
      */
@@ -99,10 +101,10 @@ public class StudentResponse {
     public static class MachineTypeInfo {
         @Schema(description = "机型ID")
         private Long machineTypeId;
-        
+
         @Schema(description = "机型名称")
         private String machineTypeName;
-        
+
         @Schema(description = "是否为主要机型")
         private Boolean isPrimary;
     }
