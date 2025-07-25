@@ -17,10 +17,38 @@ public class IdRequest {
     
     @Schema(description = "主键ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "ID不能为空")
-    private Long id;
+    private Object id;
     
     // Explicit getter method for controller compatibility
     public Long getId() {
-        return id;
+        if (id == null) {
+            return null;
+        }
+        if (id instanceof Number) {
+            return ((Number) id).longValue();
+        }
+        if (id instanceof String) {
+            try {
+                return Long.valueOf((String) id);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        if (id instanceof java.util.List<?> list && !list.isEmpty()) {
+            Object first = list.get(0);
+            if (first instanceof Number) {
+                return ((Number) first).longValue();
+            }
+            if (first instanceof String) {
+                try {
+                    return Long.valueOf((String) first);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
     }
+
+
 }
