@@ -29,7 +29,17 @@ public interface CertificateMapper extends MPJBaseMapper<Certificate> {
     void insertCertificate(Certificate entity);
 
 
-
+    /**
+     * 证书批量查询
+     * @param certificatePageQuery
+     * @return
+     */
 
     List<Certificate> cerPageQueryList(CertificatePageQuery certificatePageQuery);
+
+    /**
+     * 证书批量删除
+     * @param id
+     */
+    void deleteBatch(List<Long> id);
 }

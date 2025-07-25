@@ -92,4 +92,15 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
 
 
     }
+
+    /**
+     * 证书批量删除
+     * @param id
+     * @return
+     */
+    public boolean deleteBatch(List<Long> id) {
+        certificateMapper.deleteBatch(id);
+
+        return true;
+    }
 }

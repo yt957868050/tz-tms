@@ -8,6 +8,7 @@ import com.feian.tms.domain.Major;
 import com.feian.tms.domain.Student;
 import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
+import com.feian.tms.dto.request.CertificateDeleteRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CertificateRequest;
 import com.feian.tms.dto.response.CertificateDetailsResponse;
@@ -224,13 +225,23 @@ public class CertificateController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除证书", description = "根据ID删除证书信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = certificateService.removeById(request.getId());
+    public R<Void> delete(@RequestBody CertificateDeleteRequest certificateDeleteRequest) {
+        boolean result = certificateService.deleteBatch(certificateDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }
         return R.fail("删除证书失败");
     }
+
+
+
+//    public R<Void> delete(@Valid @RequestBody IdRequest request) {
+//        boolean result = certificateService.removeById(request.getId());
+//        if (result) {
+//            return R.success();
+//        }
+//        return R.fail("删除证书失败");
+//    }
 
     /**
      * 导出证书管理列表（使用EasyExcel）

@@ -3,6 +3,12 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.feian.tms.mapper.CertificateMapper">
+	<delete id="deleteBatch">
+		delete from tms_certificate where certificate_id in
+		<foreach collection="id" item="certificateId" open="(" separator="," close=")">
+			#{certificateId}
+		</foreach>
+	</delete>
 
 	<select id="cerPageQueryList" resultType="com.feian.tms.domain.Certificate">
 		select * from tms_certificate

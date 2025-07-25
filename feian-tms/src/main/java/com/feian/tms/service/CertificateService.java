@@ -6,6 +6,8 @@ import com.feian.tms.dto.request.CertificateRequest;
 import com.feian.tms.dto.response.CertificatePageResponse;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.util.List;
+
 /**
  * 证书管理Service接口
  * 
@@ -27,4 +29,11 @@ public interface CertificateService extends MPJBaseService<Certificate> {
      * @return
      */
     CertificatePageResponse pageQuery(CertificatePageQuery certificatePageQuery);
+
+    /**
+     * 证书批量删除
+     * @param id
+     * @return
+     */
+    boolean deleteBatch(List<Long> id);
 }
