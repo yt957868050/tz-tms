@@ -188,9 +188,28 @@ public class CertificateController {
             return R.fail("证书ID不能为空");
         }
         
-        Certificate entity = new Certificate();
-        BeanUtils.copyProperties(request, entity);
-        
+        Certificate entity = Certificate.builder()
+                .certificateId(request.getCertificateId())
+                .certificateDescription(request.getCertificateDescription())
+                .certificateCode(request.getCertificateNumber())
+                .certificateType(request.getCertificateType())
+                .certificateName(request.getCertificateName())
+                .issueDate(request.getIssueDate())
+                .validUntil(request.getExpiryDate())
+                .issueOrganization(request.getIssuingAuthority())
+                .machineTypeId(request.getMachineTypeId())
+                .majorId(request.getMajorId())
+                .remark(request.getRemark())
+                .certificateStatus(request.getStatus())
+                .studentId(request.getStudentId())
+                .build();
+
+        Student studentById = studentService.getById(entity.getStudentId());
+        MachineType machineTypeById = machineTypeService.getById(entity.getMachineTypeId());
+        Major majorById = majorService.getById(entity.getMajorId());
+        entity.setStudentName(studentById.getStudentName());
+        entity.setMachineTypeName(machineTypeById.getMachineTypeName());
+        entity.setMajorName(majorById.getMajorName());
         boolean result = certificateService.updateById(entity);
         if (result) {
             CertificateResponse response = new CertificateResponse();

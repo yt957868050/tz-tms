@@ -57,7 +57,6 @@ public class CertificateRequest {
     private Date issueDate;
 
     @Schema(description = "有效期开始", example = "2024-06-30", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "有效期开始不能为空")
     private Date validFrom;
 
     @Schema(description = "有效期结束", example = "2026-06-30", requiredMode = Schema.RequiredMode.REQUIRED)

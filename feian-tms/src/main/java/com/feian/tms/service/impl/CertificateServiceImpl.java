@@ -68,6 +68,9 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
                     dto.setStatus(entity.getCertificateStatus());
                     dto.setIssuingAuthority(entity.getIssueOrganization());
                     dto.setRemark(entity.getRemark());
+                    dto.setStudentId(entity.getStudentId());
+                    dto.setMachineTypeId(entity.getMachineTypeId());
+                    dto.setMajorId(entity.getMajorId());
                     return dto;
                 })
                 .collect(Collectors.toList());

@@ -1,6 +1,7 @@
 package com.feian.tms.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,5 +50,17 @@ public class CertificatePageQueryResponse {
 
     @Schema(description = "备注", example = "备注信息")
     private String remark;
+
+    @Schema(description = "机型ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "机型ID不能为空")
+    private Long machineTypeId;
+
+    @Schema(description = "专业ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "专业ID不能为空")
+    private Long majorId;
+
+    @Schema(description = "学员ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "学员ID不能为空")
+    private Long studentId;
 
 }
