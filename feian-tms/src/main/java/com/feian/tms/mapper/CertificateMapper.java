@@ -1,10 +1,15 @@
 package com.feian.tms.mapper;
 
 import com.feian.tms.domain.Certificate;
+import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.request.CertificateRequest;
+import com.feian.tms.dto.response.CertificatePageResponse;
+import com.github.pagehelper.Page;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * 证书管理Mapper接口
@@ -22,4 +27,9 @@ public interface CertificateMapper extends MPJBaseMapper<Certificate> {
             " values" +
             " (#{certificateDescription},#{certificateCode},#{certificateType},#{voidTime},#{issueDate},#{issueOrganization},#{machineTypeId},#{majorId},#{remark},#{certificateStatus},#{studentId},#{trainingClassId},#{trainingAbilityId},#{createTime},#{updateTime},#{certificateName})")
     void insertCertificate(Certificate entity);
+
+
+    Page<Certificate> cerPageQuery(CertificatePageQuery certificatePageQuery);
+
+    List<Certificate> cerPageQueryList(CertificatePageQuery certificatePageQuery);
 }

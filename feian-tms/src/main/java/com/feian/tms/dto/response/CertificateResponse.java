@@ -99,6 +99,9 @@ public class CertificateResponse {
     @Schema(description = "更新时间", example = "2024-01-01 10:00:00")
     private Date updateTime;
 
+    @Schema(description = "证书描述", example = "证书描述信息")
+    private String certificateDescription;
+
     @Schema(description = "备注", example = "备注信息")
     private String remark;
 }

@@ -1,7 +1,9 @@
 package com.feian.tms.service;
 
 import com.feian.tms.domain.Certificate;
+import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.request.CertificateRequest;
+import com.feian.tms.dto.response.CertificatePageResponse;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -13,6 +15,16 @@ import com.github.yulichang.base.MPJBaseService;
 public interface CertificateService extends MPJBaseService<Certificate> {
 
 
-
+    /**
+     * 新增证书
+     * @param entity
+     */
     void saveCertificate(Certificate entity);
+
+    /**
+     * 证书分页查询
+     * @param certificatePageQuery
+     * @return
+     */
+    CertificatePageResponse pageQuery(CertificatePageQuery certificatePageQuery);
 }

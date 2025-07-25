@@ -60,56 +60,5 @@ public class CertificateQuery extends PageRequest<CertificateQuery> {
     @Schema(description = "有效期结束日期", example = "2026-12-31")
     private Date validUntil;
 
-    // Getter methods for controller compatibility
-    public Date getIssueDate() {
-        return issueDate;
-    }
-    
-    public Date getValidUntil() {
-        return validUntil;
-    }
-    
-    public String getCertificateStatus() {
-        return certificateStatus;
-    }
-    
-    public String getIssueOrganization() {
-        return issueOrganization;
-    }
-    
-    public String getCertificateType() {
-        return certificateType;
-    }
-    
-    public Long getTrainingAbilityId() {
-        return trainingAbilityId;
-    }
-    
-    public Long getMajorId() {
-        return majorId;
-    }
-    
-    public Long getMachineTypeId() {
-        return machineTypeId;
-    }
-    
-    public Long getTrainingClassId() {
-        return trainingClassId;
-    }
-    
-    public String getStudentName() {
-        return studentName;
-    }
-    
-    public Long getStudentId() {
-        return studentId;
-    }
-    
-    public String getCertificateName() {
-        return certificateName;
-    }
-    
-    public String getCertificateCode() {
-        return certificateCode;
-    }
+
 }

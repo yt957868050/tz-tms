@@ -3,9 +3,11 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Certificate;
+import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CertificateRequest;
+import com.feian.tms.dto.response.CertificatePageResponse;
 import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.excel.CertificateExcel;
 import com.feian.tms.service.CertificateService;
@@ -39,42 +41,47 @@ public class CertificateController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询证书管理列表", description = "根据查询条件分页查询证书列表")
-    public R<Page<CertificateResponse>> list(@RequestBody CertificateQuery query) {
-        Page<Certificate> page = new Page<>(query.getPageNum(), query.getPageSize());
-        
-        // 构建查询条件
-        var queryWrapper = certificateService.lambdaQuery()
-                .like(query.getCertificateCode() != null, Certificate::getCertificateCode, query.getCertificateCode())
-                .like(query.getCertificateName() != null, Certificate::getCertificateName, query.getCertificateName())
-                .eq(query.getStudentId() != null, Certificate::getStudentId, query.getStudentId())
-                .eq(query.getTrainingClassId() != null, Certificate::getTrainingClassId, query.getTrainingClassId())
-                .eq(query.getMachineTypeId() != null, Certificate::getMachineTypeId, query.getMachineTypeId())
-                .eq(query.getMajorId() != null, Certificate::getMajorId, query.getMajorId())
-                .eq(query.getTrainingAbilityId() != null, Certificate::getTrainingAbilityId, query.getTrainingAbilityId())
-                .eq(query.getCertificateType() != null, Certificate::getCertificateType, query.getCertificateType())
-                .ge(query.getIssueDate() != null, Certificate::getIssueDate, query.getIssueDate())
-                .le(query.getValidUntil() != null, Certificate::getValidUntil, query.getValidUntil())
-                .like(query.getIssueOrganization() != null, Certificate::getIssueOrganization, query.getIssueOrganization())
-                .eq(query.getCertificateStatus() != null, Certificate::getCertificateStatus, query.getCertificateStatus())
-                .orderByDesc(Certificate::getCreateTime);
-        
-        Page<Certificate> result = queryWrapper.page(page);
-        
-        // 转换为响应对象
-        Page<CertificateResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
-                .map(entity -> {
-                    CertificateResponse response = new CertificateResponse();
-                    BeanUtils.copyProperties(entity, response);
-                    return response;
-                })
-                .toList();
-        
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+    public R<CertificatePageResponse> list(@RequestBody CertificatePageQuery certificatePageQuery){
+
+         CertificatePageResponse certificatePageResponse=certificateService.pageQuery(certificatePageQuery);
+        return R.success(certificatePageResponse);
     }
+//    public R<Page<CertificateResponse>> list(@RequestBody CertificateQuery query) {
+//        Page<Certificate> page = new Page<>(query.getPageNum(), query.getPageSize());
+//
+//        // 构建查询条件
+//        var queryWrapper = certificateService.lambdaQuery()
+//                .like(query.getCertificateCode() != null, Certificate::getCertificateCode, query.getCertificateCode())
+//                .like(query.getCertificateName() != null, Certificate::getCertificateName, query.getCertificateName())
+//                .eq(query.getStudentId() != null, Certificate::getStudentId, query.getStudentId())
+//                .eq(query.getTrainingClassId() != null, Certificate::getTrainingClassId, query.getTrainingClassId())
+//                .eq(query.getMachineTypeId() != null, Certificate::getMachineTypeId, query.getMachineTypeId())
+//                .eq(query.getMajorId() != null, Certificate::getMajorId, query.getMajorId())
+//                .eq(query.getTrainingAbilityId() != null, Certificate::getTrainingAbilityId, query.getTrainingAbilityId())
+//                .eq(query.getCertificateType() != null, Certificate::getCertificateType, query.getCertificateType())
+//                .ge(query.getIssueDate() != null, Certificate::getIssueDate, query.getIssueDate())
+//                .le(query.getValidUntil() != null, Certificate::getValidUntil, query.getValidUntil())
+//                .like(query.getIssueOrganization() != null, Certificate::getIssueOrganization, query.getIssueOrganization())
+//                .eq(query.getCertificateStatus() != null, Certificate::getCertificateStatus, query.getCertificateStatus())
+//                .orderByDesc(Certificate::getCreateTime);
+//
+//        Page<Certificate> result = queryWrapper.page(page);
+//
+//        // 转换为响应对象
+//        Page<CertificateResponse> responsePage = new Page<>();
+//        BeanUtils.copyProperties(result, responsePage);
+//
+//        var responseList = result.getRecords().stream()
+//                .map(entity -> {
+//                    CertificateResponse response = new CertificateResponse();
+//                    BeanUtils.copyProperties(entity, response);
+//                    return response;
+//                })
+//                .toList();
+//
+//        responsePage.setRecords(responseList);
+//        return R.success(responsePage);
+//    }
 
     /**
      * 获取证书管理详细信息
