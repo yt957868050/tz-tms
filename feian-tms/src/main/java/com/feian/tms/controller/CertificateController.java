@@ -248,10 +248,10 @@ public class CertificateController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出证书列表", description = "根据查询条件导出证书列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody CertificateQuery query) {
+    public void export( HttpServletResponse response,@ModelAttribute  CertificateQuery query) {
         // 查询所有数据（不分页）
         var queryWrapper = certificateService.lambdaQuery()
-                .like(query.getCertificateCode() != null, Certificate::getCertificateCode, query.getCertificateCode())
+//                .like(query.getCertificateCode() != null, Certificate::getCertificateCode, query.getCertificateCode())
                 .like(query.getCertificateName() != null, Certificate::getCertificateName, query.getCertificateName())
                 .eq(query.getStudentId() != null, Certificate::getStudentId, query.getStudentId())
                 .eq(query.getTrainingClassId() != null, Certificate::getTrainingClassId, query.getTrainingClassId())
@@ -260,9 +260,9 @@ public class CertificateController {
                 .eq(query.getTrainingAbilityId() != null, Certificate::getTrainingAbilityId, query.getTrainingAbilityId())
                 .eq(query.getCertificateType() != null, Certificate::getCertificateType, query.getCertificateType())
                 .ge(query.getIssueDate() != null, Certificate::getIssueDate, query.getIssueDate())
-                .le(query.getValidUntil() != null, Certificate::getValidUntil, query.getValidUntil())
-                .like(query.getIssueOrganization() != null, Certificate::getIssueOrganization, query.getIssueOrganization())
-                .eq(query.getCertificateStatus() != null, Certificate::getCertificateStatus, query.getCertificateStatus())
+//                .le(query.getValidUntil() != null, Certificate::getValidUntil, query.getValidUntil())
+//                .like(query.getIssueOrganization() != null, Certificate::getIssueOrganization, query.getIssueOrganization())
+//                .eq(query.getCertificateStatus() != null, Certificate::getCertificateStatus, query.getCertificateStatus())
                 .orderByDesc(Certificate::getCreateTime);
         
         List<Certificate> list = queryWrapper.list();
