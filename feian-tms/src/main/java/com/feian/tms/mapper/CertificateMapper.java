@@ -23,13 +23,13 @@ public interface CertificateMapper extends MPJBaseMapper<Certificate> {
      * 新增证书
      * @param entity
      */
-    @Insert("insert into tms_certificate(certificate_description,certificate_code,certificate_type,void_time,issue_date,issue_organization,machine_type_id,major_id,remark,certificate_status,student_id,training_class_id,training_ability_id,create_time,update_time,certificate_name)"+
+    @Insert("insert into tms_certificate(certificate_description,certificate_code,certificate_type,valid_until,issue_date,issue_organization,machine_type_id,major_id,remark,certificate_status,student_id,training_class_id,training_ability_id,create_time,update_time,certificate_name,student_name,machine_type_name,major_name)"+
             " values" +
-            " (#{certificateDescription},#{certificateCode},#{certificateType},#{voidTime},#{issueDate},#{issueOrganization},#{machineTypeId},#{majorId},#{remark},#{certificateStatus},#{studentId},#{trainingClassId},#{trainingAbilityId},#{createTime},#{updateTime},#{certificateName})")
+            " (#{certificateDescription},#{certificateCode},#{certificateType},#{validUntil},#{issueDate},#{issueOrganization},#{machineTypeId},#{majorId},#{remark},#{certificateStatus},#{studentId},#{trainingClassId},#{trainingAbilityId},#{createTime},#{updateTime},#{certificateName},#{studentName},#{machineTypeName},#{majorName})")
     void insertCertificate(Certificate entity);
 
 
-    Page<Certificate> cerPageQuery(CertificatePageQuery certificatePageQuery);
+
 
     List<Certificate> cerPageQueryList(CertificatePageQuery certificatePageQuery);
 }

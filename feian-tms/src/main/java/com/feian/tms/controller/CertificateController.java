@@ -3,6 +3,9 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Certificate;
+import com.feian.tms.domain.MachineType;
+import com.feian.tms.domain.Major;
+import com.feian.tms.domain.Student;
 import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
 import com.feian.tms.dto.request.IdRequest;
@@ -11,12 +14,16 @@ import com.feian.tms.dto.response.CertificatePageResponse;
 import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.excel.CertificateExcel;
 import com.feian.tms.service.CertificateService;
+import com.feian.tms.service.MachineTypeService;
+import com.feian.tms.service.MajorService;
+import com.feian.tms.service.StudentService;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,9 +40,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "证书管理", description = "证书管理相关接口")
 public class CertificateController {
-    
-    private final CertificateService certificateService;
-
+    @Autowired
+    private  CertificateService certificateService;
+    @Autowired
+    private StudentService studentService;
+    @Autowired
+    private MachineTypeService machineTypeService;
+    @Autowired
+    private MajorService majorService;
     /**
      * 查询证书管理列表
      */
@@ -111,7 +123,7 @@ public class CertificateController {
                 .certificateCode(request.getCertificateNumber())
                 .certificateType(request.getCertificateType())
                 .issueDate(request.getIssueDate())
-                .voidTime(request.getExpiryDate())
+                .validUntil(request.getExpiryDate())
                 .issueOrganization(request.getIssuingAuthority())
                 .machineTypeId(request.getMachineTypeId())
                 .majorId(request.getMajorId())
@@ -123,10 +135,14 @@ public class CertificateController {
                 .createTime(request.getIssueDate())
                 .updateTime(request.getIssueDate())
                 .certificateName("01证书")
-
-
-
                 .build();
+
+        Student studentById = studentService.getById(entity.getStudentId());
+        MachineType machineTypeById = machineTypeService.getById(entity.getMachineTypeId());
+        Major majorById = majorService.getById(entity.getMajorId());
+        entity.setStudentName(studentById.getStudentName());
+        entity.setMachineTypeName(machineTypeById.getMachineTypeName());
+        entity.setMajorName(majorById.getMajorName());
         certificateService.saveCertificate(entity);
         return R.success();
 
