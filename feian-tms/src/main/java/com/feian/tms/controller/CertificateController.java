@@ -10,6 +10,8 @@ import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CertificateRequest;
+import com.feian.tms.dto.response.CertificateDetailsResponse;
+import com.feian.tms.dto.response.CertificatePageQueryResponse;
 import com.feian.tms.dto.response.CertificatePageResponse;
 import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.excel.CertificateExcel;
@@ -100,14 +102,32 @@ public class CertificateController {
      */
     @PostMapping("/detail")
     @Operation(summary = "获取证书详细信息", description = "根据ID获取证书详细信息")
-    public R<CertificateResponse> detail(@Valid @RequestBody IdRequest request) {
+    public R<CertificateDetailsResponse> detail(@Valid @RequestBody IdRequest request) {
         Certificate entity = certificateService.getById(request.getId());
         if (entity == null) {
             return R.fail("证书信息不存在");
         }
-        
-        CertificateResponse response = new CertificateResponse();
-        BeanUtils.copyProperties(entity, response);
+
+        CertificateDetailsResponse response =CertificateDetailsResponse
+                .builder()
+                .certificateId(entity.getCertificateId())
+                .certificateNumber(entity.getCertificateCode())
+                .certificateName(entity.getCertificateName())
+                .studentId(entity.getStudentId())
+                .trainingClassId(entity.getTrainingClassId())
+                .machineTypeId(entity.getMachineTypeId())
+                .majorId(entity.getMajorId())
+                .trainingAbilityId(entity.getTrainingAbilityId())
+                .certificateType(entity.getCertificateType())
+                .issueDate(entity.getIssueDate())
+                .expiryDate(entity.getValidUntil())
+                .status(entity.getCertificateStatus())
+                .issuingAuthority(entity.getIssueOrganization())
+                .remark(entity.getRemark())
+                .certificateDescription(entity.getCertificateDescription())
+                .build();
+
+
         return R.success(response);
     }
 
