@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.domain.*;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import java.time.ZoneId;
 import com.feian.tms.common.PageRequest;
@@ -311,13 +312,13 @@ public class TrainingPlanController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除培训计划", description = "根据ID删除培训计划信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
+    public R<Void> delete(@Valid @RequestBody IdRequest idRequest) {
         // 删除培训计划
-        boolean result = trainingPlanService.removeById(request.getId());
+        boolean result = trainingPlanService.removeById(idRequest.getId());
         if (result) {
             // 删除关联的教员关系
             trainingPlanInstructorService.lambdaUpdate()
-                    .eq(TrainingPlanInstructor::getPlanId, request.getId())
+                    .eq(TrainingPlanInstructor::getPlanId,idRequest.getId())
                     .remove();
             
             return R.success();

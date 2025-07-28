@@ -3,6 +3,8 @@ package com.feian.tms.service;
 import com.feian.tms.domain.TrainingPlan;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.util.List;
+
 /**
  * 培训计划管理Service接口
  * 
@@ -11,4 +13,5 @@ import com.github.yulichang.base.MPJBaseService;
  */
 public interface TrainingPlanService extends MPJBaseService<TrainingPlan> {
 
+    boolean deleteBatch(List<Long> idList);
 }

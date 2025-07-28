@@ -5,7 +5,10 @@ import com.feian.tms.mapper.TrainingPlanMapper;
 import com.feian.tms.service.TrainingPlanService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 培训计划管理Service业务层处理
@@ -16,5 +19,11 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class TrainingPlanServiceImpl extends MPJBaseServiceImpl<TrainingPlanMapper, TrainingPlan> implements TrainingPlanService {
-
+    @Autowired
+    public TrainingPlanMapper trainingPlanMapper;
+    @Override
+    public boolean deleteBatch(List<Long> idList) {
+        trainingPlanMapper.deleteBatch(idList);
+        return true;
+    }
 }

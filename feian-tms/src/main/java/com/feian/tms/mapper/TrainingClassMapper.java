@@ -4,6 +4,8 @@ import com.feian.tms.domain.TrainingClass;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 培训班次Mapper接口
  * 
@@ -13,4 +15,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface TrainingClassMapper extends MPJBaseMapper<TrainingClass> {
 
+    void deleteBatch(List<Long> idList);
 }
