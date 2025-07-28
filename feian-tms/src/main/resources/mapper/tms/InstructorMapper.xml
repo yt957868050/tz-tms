@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feian.tms.mapper.InstructorMapper">
+
+
+    <delete id="deleteBatch">
+        delete from tms_instructor where instructor_id in
+        <foreach collection="idList" item="instructorId" open="(" separator="," close=")">
+            #{instructorId}
+        </foreach>
+    </delete>
+</mapper>

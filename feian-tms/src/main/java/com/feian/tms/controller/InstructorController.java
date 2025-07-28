@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Instructor;
@@ -102,7 +103,8 @@ public class InstructorController {
     public R<InstructorResponse> create(@Valid @RequestBody InstructorRequest request) {
         Instructor entity = new Instructor();
         BeanUtils.copyProperties(request, entity);
-        
+        Long UserId=1L;//用户ID不能为空，待定
+        entity.setUserId(UserId);
         boolean result = instructorService.save(entity);
         if (result) {
             InstructorResponse response = new InstructorResponse();
@@ -139,8 +141,8 @@ public class InstructorController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除教员", description = "根据ID删除教员信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = instructorService.removeById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = instructorService.deleteBatch(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

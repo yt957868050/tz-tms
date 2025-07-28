@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.annotation.DataScope;
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Student;
@@ -204,8 +205,8 @@ public class StudentController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除学员", description = "根据ID删除学员信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = studentService.removeById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = studentService.deleteBatch(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

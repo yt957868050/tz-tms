@@ -5,4 +5,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.feian.tms.mapper.StudentMapper">
 
 
+    <delete id="deleteIds">
+        delete from tms_student where student_id in
+        <foreach collection="idList" item="studentId" open="(" separator="," close=")">
+            #{studentId}
+        </foreach>
+    </delete>
 </mapper>

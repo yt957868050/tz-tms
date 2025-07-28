@@ -138,7 +138,7 @@ public class CertificateController {
     @PostMapping("/create")
     @Operation(summary = "新增证书", description = "创建新的证书信息")
     public R create( @RequestBody CertificateRequest request) {
-        Long trainingClassId=1L;
+        Long trainingClassId=1L;//班级ID不能为空，待定
         Certificate entity =Certificate.builder()
                 .certificateDescription(request.getCertificateDescription())
                 .certificateCode(request.getCertificateNumber())
