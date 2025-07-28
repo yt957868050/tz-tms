@@ -4,6 +4,8 @@ import com.feian.tms.domain.MachineType;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 机型管理Mapper接口
  * 
@@ -13,4 +15,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface MachineTypeMapper extends MPJBaseMapper<MachineType> {
 
+    void deleteIds(List<Long> idList);
 }

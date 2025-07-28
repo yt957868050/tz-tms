@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.common.PageRequest;
@@ -95,10 +96,10 @@ public class MajorController {
      */
     @PostMapping("/create")
     @Operation(summary = "新增专业", description = "创建新的专业信息")
-    public R<MajorResponse> create(@Valid @RequestBody MajorRequest request) {
+    public R<MajorResponse> create( @RequestBody MajorRequest request) {
         Major entity = new Major();
         BeanUtils.copyProperties(request, entity);
-        
+        entity.setMajorType(String.valueOf(entity.getOrderNum()));
         boolean result = majorService.save(entity);
         if (result) {
             MajorResponse response = new MajorResponse();
@@ -135,8 +136,8 @@ public class MajorController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除专业", description = "根据ID删除专业信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = majorService.removeById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = majorService.removeIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

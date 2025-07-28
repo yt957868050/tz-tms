@@ -3,6 +3,8 @@ package com.feian.tms.service;
 import com.feian.tms.domain.MachineType;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.util.List;
+
 /**
  * 机型管理Service接口
  * 
@@ -11,4 +13,6 @@ import com.github.yulichang.base.MPJBaseService;
  */
 public interface MachineTypeService extends MPJBaseService<MachineType> {
 
+
+    boolean deleteBatch(List<Long> idList);
 }

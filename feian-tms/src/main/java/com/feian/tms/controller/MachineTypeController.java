@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.common.PageRequest;
@@ -134,8 +135,8 @@ public class MachineTypeController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除机型", description = "根据ID删除机型信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = machineTypeService.removeById(request.getId());
+    public R<Void> delete( @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = machineTypeService.deleteBatch(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }
