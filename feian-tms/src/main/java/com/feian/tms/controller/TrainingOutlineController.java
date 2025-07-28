@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingOutline;
@@ -123,8 +124,8 @@ public class TrainingOutlineController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除培训大纲", description = "根据ID删除培训大纲信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = trainingOutlineService.deleteTrainingOutlineById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = trainingOutlineService.deleteBatch(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

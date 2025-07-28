@@ -23,7 +23,7 @@ public interface TrainingOutlineMapper extends MPJBaseMapper<TrainingOutline> {
      * @param outline 培训大纲查询条件
      * @return 培训大纲列表
      */
-    List<TrainingOutline> selectTrainingOutlineListWithRelations(@Param("outline") TrainingOutline outline);
+//    List<TrainingOutline> selectTrainingOutlineListWithRelations(@Param("outline") TrainingOutline outline);
 
     /**
      * 查询培训大纲详情（包含关联信息）
@@ -31,7 +31,7 @@ public interface TrainingOutlineMapper extends MPJBaseMapper<TrainingOutline> {
      * @param outlineId 大纲ID
      * @return 培训大纲详情
      */
-    TrainingOutline selectTrainingOutlineByIdWithRelations(@Param("outlineId") Long outlineId);
+//    TrainingOutline selectTrainingOutlineByIdWithRelations(@Param("outlineId") Long outlineId);
 
     /**
      * 检查机型+专业+培训能力组合的唯一性
@@ -72,4 +72,6 @@ public interface TrainingOutlineMapper extends MPJBaseMapper<TrainingOutline> {
     TrainingOutline selectActiveOutline(@Param("machineTypeId") Long machineTypeId, 
                                        @Param("majorId") Long majorId, 
                                        @Param("trainingAbilityId") Long trainingAbilityId);
+
+    void deleteBatch(List<Long> idList);
 }

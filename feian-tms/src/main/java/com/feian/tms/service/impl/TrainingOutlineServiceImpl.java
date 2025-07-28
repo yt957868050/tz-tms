@@ -193,6 +193,12 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
         return selectTrainingOutlineById(outlineId);
     }
 
+    @Override
+    public boolean deleteBatch(List<Long> idList) {
+        trainingOutlineMapper.deleteBatch(idList);
+        return true;
+    }
+
     /**
      * 转换实体为响应对象
      */
