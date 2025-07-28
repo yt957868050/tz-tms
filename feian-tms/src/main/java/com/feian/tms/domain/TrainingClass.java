@@ -88,20 +88,26 @@ public class TrainingClass extends BaseEntity {
     private String status;
 
     /** 培训计划名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingPlanName;
 
     /** 机型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String machineTypeName;
 
     /** 专业名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String majorName;
 
     /** 培训能力名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingAbilityName;
 
     /** 主要教员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String primaryInstructorName;
 
     /** 班次学员列表 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private List<ClassStudent> classStudentList;
 }

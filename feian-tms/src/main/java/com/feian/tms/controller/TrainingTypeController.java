@@ -3,7 +3,7 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingType;
-import com.feian.tms.dto.query.TrainingTypeQuery;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.TrainingTypeRequest;
 import com.feian.tms.dto.response.TrainingTypeResponse;
@@ -39,9 +39,13 @@ public class TrainingTypeController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训类型管理列表", description = "根据查询条件分页查询培训类型列表")
-    public R<Page<TrainingTypeResponse>> list(@RequestBody TrainingTypeQuery query) {
-        Page<TrainingType> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<Page<TrainingTypeResponse>> list(@RequestBody PageRequest<TrainingTypeRequest> pageRequest) {
+        Page<TrainingType> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         
+        TrainingTypeRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new TrainingTypeRequest();
+        }
         // 构建查询条件
         var queryWrapper = trainingTypeService.lambdaQuery()
                 .like(query.getTrainingTypeName() != null, TrainingType::getTrainingTypeName, query.getTrainingTypeName())
@@ -143,7 +147,7 @@ public class TrainingTypeController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出培训类型列表", description = "根据查询条件导出培训类型列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody TrainingTypeQuery query) {
+    public void export(HttpServletResponse response, @RequestBody TrainingTypeRequest query) {
         // 查询所有数据（不分页）
         var queryWrapper = trainingTypeService.lambdaQuery()
                 .like(query.getTrainingTypeName() != null, TrainingType::getTrainingTypeName, query.getTrainingTypeName())

@@ -37,6 +37,9 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         
         // 自动填充更新人
         this.strictInsertFill(metaObject, "updateBy", String.class, getCurrentUser());
+        
+        // 自动填充逻辑删除标志
+        this.strictInsertFill(metaObject, "isDeleted", Integer.class, 0);
     }
 
     /**

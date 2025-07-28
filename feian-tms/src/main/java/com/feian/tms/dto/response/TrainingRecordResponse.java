@@ -100,6 +100,10 @@ public class TrainingRecordResponse {
     @Schema(description = "学员姓名")
     private String studentName;
 
+    /** 学员编号 */
+    @Schema(description = "学员编号")
+    private String studentCode;
+
     /** 班次名称 */
     @Schema(description = "班次名称")
     private String className;

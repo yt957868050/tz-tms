@@ -92,17 +92,22 @@ public class StudentAbility extends BaseEntity {
     private String status;
 
     /** 学员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String studentName;
 
     /** 机型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String machineTypeName;
 
     /** 专业名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String majorName;
 
     /** 培训能力名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingAbilityName;
 
     /** 课程名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String courseName;
 }

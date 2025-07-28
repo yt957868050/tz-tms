@@ -1,9 +1,11 @@
 package com.feian.tms.dto.response;
 
 import lombok.Data;
+import com.feian.tms.domain.CoursewareFile;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 课件管理响应对象
@@ -79,4 +81,10 @@ public class CoursewareResponse {
 
     /** 备注 */
     private String remark;
+
+    /** 培训类型（1理论 2实践） */
+    private String trainingType;
+
+    /** 关联的课件文件列表 */
+    private List<CoursewareFile> files;
 }

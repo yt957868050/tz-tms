@@ -1,6 +1,7 @@
 package com.feian.tms.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.feian.common.annotation.Excel;
@@ -65,5 +66,6 @@ public class CoursewareFile extends BaseEntity {
     private Integer orderNum;
 
     /** 课程名称 */
+    @TableField(exist = false)
     private String courseName;
 }

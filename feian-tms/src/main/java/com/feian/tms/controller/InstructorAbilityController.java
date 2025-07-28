@@ -3,7 +3,7 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.InstructorAbility;
-import com.feian.tms.dto.query.InstructorAbilityQuery;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.InstructorAbilityRequest;
 import com.feian.tms.dto.response.InstructorAbilityResponse;
@@ -39,9 +39,13 @@ public class InstructorAbilityController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询教员授课能力列表", description = "根据查询条件分页查询教员授课能力列表")
-    public R<Page<InstructorAbilityResponse>> list(@RequestBody InstructorAbilityQuery query) {
-        Page<InstructorAbility> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<Page<InstructorAbilityResponse>> list(@RequestBody PageRequest<InstructorAbilityRequest> pageRequest) {
+        Page<InstructorAbility> page = new Page<>(pageRequest.getPageNum(), pageRequest.getPageSize());
         
+        InstructorAbilityRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new InstructorAbilityRequest();
+        }
         // 构建查询条件
         var queryWrapper = instructorAbilityService.lambdaQuery()
                 .eq(query.getInstructorId() != null, InstructorAbility::getInstructorId, query.getInstructorId())
@@ -148,7 +152,7 @@ public class InstructorAbilityController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出教员授课能力列表", description = "根据查询条件导出教员授课能力列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody InstructorAbilityQuery query) {
+    public void export(HttpServletResponse response, @RequestBody InstructorAbilityRequest query) {
         // 查询所有数据（不分页）
         var queryWrapper = instructorAbilityService.lambdaQuery()
                 .eq(query.getInstructorId() != null, InstructorAbility::getInstructorId, query.getInstructorId())

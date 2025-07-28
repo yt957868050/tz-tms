@@ -79,17 +79,22 @@ public class InstructorAbility extends BaseEntity {
     private String status;
 
     /** 教员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String instructorName;
 
     /** 机型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String machineTypeName;
 
     /** 专业名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String majorName;
 
     /** 培训类型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingTypeName;
 
     /** 课程名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String courseName;
 }

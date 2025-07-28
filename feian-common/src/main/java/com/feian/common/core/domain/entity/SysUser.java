@@ -92,6 +92,15 @@ public class SysUser extends BaseEntity
     /** 角色ID */
     private Long roleId;
 
+    /** 学员ID（如果该用户为学员） */
+    private Long studentId;
+
+    /** 当前选择的机型ID（登录时选择） */
+    private Long currentMachineTypeId;
+
+    /** 当前选择的机型名称 */
+    private String currentMachineTypeName;
+
     public SysUser()
     {
 
@@ -308,6 +317,36 @@ public class SysUser extends BaseEntity
     public void setRoleId(Long roleId)
     {
         this.roleId = roleId;
+    }
+
+    public Long getStudentId()
+    {
+        return studentId;
+    }
+
+    public void setStudentId(Long studentId)
+    {
+        this.studentId = studentId;
+    }
+
+    public Long getCurrentMachineTypeId()
+    {
+        return currentMachineTypeId;
+    }
+
+    public void setCurrentMachineTypeId(Long currentMachineTypeId)
+    {
+        this.currentMachineTypeId = currentMachineTypeId;
+    }
+
+    public String getCurrentMachineTypeName()
+    {
+        return currentMachineTypeName;
+    }
+
+    public void setCurrentMachineTypeName(String currentMachineTypeName)
+    {
+        this.currentMachineTypeName = currentMachineTypeName;
     }
 
     @Override

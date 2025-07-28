@@ -1,14 +1,21 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.annotation.DataScope;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Student;
-import com.feian.tms.dto.query.StudentQuery;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.StudentRequest;
 import com.feian.tms.dto.response.StudentResponse;
 import com.feian.tms.excel.StudentExcel;
 import com.feian.tms.service.StudentService;
+import com.feian.tms.service.IStudentMachineTypeService;
+import com.feian.tms.service.MajorService;
+import com.feian.tms.domain.MachineType;
+import com.feian.tms.domain.StudentMachineType;
+import com.feian.tms.domain.Major;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,14 +40,23 @@ import java.util.List;
 public class StudentController {
     
     private final StudentService studentService;
+    private final IStudentMachineTypeService studentMachineTypeService;
+    private final MajorService majorService;
 
     /**
      * 查询学员信息列表
      */
     @PostMapping("/list")
     @Operation(summary = "查询学员信息列表", description = "根据查询条件分页查询学员信息列表")
-    public R<Page<StudentResponse>> list(@RequestBody StudentQuery query) {
-        Page<Student> page = new Page<>(query.getPageNum(), query.getPageSize());
+    @DataScope(enableMachineTypeFilter = true, studentAlias = "s")
+    public R<PageInfo<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        StudentRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new StudentRequest();
+        }
         
         // 构建查询条件
         var queryWrapper = studentService.lambdaQuery()
@@ -56,22 +72,47 @@ public class StudentController {
                 .eq(query.getStatus() != null, Student::getStatus, query.getStatus())
                 .orderByDesc(Student::getCreateTime);
         
-        Page<Student> result = queryWrapper.page(page);
+        List<Student> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<StudentResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     StudentResponse response = new StudentResponse();
                     BeanUtils.copyProperties(entity, response);
+                    
+                    // 添加机型信息
+                    List<MachineType> machineTypes = studentMachineTypeService.getAvailableMachineTypesByStudentId(entity.getStudentId());
+                    List<StudentResponse.MachineTypeInfo> machineTypeInfos = machineTypes.stream()
+                            .map(mt -> {
+                                StudentResponse.MachineTypeInfo info = new StudentResponse.MachineTypeInfo();
+                                info.setMachineTypeId(mt.getMachineTypeId());
+                                info.setMachineTypeName(mt.getMachineTypeName());
+                                info.setIsPrimary(mt.getMachineTypeId().equals(entity.getPrimaryMachineTypeId()));
+                                
+                                // 设置主要机型名称
+                                if (info.getIsPrimary()) {
+                                    response.setPrimaryMachineTypeName(mt.getMachineTypeName());
+                                }
+                                
+                                return info;
+                            })
+                            .toList();
+                    response.setMachineTypes(machineTypeInfos);
+                    
+                    // 添加专业名称
+                    if (entity.getPrimaryMajorId() != null) {
+                        Major major = majorService.getById(entity.getPrimaryMajorId());
+                        if (major != null) {
+                            response.setPrimaryMajorName(major.getMajorName());
+                        }
+                    }
+                    
                     return response;
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**
@@ -87,6 +128,34 @@ public class StudentController {
         
         StudentResponse response = new StudentResponse();
         BeanUtils.copyProperties(entity, response);
+        
+        // 添加机型信息
+        List<MachineType> machineTypes = studentMachineTypeService.getAvailableMachineTypesByStudentId(entity.getStudentId());
+        List<StudentResponse.MachineTypeInfo> machineTypeInfos = machineTypes.stream()
+                .map(mt -> {
+                    StudentResponse.MachineTypeInfo info = new StudentResponse.MachineTypeInfo();
+                    info.setMachineTypeId(mt.getMachineTypeId());
+                    info.setMachineTypeName(mt.getMachineTypeName());
+                    info.setIsPrimary(mt.getMachineTypeId().equals(entity.getPrimaryMachineTypeId()));
+                    
+                    // 设置主要机型名称
+                    if (info.getIsPrimary()) {
+                        response.setPrimaryMachineTypeName(mt.getMachineTypeName());
+                    }
+                    
+                    return info;
+                })
+                .toList();
+        response.setMachineTypes(machineTypeInfos);
+        
+        // 添加专业名称
+        if (entity.getPrimaryMajorId() != null) {
+            Major major = majorService.getById(entity.getPrimaryMajorId());
+            if (major != null) {
+                response.setPrimaryMajorName(major.getMajorName());
+            }
+        }
+        
         return R.success(response);
     }
 
@@ -148,7 +217,7 @@ public class StudentController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出学员列表", description = "根据查询条件导出学员列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody StudentQuery query) {
+    public void export(HttpServletResponse response, @RequestBody StudentRequest query) {
         // 查询所有数据（不分页）
         var queryWrapper = studentService.lambdaQuery()
                 .like(query.getStudentName() != null, Student::getStudentName, query.getStudentName())

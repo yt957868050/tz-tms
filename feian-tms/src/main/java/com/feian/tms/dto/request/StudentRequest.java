@@ -56,6 +56,10 @@ public class StudentRequest {
 
     @Schema(description = "入职时间", example = "2024-01-01")
     private Date hireDate;
+    @Schema(description = "入学时间", example = "2024-01-01")
+
+    private Date enrollmentDate;
+
 
     @Schema(description = "主要机型ID", example = "1")
     private Long primaryMachineTypeId;

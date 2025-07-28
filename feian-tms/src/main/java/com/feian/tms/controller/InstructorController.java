@@ -1,9 +1,10 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Instructor;
-import com.feian.tms.dto.query.InstructorQuery;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.InstructorRequest;
 import com.feian.tms.dto.response.InstructorResponse;
@@ -39,8 +40,14 @@ public class InstructorController {
      */
     @PostMapping("/list")
     @Operation(summary = "查询教员信息列表", description = "根据查询条件分页查询教员信息列表")
-    public R<Page<InstructorResponse>> list(@RequestBody InstructorQuery query) {
-        Page<Instructor> page = new Page<>(query.getPageNum(), query.getPageSize());
+    public R<PageInfo<InstructorResponse>> list(@RequestBody PageRequest<InstructorRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        
+        InstructorRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new InstructorRequest();
+        }
         
         // 构建查询条件
         var queryWrapper = instructorService.lambdaQuery()
@@ -56,13 +63,10 @@ public class InstructorController {
                 .eq(query.getStatus() != null, Instructor::getStatus, query.getStatus())
                 .orderByDesc(Instructor::getCreateTime);
         
-        Page<Instructor> result = queryWrapper.page(page);
+        List<Instructor> list = queryWrapper.list();
         
         // 转换为响应对象
-        Page<InstructorResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
+        var responseList = list.stream()
                 .map(entity -> {
                     InstructorResponse response = new InstructorResponse();
                     BeanUtils.copyProperties(entity, response);
@@ -70,8 +74,8 @@ public class InstructorController {
                 })
                 .toList();
         
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 返回分页信息
+        return R.success(new PageInfo<>(responseList));
     }
 
     /**
@@ -148,7 +152,7 @@ public class InstructorController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出教员列表", description = "根据查询条件导出教员列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody InstructorQuery query) {
+    public void export(HttpServletResponse response, @RequestBody InstructorRequest query) {
         // 查询所有数据（不分页）
         var queryWrapper = instructorService.lambdaQuery()
                 .like(query.getInstructorName() != null, Instructor::getInstructorName, query.getInstructorName())

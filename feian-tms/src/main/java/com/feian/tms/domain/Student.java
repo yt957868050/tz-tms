@@ -26,6 +26,10 @@ public class Student extends BaseEntity {
     @TableId(type = IdType.AUTO)
     private Long studentId;
 
+    /** 关联的用户ID */
+    @Excel(name = "用户ID")
+    private Long userId;
+
     /** 学员工号 */
     @Excel(name = "学员工号")
     private String studentCode;
@@ -66,6 +70,10 @@ public class Student extends BaseEntity {
     @Excel(name = "入职时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date hireDate;
 
+    /** 入学时间 */
+    @Excel(name = "入学时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date enrollmentDate;
+
     /** 主要机型ID */
     @Excel(name = "主要机型ID")
     private Long primaryMachineTypeId;
@@ -91,8 +99,14 @@ public class Student extends BaseEntity {
     private String status;
 
     /** 主要机型名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String primaryMachineTypeName;
 
     /** 主要专业名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String primaryMajorName;
+
+
+
+
 }

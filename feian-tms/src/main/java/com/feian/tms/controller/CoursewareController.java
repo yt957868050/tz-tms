@@ -1,17 +1,22 @@
 package com.feian.tms.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.github.pagehelper.PageInfo;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Courseware;
 import com.feian.tms.dto.request.CoursewareRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.response.CoursewareResponse;
 import com.feian.tms.service.CoursewareService;
+import com.feian.tms.service.CoursewareFileService;
+import com.feian.tms.domain.CoursewareFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -28,41 +33,37 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class CoursewareController {
     
     private final CoursewareService coursewareService;
+    private final CoursewareFileService coursewareFileService;
 
     /**
      * 查询课件管理列表
      */
     @PostMapping("/list")
     @Operation(summary = "查询课件管理列表", description = "根据查询条件分页查询课件列表")
-    public R<Page<CoursewareResponse>> list(@RequestBody CoursewareRequest query) {
-        Page<Courseware> page = new Page<>(1, 10);
+    public R<PageInfo<CoursewareResponse>> list(@RequestBody PageRequest<CoursewareRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+
+        CoursewareRequest query = pageRequest.getQuery();
+        if (query == null) {
+            query = new CoursewareRequest();
+        }
+
+        // 使用service的新方法，包含关联查询
+        List<CoursewareResponse> list = coursewareService.selectCoursewareList(query);
         
-        // 构建查询条件
-        var queryWrapper = coursewareService.lambdaQuery()
-                .like(query.getCourseName() != null, Courseware::getCourseName, query.getCourseName())
-                .like(query.getCourseCode() != null, Courseware::getCourseCode, query.getCourseCode())
-                .eq(query.getMachineTypeId() != null, Courseware::getMachineTypeId, query.getMachineTypeId())
-                .eq(query.getMajorId() != null, Courseware::getMajorId, query.getMajorId())
-                .eq(query.getStatus() != null, Courseware::getStatus, query.getStatus())
-                .orderByAsc(Courseware::getOrderNum)
-                .orderByDesc(Courseware::getCreateTime);
-        
-        Page<Courseware> result = queryWrapper.page(page);
-        
-        // 转换为响应对象
-        Page<CoursewareResponse> responsePage = new Page<>();
-        BeanUtils.copyProperties(result, responsePage);
-        
-        var responseList = result.getRecords().stream()
-                .map(entity -> {
-                    CoursewareResponse response = new CoursewareResponse();
-                    BeanUtils.copyProperties(entity, response);
-                    return response;
-                })
-                .toList();
-        
-        responsePage.setRecords(responseList);
-        return R.success(responsePage);
+        // 为每个课件查询关联的文件
+        list.forEach(response -> {
+            var files = coursewareFileService.lambdaQuery()
+                    .eq(CoursewareFile::getCoursewareId, response.getCoursewareId())
+                    .eq(CoursewareFile::getStatus, "0")
+                    .orderByAsc(CoursewareFile::getOrderNum)
+                    .list();
+            response.setFiles(files);
+        });
+
+        // 返回分页信息
+        return R.success(new PageInfo<>(list));
     }
 
     /**
@@ -71,13 +72,19 @@ public class CoursewareController {
     @PostMapping("/detail")
     @Operation(summary = "获取课件详细信息", description = "根据ID获取课件详细信息")
     public R<CoursewareResponse> detail(@Valid @RequestBody IdRequest request) {
-        Courseware entity = coursewareService.getById(request.getId());
-        if (entity == null) {
+        CoursewareResponse response = coursewareService.selectCoursewareById(request.getId());
+        if (response == null) {
             return R.fail("课件信息不存在");
         }
         
-        CoursewareResponse response = new CoursewareResponse();
-        BeanUtils.copyProperties(entity, response);
+        // 查询关联的文件
+        var files = coursewareFileService.lambdaQuery()
+                .eq(CoursewareFile::getCoursewareId, response.getCoursewareId())
+                .eq(CoursewareFile::getStatus, "0")
+                .orderByAsc(CoursewareFile::getOrderNum)
+                .list();
+        response.setFiles(files);
+        
         return R.success(response);
     }
 

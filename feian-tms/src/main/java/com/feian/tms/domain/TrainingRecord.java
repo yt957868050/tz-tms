@@ -92,14 +92,22 @@ public class TrainingRecord extends BaseEntity {
     private String trainingEffect;
 
     /** 学员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String studentName;
 
+    /** 学员编号 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    private String studentCode;
+
     /** 班次名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String className;
 
     /** 课程名称 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String courseName;
 
     /** 教员姓名 */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String instructorName;
 }
