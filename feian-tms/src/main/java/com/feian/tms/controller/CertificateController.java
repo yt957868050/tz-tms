@@ -8,10 +8,10 @@ import com.feian.tms.domain.Major;
 import com.feian.tms.domain.Student;
 import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
-import com.feian.tms.dto.request.CertificateDeleteRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CertificateRequest;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.feian.tms.dto.response.CertificateDetailsResponse;
 import com.feian.tms.dto.response.CertificatePageQueryResponse;
 import com.feian.tms.dto.response.CertificatePageResponse;
@@ -249,24 +249,27 @@ public class CertificateController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出证书列表", description = "根据查询条件导出证书列表到Excel")
-    public void export( HttpServletResponse response,@ModelAttribute  CertificateQuery query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = certificateService.lambdaQuery()
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // 根据id查询所有数据（不分页）
+        List<Certificate> list=certificateService.listByIds(idsRequest.getIdList());
+//        var queryWrapper = certificateService.lambdaQuery()
+//                .in(Certificate::getCertificateId, idsRequest.getIdList());
+//        var queryWrapper = certificateService.lambdaQuery()
 //                .like(query.getCertificateCode() != null, Certificate::getCertificateCode, query.getCertificateCode())
-                .like(query.getCertificateName() != null, Certificate::getCertificateName, query.getCertificateName())
-                .eq(query.getStudentId() != null, Certificate::getStudentId, query.getStudentId())
-                .eq(query.getTrainingClassId() != null, Certificate::getTrainingClassId, query.getTrainingClassId())
-                .eq(query.getMachineTypeId() != null, Certificate::getMachineTypeId, query.getMachineTypeId())
-                .eq(query.getMajorId() != null, Certificate::getMajorId, query.getMajorId())
-                .eq(query.getTrainingAbilityId() != null, Certificate::getTrainingAbilityId, query.getTrainingAbilityId())
-                .eq(query.getCertificateType() != null, Certificate::getCertificateType, query.getCertificateType())
-                .ge(query.getIssueDate() != null, Certificate::getIssueDate, query.getIssueDate())
+//                .like(query.getCertificateName() != null, Certificate::getCertificateName, query.getCertificateName())
+//                .eq(query.getStudentId() != null, Certificate::getStudentId, query.getStudentId())
+//                .eq(query.getTrainingClassId() != null, Certificate::getTrainingClassId, query.getTrainingClassId())
+//                .eq(query.getMachineTypeId() != null, Certificate::getMachineTypeId, query.getMachineTypeId())
+//                .eq(query.getMajorId() != null, Certificate::getMajorId, query.getMajorId())
+//                .eq(query.getTrainingAbilityId() != null, Certificate::getTrainingAbilityId, query.getTrainingAbilityId())
+//                .eq(query.getCertificateType() != null, Certificate::getCertificateType, query.getCertificateType())
+//                .ge(query.getIssueDate() != null, Certificate::getIssueDate, query.getIssueDate())
 //                .le(query.getValidUntil() != null, Certificate::getValidUntil, query.getValidUntil())
-//                .like(query.getIssueOrganization() != null, Certificate::getIssueOrganization, query.getIssueOrganization())
+//               .like(query.getIssueOrganization() != null, Certificate::getIssueOrganization, query.getIssueOrganization())
 //                .eq(query.getCertificateStatus() != null, Certificate::getCertificateStatus, query.getCertificateStatus())
-                .orderByDesc(Certificate::getCreateTime);
+//                .orderByDesc(Certificate::getCreateTime);
         
-        List<Certificate> list = queryWrapper.list();
+//        List<Certificate> list = queryWrapper.list();
         
         // 转换为导出对象
         List<CertificateExcel> excelList = list.stream()

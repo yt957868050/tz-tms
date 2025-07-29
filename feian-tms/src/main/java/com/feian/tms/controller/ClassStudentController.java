@@ -5,6 +5,7 @@ import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.ClassStudent;
 import com.feian.tms.dto.query.ClassStudentQuery;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.ClassStudentRequest;
@@ -117,8 +118,8 @@ public class ClassStudentController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除班次学员关联", description = "根据ID删除班次学员关联信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = classStudentService.removeById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = classStudentService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

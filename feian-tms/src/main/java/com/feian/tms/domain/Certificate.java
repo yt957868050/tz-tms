@@ -110,23 +110,23 @@ public class Certificate extends BaseEntity {
     private Date updateTime;
 
     /** 学员姓名 */
-    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    //@com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String studentName;
 
     /** 班次名称 */
-    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    //@com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String className;
 
     /** 机型名称 */
-    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    //@com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String machineTypeName;
 
     /** 专业名称 */
-    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+   // @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String majorName;
 
     /** 培训能力名称 */
-    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    //@com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingAbilityName;
 
     /** 证书描述 */
