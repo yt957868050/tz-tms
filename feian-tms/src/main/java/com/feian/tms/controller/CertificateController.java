@@ -11,6 +11,7 @@ import com.feian.tms.dto.query.CertificateQuery;
 import com.feian.tms.dto.request.CertificateDeleteRequest;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.CertificateRequest;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.response.CertificateDetailsResponse;
 import com.feian.tms.dto.response.CertificatePageQueryResponse;
 import com.feian.tms.dto.response.CertificatePageResponse;
@@ -225,8 +226,8 @@ public class CertificateController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除证书", description = "根据ID删除证书信息")
-    public R<Void> delete(@RequestBody CertificateDeleteRequest certificateDeleteRequest) {
-        boolean result = certificateService.deleteBatch(certificateDeleteRequest.getIdList());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = certificateService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

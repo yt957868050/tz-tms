@@ -13,6 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="cerPageQueryList" resultType="com.feian.tms.domain.Certificate">
 		select * from tms_certificate
 		<where>
+			and is_deleted = 0
 			<if test="studentName!=null and studentName!=''" >
 				and student_name like concat('%',#{studentName},'%')
 			</if>
@@ -25,6 +26,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="status!=null and status!=''" >
 				and certificate_status = #{status}
 			</if>
+
 		</where>
 
 	</select>

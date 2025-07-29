@@ -206,7 +206,7 @@ public class StudentController {
     @PostMapping("/delete")
     @Operation(summary = "删除学员", description = "根据ID删除学员信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
-        boolean result = studentService.deleteBatch(idsDeleteRequest.getIdList());
+        boolean result = studentService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

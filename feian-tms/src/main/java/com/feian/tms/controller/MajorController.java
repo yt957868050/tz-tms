@@ -137,7 +137,7 @@ public class MajorController {
     @PostMapping("/delete")
     @Operation(summary = "删除专业", description = "根据ID删除专业信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
-        boolean result = majorService.removeIds(idsDeleteRequest.getIdList());
+        boolean result = majorService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

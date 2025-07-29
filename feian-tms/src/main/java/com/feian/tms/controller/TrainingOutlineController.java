@@ -125,7 +125,7 @@ public class TrainingOutlineController {
     @PostMapping("/delete")
     @Operation(summary = "删除培训大纲", description = "根据ID删除培训大纲信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
-        boolean result = trainingOutlineService.deleteBatch(idsDeleteRequest.getIdList());
+        boolean result = trainingOutlineService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

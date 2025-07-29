@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
@@ -133,8 +134,8 @@ public class CoursewareController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除课件", description = "根据ID删除课件信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = coursewareService.removeById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
+        boolean result = coursewareService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }
