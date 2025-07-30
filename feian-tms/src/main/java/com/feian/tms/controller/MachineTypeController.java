@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.common.PageRequest;
@@ -148,16 +149,17 @@ public class MachineTypeController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出机型列表", description = "根据查询条件导出机型列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody MachineTypeQuery query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = machineTypeService.lambdaQuery()
-                .like(query.getMachineTypeName() != null, MachineType::getMachineTypeName, query.getMachineTypeName())
-                .like(query.getMachineTypeCode() != null, MachineType::getMachineTypeCode, query.getMachineTypeCode())
-                .eq(query.getStatus() != null, MachineType::getStatus, query.getStatus())
-                .orderByAsc(MachineType::getOrderNum)
-                .orderByDesc(MachineType::getCreateTime);
-        
-        List<MachineType> list = queryWrapper.list();
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // 根据id查询所有数据（不分页）
+        List<MachineType> list = machineTypeService.listByIds(idsRequest.getIdList());
+//        var queryWrapper = machineTypeService.lambdaQuery()
+//                .like(query.getMachineTypeName() != null, MachineType::getMachineTypeName, query.getMachineTypeName())
+//                .like(query.getMachineTypeCode() != null, MachineType::getMachineTypeCode, query.getMachineTypeCode())
+//                .eq(query.getStatus() != null, MachineType::getStatus, query.getStatus())
+//                .orderByAsc(MachineType::getOrderNum)
+//                .orderByDesc(MachineType::getCreateTime);
+//
+//        List<MachineType> list = queryWrapper.list();
         
         // 转换为导出对象
         List<MachineTypeExcel> excelList = list.stream()

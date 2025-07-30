@@ -195,7 +195,17 @@ public class StudentMachineTypeServiceImpl extends MPJBaseServiceImpl<StudentMac
         
         return true;
     }
-    
+
+    /**
+     * 根据机型ID设置学员的主要机型名称
+     * @param studentId
+     * @param primaryMachineTypeId
+     */
+    public void setPrimaryMachineName(Long studentId, Long primaryMachineTypeId) {
+        studentMapper.setPrimaryMachineName(studentId, primaryMachineTypeId);
+    }
+
+
     /**
      * 更新用户表中的当前机型ID
      */

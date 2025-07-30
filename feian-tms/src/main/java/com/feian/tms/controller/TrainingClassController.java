@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingClass;
@@ -236,22 +237,23 @@ public class TrainingClassController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出培训班次列表", description = "根据查询条件导出培训班次列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody TrainingClassRequest query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = trainingClassService.lambdaQuery()
-                .like(query.getClassCode() != null, TrainingClass::getClassCode, query.getClassCode())
-                .like(query.getClassName() != null, TrainingClass::getClassName, query.getClassName())
-                .eq(query.getTrainingPlanId() != null, TrainingClass::getTrainingPlanId, query.getTrainingPlanId())
-                .eq(query.getMachineTypeId() != null, TrainingClass::getMachineTypeId, query.getMachineTypeId())
-                .eq(query.getMajorId() != null, TrainingClass::getMajorId, query.getMajorId())
-                .eq(query.getTrainingAbilityId() != null, TrainingClass::getTrainingAbilityId, query.getTrainingAbilityId())
-                .ge(query.getPlanStartTime() != null, TrainingClass::getPlanStartTime, query.getPlanStartTime())
-                .le(query.getPlanEndTime() != null, TrainingClass::getPlanEndTime, query.getPlanEndTime())
-                .eq(query.getPrimaryInstructorId() != null, TrainingClass::getPrimaryInstructorId, query.getPrimaryInstructorId())
-                .eq(query.getStatus() != null, TrainingClass::getStatus, query.getStatus())
-                .orderByDesc(TrainingClass::getCreateTime);
-        
-        List<TrainingClass> list = queryWrapper.list();
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // ID查询所有数据（不分页）
+        List<TrainingClass> list =trainingClassService.listByIds(idsRequest.getIdList());
+//        var queryWrapper = trainingClassService.lambdaQuery()
+//                .like(query.getClassCode() != null, TrainingClass::getClassCode, query.getClassCode())
+//                .like(query.getClassName() != null, TrainingClass::getClassName, query.getClassName())
+//                .eq(query.getTrainingPlanId() != null, TrainingClass::getTrainingPlanId, query.getTrainingPlanId())
+//                .eq(query.getMachineTypeId() != null, TrainingClass::getMachineTypeId, query.getMachineTypeId())
+//                .eq(query.getMajorId() != null, TrainingClass::getMajorId, query.getMajorId())
+//                .eq(query.getTrainingAbilityId() != null, TrainingClass::getTrainingAbilityId, query.getTrainingAbilityId())
+//                .ge(query.getPlanStartTime() != null, TrainingClass::getPlanStartTime, query.getPlanStartTime())
+//                .le(query.getPlanEndTime() != null, TrainingClass::getPlanEndTime, query.getPlanEndTime())
+//                .eq(query.getPrimaryInstructorId() != null, TrainingClass::getPrimaryInstructorId, query.getPrimaryInstructorId())
+//                .eq(query.getStatus() != null, TrainingClass::getStatus, query.getStatus())
+//                .orderByDesc(TrainingClass::getCreateTime);
+//
+//        List<TrainingClass> list = queryWrapper.list();
         
         // 转换为导出对象
         List<TrainingClassExcel> excelList = list.stream()

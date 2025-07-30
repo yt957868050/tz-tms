@@ -3,6 +3,7 @@ package com.feian.tms.controller;
 import com.feian.common.annotation.DataScope;
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Student;
@@ -170,6 +171,7 @@ public class StudentController {
         BeanUtils.copyProperties(request, entity);
         
         boolean result = studentService.save(entity);
+        studentService.setPrimaryMajor(entity.getStudentId(), entity.getPrimaryMajorId());
         if (result) {
             StudentResponse response = new StudentResponse();
             BeanUtils.copyProperties(entity, response);
@@ -187,7 +189,6 @@ public class StudentController {
         if (request.getStudentId() == null) {
             return R.fail("学员ID不能为空");
         }
-        
         Student entity = new Student();
         BeanUtils.copyProperties(request, entity);
         
@@ -218,22 +219,23 @@ public class StudentController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出学员列表", description = "根据查询条件导出学员列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody StudentRequest query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = studentService.lambdaQuery()
-                .like(query.getStudentName() != null, Student::getStudentName, query.getStudentName())
-                .like(query.getStudentCode() != null, Student::getStudentCode, query.getStudentCode())
-                .eq(query.getGender() != null, Student::getGender, query.getGender())
-                .like(query.getPhoneNumber() != null, Student::getPhoneNumber, query.getPhoneNumber())
-                .like(query.getDepartment() != null, Student::getDepartment, query.getDepartment())
-                .eq(query.getPrimaryMachineTypeId() != null, Student::getPrimaryMachineTypeId, query.getPrimaryMachineTypeId())
-                .eq(query.getPrimaryMajorId() != null, Student::getPrimaryMajorId, query.getPrimaryMajorId())
-                .eq(query.getEducation() != null, Student::getEducation, query.getEducation())
-                .eq(query.getTrainingStatus() != null, Student::getTrainingStatus, query.getTrainingStatus())
-                .eq(query.getStatus() != null, Student::getStatus, query.getStatus())
-                .orderByDesc(Student::getCreateTime);
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // 根据ID查询所有数据（不分页）
+             List<Student> list = studentService.studentListByIds(idsRequest.getIdList());
+//        var queryWrapper = studentService.lambdaQuery()
+//                .like(query.getStudentName() != null, Student::getStudentName, query.getStudentName())
+//                .like(query.getStudentCode() != null, Student::getStudentCode, query.getStudentCode())
+//                .eq(query.getGender() != null, Student::getGender, query.getGender())
+//                .like(query.getPhoneNumber() != null, Student::getPhoneNumber, query.getPhoneNumber())
+//                .like(query.getDepartment() != null, Student::getDepartment, query.getDepartment())
+//                .eq(query.getPrimaryMachineTypeId() != null, Student::getPrimaryMachineTypeId, query.getPrimaryMachineTypeId())
+//                .eq(query.getPrimaryMajorId() != null, Student::getPrimaryMajorId, query.getPrimaryMajorId())
+//                .eq(query.getEducation() != null, Student::getEducation, query.getEducation())
+//                .eq(query.getTrainingStatus() != null, Student::getTrainingStatus, query.getTrainingStatus())
+//                .eq(query.getStatus() != null, Student::getStatus, query.getStatus())
+//                .orderByDesc(Student::getCreateTime);
         
-        List<Student> list = queryWrapper.list();
+//        List<Student> list = queryWrapper.list();
         
         // 转换为导出对象
         List<StudentExcel> excelList = list.stream()

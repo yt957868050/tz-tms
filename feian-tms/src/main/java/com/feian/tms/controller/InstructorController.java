@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Instructor;
@@ -154,22 +155,23 @@ public class InstructorController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出教员列表", description = "根据查询条件导出教员列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody InstructorRequest query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = instructorService.lambdaQuery()
-                .like(query.getInstructorName() != null, Instructor::getInstructorName, query.getInstructorName())
-                .like(query.getInstructorCode() != null, Instructor::getInstructorCode, query.getInstructorCode())
-                .eq(query.getGender() != null, Instructor::getGender, query.getGender())
-                .like(query.getPhoneNumber() != null, Instructor::getPhoneNumber, query.getPhoneNumber())
-                .like(query.getDepartment() != null, Instructor::getDepartment, query.getDepartment())
-                .eq(query.getInstructorLevel() != null, Instructor::getInstructorLevel, query.getInstructorLevel())
-                .eq(query.getEducation() != null, Instructor::getEducation, query.getEducation())
-                .like(query.getTechnicalTitle() != null, Instructor::getTechnicalTitle, query.getTechnicalTitle())
-                .eq(query.getTeachingStatus() != null, Instructor::getTeachingStatus, query.getTeachingStatus())
-                .eq(query.getStatus() != null, Instructor::getStatus, query.getStatus())
-                .orderByDesc(Instructor::getCreateTime);
-        
-        List<Instructor> list = queryWrapper.list();
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // 根据ID查询所有数据（不分页）
+        List<Instructor> list =instructorService.listByIds(idsRequest.getIdList());
+//        var queryWrapper = instructorService.lambdaQuery()
+//                .like(query.getInstructorName() != null, Instructor::getInstructorName, query.getInstructorName())
+//                .like(query.getInstructorCode() != null, Instructor::getInstructorCode, query.getInstructorCode())
+//                .eq(query.getGender() != null, Instructor::getGender, query.getGender())
+//                .like(query.getPhoneNumber() != null, Instructor::getPhoneNumber, query.getPhoneNumber())
+//                .like(query.getDepartment() != null, Instructor::getDepartment, query.getDepartment())
+//                .eq(query.getInstructorLevel() != null, Instructor::getInstructorLevel, query.getInstructorLevel())
+//                .eq(query.getEducation() != null, Instructor::getEducation, query.getEducation())
+//                .like(query.getTechnicalTitle() != null, Instructor::getTechnicalTitle, query.getTechnicalTitle())
+//                .eq(query.getTeachingStatus() != null, Instructor::getTeachingStatus, query.getTeachingStatus())
+//                .eq(query.getStatus() != null, Instructor::getStatus, query.getStatus())
+//                .orderByDesc(Instructor::getCreateTime);
+//
+//        List<Instructor> list = queryWrapper.list();
         
         // 转换为导出对象
         List<InstructorExcel> excelList = list.stream()

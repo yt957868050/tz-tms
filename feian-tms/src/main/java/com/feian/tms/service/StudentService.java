@@ -14,4 +14,9 @@ import java.util.List;
 public interface StudentService extends MPJBaseService<Student> {
 
     boolean deleteBatch(List<Long> idList);
+
+
+    void setPrimaryMajor(Long studentId, Long primaryMajorId);
+
+    List<Student> studentListByIds(List<Long> idList);
 }

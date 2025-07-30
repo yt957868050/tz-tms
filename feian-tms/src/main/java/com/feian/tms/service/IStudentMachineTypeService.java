@@ -43,4 +43,11 @@ public interface IStudentMachineTypeService extends MPJBaseService<StudentMachin
      * 批量更新学员机型关联
      */
     boolean updateStudentMachineTypes(Long studentId, List<Long> machineTypeIds, Long primaryMachineTypeId);
+
+    /**
+     * 设置学员的主要机型名称
+     * @param studentId
+     * @param primaryMachineTypeId
+     */
+    void setPrimaryMachineName(Long studentId, Long primaryMachineTypeId);
 }

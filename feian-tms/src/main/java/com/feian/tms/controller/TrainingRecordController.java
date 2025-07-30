@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingRecord;
@@ -219,20 +220,21 @@ public class TrainingRecordController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出培训记录列表", description = "根据查询条件导出培训记录列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody TrainingRecordRequest query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = trainingRecordService.lambdaQuery()
-                .eq(query.getStudentId() != null, TrainingRecord::getStudentId, query.getStudentId())
-                .eq(query.getTrainingClassId() != null, TrainingRecord::getTrainingClassId, query.getTrainingClassId())
-                .eq(query.getCoursewareId() != null, TrainingRecord::getCoursewareId, query.getCoursewareId())
-                .eq(query.getInstructorId() != null, TrainingRecord::getInstructorId, query.getInstructorId())
-                .ge(query.getTrainingDate() != null, TrainingRecord::getTrainingDate, query.getTrainingDate())
-                .eq(query.getTrainingMethod() != null, TrainingRecord::getTrainingMethod, query.getTrainingMethod())
-                .eq(query.getAttendanceStatus() != null, TrainingRecord::getAttendanceStatus, query.getAttendanceStatus())
-                .eq(query.getTrainingEffect() != null, TrainingRecord::getTrainingEffect, query.getTrainingEffect())
-                .orderByDesc(TrainingRecord::getTrainingDate);
-        
-        List<TrainingRecord> list = queryWrapper.list();
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // 根据ID查询所有数据（不分页）
+        List<TrainingRecord> list =trainingRecordService.listByIds(idsRequest.getIdList());
+//        var queryWrapper = trainingRecordService.lambdaQuery()
+//                .eq(query.getStudentId() != null, TrainingRecord::getStudentId, query.getStudentId())
+//                .eq(query.getTrainingClassId() != null, TrainingRecord::getTrainingClassId, query.getTrainingClassId())
+//                .eq(query.getCoursewareId() != null, TrainingRecord::getCoursewareId, query.getCoursewareId())
+//                .eq(query.getInstructorId() != null, TrainingRecord::getInstructorId, query.getInstructorId())
+//                .ge(query.getTrainingDate() != null, TrainingRecord::getTrainingDate, query.getTrainingDate())
+//                .eq(query.getTrainingMethod() != null, TrainingRecord::getTrainingMethod, query.getTrainingMethod())
+//                .eq(query.getAttendanceStatus() != null, TrainingRecord::getAttendanceStatus, query.getAttendanceStatus())
+//                .eq(query.getTrainingEffect() != null, TrainingRecord::getTrainingEffect, query.getTrainingEffect())
+//                .orderByDesc(TrainingRecord::getTrainingDate);
+//
+//        List<TrainingRecord> list = queryWrapper.list();
         
         // 转换为导出对象
         List<TrainingRecordExcel> excelList = list.stream()

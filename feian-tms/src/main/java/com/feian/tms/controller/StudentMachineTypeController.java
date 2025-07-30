@@ -46,6 +46,7 @@ public class StudentMachineTypeController {
             request.getMachineTypeIds(), 
             request.getPrimaryMachineTypeId()
         );
+        studentMachineTypeService.setPrimaryMachineName(request.getStudentId(),request.getPrimaryMachineTypeId());
         return result ? R.success() : R.fail("更新失败");
     }
 
@@ -56,6 +57,7 @@ public class StudentMachineTypeController {
     @Operation(summary = "设置主要机型", description = "为学员设置主要机型")
     public R<Void> setPrimary(@Valid @RequestBody SetPrimaryRequest request) {
         boolean result = studentMachineTypeService.setPrimaryMachineType(request.getStudentId(), request.getMachineTypeId());
+        studentMachineTypeService.setPrimaryMachineName(request.getStudentId(),request.getMachineTypeId());
         return result ? R.success() : R.fail("设置失败");
     }
 

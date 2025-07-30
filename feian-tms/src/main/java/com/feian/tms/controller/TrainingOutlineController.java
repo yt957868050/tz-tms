@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingOutline;
@@ -137,8 +138,8 @@ public class TrainingOutlineController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出培训大纲列表", description = "根据查询条件导出培训大纲列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody TrainingOutlineRequest query) {
-        List<TrainingOutlineResponse> list = trainingOutlineService.exportTrainingOutlineList(query);
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        List<TrainingOutline> list = trainingOutlineService.listByIds(idsRequest.getIdList());
         
         // 转换为导出对象
         List<TrainingOutlineExcel> excelList = list.stream()

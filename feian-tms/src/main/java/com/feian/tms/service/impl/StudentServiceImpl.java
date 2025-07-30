@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,4 +27,19 @@ public class StudentServiceImpl extends MPJBaseServiceImpl<StudentMapper, Studen
         studentMapper.deleteIds(idList);
         return true;
     }
+
+    @Override
+    public void setPrimaryMajor(Long studentId, Long primaryMajorId) {
+        studentMapper.setPrimaryMajor(studentId, primaryMajorId);
+    }
+
+    @Override
+    public List<Student> studentListByIds(List<Long> idList) {
+        // 进行非空判断，避免传入空列表导致SQL报错或查询无意义
+        if (idList == null || idList.isEmpty()) {
+            return Collections.emptyList(); // 返回空列表，而不是null
+        }
+        return studentMapper.studentListByIds(idList);
+    }
+
 }

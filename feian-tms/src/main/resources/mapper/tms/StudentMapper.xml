@@ -3,6 +3,18 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.feian.tms.mapper.StudentMapper">
+    <update id="setPrimaryMachineName">
+        update tms_student as s
+        join tms_machine_type as mt on mt.machine_type_id = #{primaryMachineTypeId}
+        set s.primary_machine_type_name = mt.machine_type_name
+        where s.student_id = #{studentId}
+    </update>
+    <update id="setPrimaryMajor">
+        update tms_student as s
+        join tms_major as m on m.major_id = #{primaryMajorId}
+        set s.primary_major_name = m.major_name
+        where s.student_id = #{studentId}
+    </update>
 
 
     <delete id="deleteIds">
@@ -11,4 +23,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{studentId}
         </foreach>
     </delete>
+    <select id="studentListByIds" resultType="com.feian.tms.domain.Student">
+        select * from tms_student where student_id in
+        <foreach collection="idList" item="studentId" open="(" separator="," close=")">
+            #{studentId}
+        </foreach>
+    </select>
 </mapper>

@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.common.PageRequest;
@@ -149,17 +150,18 @@ public class MajorController {
      */
     @PostMapping("/export")
     @Operation(summary = "导出专业列表", description = "根据查询条件导出专业列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody MajorQuery query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = majorService.lambdaQuery()
-                .like(query.getMajorName() != null, Major::getMajorName, query.getMajorName())
-                .like(query.getMajorCode() != null, Major::getMajorCode, query.getMajorCode())
-                .eq(query.getMajorType() != null, Major::getMajorType, query.getMajorType())
-                .eq(query.getStatus() != null, Major::getStatus, query.getStatus())
-                .orderByAsc(Major::getOrderNum)
-                .orderByDesc(Major::getCreateTime);
-        
-        List<Major> list = queryWrapper.list();
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        // 根据id查询所有数据（不分页）
+        List<Major> list = majorService.listByIds(idsRequest.getIdList());
+//        var queryWrapper = majorService.lambdaQuery()
+//                .like(query.getMajorName() != null, Major::getMajorName, query.getMajorName())
+//                .like(query.getMajorCode() != null, Major::getMajorCode, query.getMajorCode())
+//                .eq(query.getMajorType() != null, Major::getMajorType, query.getMajorType())
+//                .eq(query.getStatus() != null, Major::getStatus, query.getStatus())
+//                .orderByAsc(Major::getOrderNum)
+//                .orderByDesc(Major::getCreateTime);
+//
+//        List<Major> list = queryWrapper.list();
         
         // 转换为导出对象
         List<MajorExcel> excelList = list.stream()

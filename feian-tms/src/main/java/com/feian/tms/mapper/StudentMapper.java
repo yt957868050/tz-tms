@@ -16,4 +16,11 @@ import java.util.List;
 public interface StudentMapper extends MPJBaseMapper<Student> {
 
     void deleteIds(List<Long> idList);
+
+
+    void setPrimaryMachineName(Long studentId, Long primaryMachineTypeId);
+
+    void setPrimaryMajor(Long studentId, Long primaryMajorId);
+
+    List<Student> studentListByIds(List<Long> idList);
 }
