@@ -17,7 +17,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -119,12 +122,52 @@ public class CoursewareController {
         if (request.getCoursewareId() == null) {
             return R.fail("课件ID不能为空");
         }
-        
         Courseware entity = new Courseware();
         BeanUtils.copyProperties(request, entity);
-        
         boolean result = coursewareService.updateById(entity);
-        if (result) {
+        entity.setCoursewareId(coursewareService.getCoursewareIdBycourse_code(request.getCourseCode()));
+        request.getFiles().forEach(file -> file.setCoursewareId(entity.getCoursewareId()));
+        int TypeOne=0;
+        int TypeThree=0;
+        int TypeFour=0;
+        for(CoursewareFile file : request.getFiles()) {
+           if(file.getCoursewareFileId() == null) {
+               coursewareFileService.save(file);
+               switch (file.getFileType()){
+                   case "1":
+                       TypeOne=1;
+                       break;
+                   case "3":
+                       TypeThree=1;
+                       break;
+                   case "4":
+                       TypeFour=1;
+               }
+           } else {
+               coursewareFileService.removeById(file.getCoursewareFileId());
+           }
+        }
+        for(CoursewareFile file : request.getFiles()){
+            if(file.getCoursewareFileId() != null){
+                if(Objects.equals(file.getFileType(), "1") &&TypeOne==0){
+                    file.setCoursewareFileId(null);
+                    coursewareFileService.save(file);
+                }
+                if(Objects.equals(file.getFileType(), "3") &&TypeThree==0){
+                    file.setCoursewareFileId(null);
+                    coursewareFileService.save(file);
+                }
+                if(Objects.equals(file.getFileType(), "4") &&TypeFour==0){
+                    file.setCoursewareFileId(null);
+                    coursewareFileService.save(file);
+                }
+            }
+            else{
+                break;
+            }
+        }
+
+            if (result) {
             CoursewareResponse response = new CoursewareResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);

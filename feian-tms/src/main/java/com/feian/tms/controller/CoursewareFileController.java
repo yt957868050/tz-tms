@@ -121,6 +121,7 @@ public class CoursewareFileController {
         BeanUtils.copyProperties(request, entity);
         
         boolean result = coursewareFileService.updateById(entity);
+
         if (result) {
             CoursewareFileResponse response = new CoursewareFileResponse();
             BeanUtils.copyProperties(entity, response);
