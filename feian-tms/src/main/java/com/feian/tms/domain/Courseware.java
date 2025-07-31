@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 课件管理对象 tms_courseware
@@ -94,4 +95,5 @@ public class Courseware extends BaseEntity {
     /** 培训类型名称 */
     @TableField(exist = false)
     private String trainingTypeName;
+
 }

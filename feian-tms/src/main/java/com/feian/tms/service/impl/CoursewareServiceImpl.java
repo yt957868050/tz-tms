@@ -82,6 +82,11 @@ public class CoursewareServiceImpl extends MPJBaseServiceImpl<CoursewareMapper, 
         return convertToResponse(courseware);
     }
 
+    @Override
+    public Long getCoursewareIdBycourse_code(String courseCode) {
+        return coursewareMapper.getCoursewareIdBycourse_code(courseCode);
+    }
+
     /**
      * 构建查询条件
      */

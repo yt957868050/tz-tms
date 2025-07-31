@@ -97,8 +97,11 @@ public class CoursewareController {
     public R<CoursewareResponse> create(@Valid @RequestBody CoursewareRequest request) {
         Courseware entity = new Courseware();
         BeanUtils.copyProperties(request, entity);
-        
         boolean result = coursewareService.save(entity);
+        entity.setCoursewareId(coursewareService.getCoursewareIdBycourse_code(request.getCourseCode()));
+        request.getFiles().forEach(file -> file.setCoursewareId(entity.getCoursewareId()));
+        coursewareFileService.saveBatch(request.getFiles());
+
         if (result) {
             CoursewareResponse response = new CoursewareResponse();
             BeanUtils.copyProperties(entity, response);

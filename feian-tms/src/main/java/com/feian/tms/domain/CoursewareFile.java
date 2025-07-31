@@ -68,4 +68,5 @@ public class CoursewareFile extends BaseEntity {
     /** 课程名称 */
     @TableField(exist = false)
     private String courseName;
+
 }

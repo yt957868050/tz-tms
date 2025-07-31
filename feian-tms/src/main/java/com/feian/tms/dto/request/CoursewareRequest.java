@@ -1,10 +1,12 @@
 package com.feian.tms.dto.request;
 
+import com.feian.tms.domain.CoursewareFile;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 课件管理请求对象
@@ -68,4 +70,7 @@ public class CoursewareRequest {
 
     /** 备注 */
     private String remark;
+
+    /** 关联的文件列表 */
+    private List<CoursewareFile> files;
 }
