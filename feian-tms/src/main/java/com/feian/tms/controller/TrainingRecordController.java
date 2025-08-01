@@ -207,8 +207,8 @@ public class TrainingRecordController {
      */
     @PostMapping("/delete")
     @Operation(summary = "删除培训记录", description = "根据ID删除培训记录信息")
-    public R<Void> delete(@Valid @RequestBody IdRequest request) {
-        boolean result = trainingRecordService.removeById(request.getId());
+    public R<Void> delete(@Valid @RequestBody IdsRequest idsRequest) {
+        boolean result = trainingRecordService.removeByIds(idsRequest.getIdList());
         if (result) {
             return R.success();
         }

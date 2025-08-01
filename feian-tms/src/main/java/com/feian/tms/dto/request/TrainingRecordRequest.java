@@ -87,4 +87,8 @@ public class TrainingRecordRequest {
     /** 培训效果（1优秀 2良好 3一般 4较差） */
     @Schema(description = "培训效果", allowableValues = {"1", "2", "3", "4"})
     private String trainingEffect;
+
+    /** 备注 */
+    @Schema(description = "备注")
+    private String remark;
 }
