@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * 通用ID请求对象
@@ -45,6 +46,27 @@ public class IdRequest {
                 } catch (NumberFormatException e) {
                     return null;
                 }
+            }
+        }
+        //  id 是一个 Map (对应前端的 {id: {id: 17}} 这种对象)
+        // Spring Boot 默认的 Jackson 库会将 JSON 对象解析为 Map<String, Object>
+        if (id instanceof Map) {
+            Map<?, ?> idMap = (Map<?, ?>) id;
+            Object innerId = idMap.get("id"); // 获取嵌套的 "id" 键的值
+            if (innerId != null) {
+                // 递归调用 getId() 来处理嵌套的 id，因为它也可能是 Number, String, 或其他类型
+                // 注意：这里需要稍微调整一下逻辑，直接处理 innerId
+                if (innerId instanceof Number) {
+                    return ((Number) innerId).longValue();
+                }
+                if (innerId instanceof String) {
+                    try {
+                        return Long.valueOf((String) innerId);
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+                // 如果嵌套的 id 还有更深层的结构，也可以在这里继续处理，但通常不建议太深
             }
         }
         return null;
