@@ -103,4 +103,8 @@ public class TrainingPlan extends BaseEntity {
     /** 培训能力名称 */
     @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String trainingAbilityName;
+
+    /** 培训班次ID */
+    @Excel(name = "培训班次ID")
+    private Long trainingClassId;
 }

@@ -14,4 +14,6 @@ import java.util.List;
 public interface TrainingPlanService extends MPJBaseService<TrainingPlan> {
 
     boolean deleteBatch(List<Long> idList);
+
+    String getClassNameById(Long trainingClassId);
 }

@@ -26,4 +26,9 @@ public class TrainingPlanServiceImpl extends MPJBaseServiceImpl<TrainingPlanMapp
         trainingPlanMapper.deleteBatch(idList);
         return true;
     }
+
+    @Override
+    public String getClassNameById(Long trainingClassId) {
+        return trainingPlanMapper.getClassNameById(trainingClassId);
+    }
 }

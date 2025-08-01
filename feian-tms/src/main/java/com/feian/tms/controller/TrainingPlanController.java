@@ -90,7 +90,9 @@ public class TrainingPlanController {
                 .map(entity -> {
                     TrainingPlanResponse response = new TrainingPlanResponse();
                     BeanUtils.copyProperties(entity, response);
-                    
+                    if(entity.getTrainingClassId()!=null){
+                        response.setClassName(trainingPlanService.getClassNameById(entity.getTrainingClassId()));
+                    }
                     // 设置关联字段名称
                     if (entity.getMachineTypeId() != null) {
                         var machineType = machineTypeService.getById(entity.getMachineTypeId());
@@ -167,7 +169,6 @@ public class TrainingPlanController {
         
         TrainingPlanResponse response = new TrainingPlanResponse();
         BeanUtils.copyProperties(entity, response);
-        
         // 设置关联字段名称
         if (entity.getMachineTypeId() != null) {
             var machineType = machineTypeService.getById(entity.getMachineTypeId());

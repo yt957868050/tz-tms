@@ -100,4 +100,10 @@ public class TrainingPlanResponse {
 
     @Schema(description = "教员数量")
     private Integer instructorCount;
+
+    @Schema(description = "培训班次ID")
+    private Long trainingClassId;
+
+    @Schema(description = "培训班次")
+    private String className;
 }

@@ -88,6 +88,9 @@ public class TrainingPlanRequest extends PageRequest {
     @Schema(description = "主责教员ID")
     private Long chiefInstructorId;
 
+    @Schema(description = "培训班次ID")
+    private Long trainingClassId;
+
     // 验证分组接口
     public interface Create {}
     public interface Update {}
