@@ -128,8 +128,11 @@ public class CoursewareController {
         entity.setCoursewareId(coursewareService.getCoursewareIdBycourse_code(request.getCourseCode()));
         request.getFiles().forEach(file -> file.setCoursewareId(entity.getCoursewareId()));
         int TypeOne=0;
+        int TypeTwo=0;
         int TypeThree=0;
         int TypeFour=0;
+        int TypeFive=0;
+        int TypeSeven=0;
         for(CoursewareFile file : request.getFiles()) {
            if(file.getCoursewareFileId() == null) {
                coursewareFileService.save(file);
@@ -137,11 +140,18 @@ public class CoursewareController {
                    case "1":
                        TypeOne=1;
                        break;
+                   case "2":
+                       TypeTwo=1;
+                       break;
                    case "3":
                        TypeThree=1;
                        break;
                    case "4":
                        TypeFour=1;
+                   case "5":
+                       TypeFive=1;
+                   case "7":
+                       TypeSeven=1;
                }
            } else {
                coursewareFileService.removeById(file.getCoursewareFileId());
@@ -153,11 +163,23 @@ public class CoursewareController {
                     file.setCoursewareFileId(null);
                     coursewareFileService.save(file);
                 }
+                if(Objects.equals(file.getFileType(), "2") &&TypeTwo==0){
+                    file.setCoursewareFileId(null);
+                    coursewareFileService.save(file);
+                }
                 if(Objects.equals(file.getFileType(), "3") &&TypeThree==0){
                     file.setCoursewareFileId(null);
                     coursewareFileService.save(file);
                 }
                 if(Objects.equals(file.getFileType(), "4") &&TypeFour==0){
+                    file.setCoursewareFileId(null);
+                    coursewareFileService.save(file);
+                }
+                if(Objects.equals(file.getFileType(), "5") &&TypeFive==0){
+                    file.setCoursewareFileId(null);
+                    coursewareFileService.save(file);
+                }
+                if(Objects.equals(file.getFileType(), "7") &&TypeSeven==0){
                     file.setCoursewareFileId(null);
                     coursewareFileService.save(file);
                 }
