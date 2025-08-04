@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;  
@@ -246,10 +247,10 @@ public class TrainingPlanController {
         if (exists) {
             return R.fail("计划编号已存在");
         }
-        
+
         TrainingPlan entity = new TrainingPlan();
         BeanUtils.copyProperties(request, entity);
-        
+
         // 设置默认值
         if (entity.getPlanStatus() == null) {
             entity.setPlanStatus("0"); // 默认草稿状态
@@ -257,7 +258,7 @@ public class TrainingPlanController {
         if (entity.getScheduleGenerated() == null) {
             entity.setScheduleGenerated("0"); // 默认未生成课表
         }
-        
+
         boolean result = trainingPlanService.save(entity);
         if (result) {
             //保存主责教员
@@ -280,7 +281,7 @@ public class TrainingPlanController {
                 }
             }
 
-            
+
             TrainingPlanResponse response = new TrainingPlanResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);
@@ -292,6 +293,7 @@ public class TrainingPlanController {
      * 修改培训计划
      */
     @PostMapping("/update")
+    @Transactional(rollbackFor = Exception.class) // <-- 事务注解在这里！
     @Operation(summary = "修改培训计划", description = "更新现有培训计划信息")
     public R<TrainingPlanResponse> update(@Valid @RequestBody TrainingPlanRequest request) {
         if (request.getPlanId() == null) {
@@ -300,45 +302,40 @@ public class TrainingPlanController {
 
         TrainingPlan entity = new TrainingPlan();
         BeanUtils.copyProperties(request, entity);
-        
-        boolean result = trainingPlanService.updateById(entity);
+
+        boolean result = trainingPlanService.updateById(entity); // (A) 第一次数据库操作：更新培训计划本身
         if (result) {
-            try{
-            // 更新教员关联关系
+            // (B) 开始处理教员关联逻辑
             if (request.getInstructorIds() != null) {
                 // 删除原有关联
-                trainingPlanInstructorService.delete(entity.getPlanId());
+                // 注意：您代码中依然使用的是 trainingPlanInstructorService.delete(entity.getPlanId());
+                // 如果这是一个自定义方法且没有明确的条件，可能存在风险。
+                // Mybatis-Plus 推荐使用 lambdaUpdate().eq(...).remove()
+                trainingPlanInstructorService.delete(entity.getPlanId()); // (C) 第二次数据库操作：删除旧的教员关联
 
-//                trainingPlanInstructorService.lambdaUpdate()
-//                        .eq(TrainingPlanInstructor::getPlanId, entity.getPlanId())
-//                        .remove();
-                //添加主责教员
+                // 添加主责教员
                 TrainingPlanInstructor tp = new TrainingPlanInstructor();
                 tp.setPlanId(entity.getPlanId());
                 tp.setInstructorId(request.getChiefInstructorId());
                 tp.setStatus("0");
                 tp.setIsChief("1");
-                trainingPlanInstructorService.save(tp);
+                trainingPlanInstructorService.save(tp); // (D) 第三次数据库操作：保存主责教员（这里可能因重复插入而抛异常）
 
                 // 添加新的关联
                 for (Long instructorId : request.getInstructorIds()) {
                     TrainingPlanInstructor tpi = new TrainingPlanInstructor();
                     tpi.setPlanId(entity.getPlanId());
                     tpi.setInstructorId(instructorId);
-//                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
                     tpi.setStatus("0");
-                    trainingPlanInstructorService.save(tpi);
+                    trainingPlanInstructorService.save(tpi); // (E) 后续数据库操作：保存其他教员（这里也可能因重复插入而抛异常）
                 }
-            }} catch (Exception e) {
-                throw new RuntimeException(e);
             }
-
-
+            // (F) 教员关联逻辑处理结束
             TrainingPlanResponse response = new TrainingPlanResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);
         }
-        return R.fail("更新培训计划失败");
+        return R.fail("更新培训计划失败"); // (G) 如果第一次 updateById 返回 false
     }
 
     /**
