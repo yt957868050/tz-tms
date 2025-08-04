@@ -297,12 +297,13 @@ public class TrainingPlanController {
         if (request.getPlanId() == null) {
             return R.fail("培训计划ID不能为空");
         }
-        
+
         TrainingPlan entity = new TrainingPlan();
         BeanUtils.copyProperties(request, entity);
         
         boolean result = trainingPlanService.updateById(entity);
         if (result) {
+            try{
             // 更新教员关联关系
             if (request.getInstructorIds() != null) {
                 // 删除原有关联
@@ -328,8 +329,11 @@ public class TrainingPlanController {
                     tpi.setStatus("0");
                     trainingPlanInstructorService.save(tpi);
                 }
+            }} catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            
+
+
             TrainingPlanResponse response = new TrainingPlanResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);
