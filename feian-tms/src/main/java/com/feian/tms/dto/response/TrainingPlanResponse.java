@@ -1,5 +1,6 @@
 package com.feian.tms.dto.response;
 
+import com.feian.tms.domain.TrainingPlanInstructor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -106,4 +107,7 @@ public class TrainingPlanResponse {
 
     @Schema(description = "培训班次")
     private String className;
+
+    @Schema(description = "主教员")
+    private TrainingPlanInstructor trainingPlanInstructor;
 }

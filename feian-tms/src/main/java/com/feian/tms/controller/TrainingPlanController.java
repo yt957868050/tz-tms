@@ -1,5 +1,6 @@
 package com.feian.tms.controller;
 
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.domain.*;
 import com.feian.tms.dto.request.IdsDeleteRequest;
@@ -190,11 +191,20 @@ public class TrainingPlanController {
                 response.setTrainingAbilityName(trainingAbility.getAbilityName());
             }
         }
+
+        //查询主教员
+        TrainingPlanInstructor chefInstructor = trainingPlanInstructorService.lambdaQuery()
+                .eq(TrainingPlanInstructor::getPlanId, entity.getPlanId())
+                .eq(TrainingPlanInstructor::getIsChief, "1")
+                .one();
+
+
         
         // 查询关联教员信息
         var instructors = trainingPlanInstructorService.lambdaQuery()
                 .eq(TrainingPlanInstructor::getPlanId, entity.getPlanId())
                 .eq(TrainingPlanInstructor::getStatus, "0")
+                .eq(TrainingPlanInstructor::getIsChief, "0")
                 .list();
         
         if (!instructors.isEmpty()) {
@@ -216,6 +226,7 @@ public class TrainingPlanController {
                     .toList();
             
             response.setInstructors(instructorResponses);
+            response.setTrainingPlanInstructor(chefInstructor);
             response.setInstructorCount(instructorResponses.size());
         }
         
@@ -249,17 +260,26 @@ public class TrainingPlanController {
         
         boolean result = trainingPlanService.save(entity);
         if (result) {
+            //保存主责教员
+            TrainingPlanInstructor tp = new TrainingPlanInstructor();
+            tp.setPlanId(entity.getPlanId());
+            tp.setInstructorId(request.getChiefInstructorId());
+            tp.setStatus("0");
+            tp.setIsChief("1");
+            trainingPlanInstructorService.save(tp);
+
             // 保存教员关联关系
             if (request.getInstructorIds() != null && !request.getInstructorIds().isEmpty()) {
                 for (Long instructorId : request.getInstructorIds()) {
                     TrainingPlanInstructor tpi = new TrainingPlanInstructor();
                     tpi.setPlanId(entity.getPlanId());
                     tpi.setInstructorId(instructorId);
-                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
+//                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
                     tpi.setStatus("0");
                     trainingPlanInstructorService.save(tpi);
                 }
             }
+
             
             TrainingPlanResponse response = new TrainingPlanResponse();
             BeanUtils.copyProperties(entity, response);
