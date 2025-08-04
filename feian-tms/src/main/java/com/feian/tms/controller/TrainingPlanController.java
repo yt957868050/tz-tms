@@ -374,23 +374,22 @@ public class TrainingPlanController {
     public R<Map<String, Object>> autoSchedule(@RequestBody TrainingPlanRequest request) {
         try {
             // 1. 创建培训计划
-            TrainingPlan trainingPlan = new TrainingPlan();
-            BeanUtils.copyProperties(request, trainingPlan);
-            
-            // 生成计划编号和名称
-            String planCode = generatePlanCode(request.getMachineTypeId(), request.getMajorId(), request.getTrainingAbilityId());
-            trainingPlan.setPlanCode(planCode);
+                TrainingPlan trainingPlan = new TrainingPlan();
+                BeanUtils.copyProperties(request, trainingPlan);
+            // 生成计划编号
+            trainingPlan.setPlanCode("null");
             trainingPlan.setPlanName(generatePlanName(request.getMachineTypeId(), request.getMajorId(), request.getTrainingAbilityId()));
             trainingPlan.setPlanStatus("0"); // 草稿状态
             trainingPlan.setScheduleGenerated("0"); // 未生成课表
             trainingPlan.setStatus("0"); // 正常状态
             
             // 保存培训计划
-            trainingPlanService.save(trainingPlan);
-            
+            if(request.getPlanId() == null) {
+                trainingPlanService.save(trainingPlan);
+            }
             // 2. 生成班次编号（年份+序号）
             String classCode = generateClassCode();
-            
+
             // 创建培训班次
             TrainingClass trainingClass = new TrainingClass();
             trainingClass.setClassCode(classCode);
@@ -401,7 +400,7 @@ public class TrainingPlanController {
             trainingClass.setTrainingAbilityId(request.getTrainingAbilityId());
             trainingClass.setPlanStartTime(request.getStartDate());
             trainingClass.setStatus("0"); // 待开班
-            
+
             trainingClassService.save(trainingClass);
             
             // 3. 自动生成课程安排
@@ -417,6 +416,8 @@ public class TrainingPlanController {
             trainingPlan.setClassScheduleName(trainingClass.getClassName() + "-课程表");
             trainingPlan.setTeachingScheduleName(trainingClass.getClassName() + "-教学进度安排表");
             trainingPlan.setPracticalProjectListName(trainingClass.getClassName() + "-实作项目清单");
+            if(request.getPlanCode()!=null){
+            trainingPlan.setPlanCode(request.getPlanCode());}
             trainingPlanService.updateById(trainingPlan);
             
             // 5. 保存责任教员关系
