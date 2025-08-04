@@ -227,10 +227,10 @@ public class TrainingPlanController {
                     .toList();
             
             response.setInstructors(instructorResponses);
-            response.setTrainingPlanInstructor(chefInstructor);
+
             response.setInstructorCount(instructorResponses.size());
         }
-        
+        response.setTrainingPlanInstructor(chefInstructor);
         return R.success(response);
     }
 
@@ -239,6 +239,7 @@ public class TrainingPlanController {
      */
     @PostMapping("/create")
     @Operation(summary = "新增培训计划", description = "创建新的培训计划信息")
+    @Transactional(rollbackFor = Exception.class) // <-- 在这里添加 @Transactional 注解
     public R<TrainingPlanResponse> create(@Valid @RequestBody TrainingPlanRequest request) {
         // 检查计划编号是否重复
         boolean exists = trainingPlanService.lambdaQuery()
@@ -259,34 +260,47 @@ public class TrainingPlanController {
             entity.setScheduleGenerated("0"); // 默认未生成课表
         }
 
+        // 保存培训计划基本信息
         boolean result = trainingPlanService.save(entity);
-        if (result) {
-            //保存主责教员
-            TrainingPlanInstructor tp = new TrainingPlanInstructor();
+        if (!result) { // 如果保存失败，抛出异常以触发回滚
+            throw new RuntimeException("保存培训计划基本信息失败。");
+        }
+
+        try {
+            if (request.getChiefInstructorId() != null) {
+                //保存主责教员
+                TrainingPlanInstructor tp = new TrainingPlanInstructor();
             tp.setPlanId(entity.getPlanId());
             tp.setInstructorId(request.getChiefInstructorId());
             tp.setStatus("0");
             tp.setIsChief("1");
             trainingPlanInstructorService.save(tp);
-
+        }
             // 保存教员关联关系
             if (request.getInstructorIds() != null && !request.getInstructorIds().isEmpty()) {
                 for (Long instructorId : request.getInstructorIds()) {
+                    // 排除主责教员，避免重复插入导致Duplicate entry
+                    if (instructorId.equals(request.getChiefInstructorId())) {
+                        continue;
+                    }
+
                     TrainingPlanInstructor tpi = new TrainingPlanInstructor();
                     tpi.setPlanId(entity.getPlanId());
                     tpi.setInstructorId(instructorId);
-//                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
                     tpi.setStatus("0");
                     trainingPlanInstructorService.save(tpi);
                 }
             }
-
-
-            TrainingPlanResponse response = new TrainingPlanResponse();
-            BeanUtils.copyProperties(entity, response);
-            return R.success(response);
+        } catch (Exception e) {
+            // 记录详细错误日志（请替换为实际的日志记录器，例如 SLF4J）
+            System.err.println("新增培训计划的教员关联失败，计划ID: " + entity.getPlanId() + ", 错误: " + e.getMessage());
+            // 重新抛出 RuntimeException，这将告知 Spring 事务管理器回滚整个事务
+            throw new RuntimeException("新增培训计划的教员关联失败：" + e.getMessage(), e);
         }
-        return R.fail("新增培训计划失败");
+
+        TrainingPlanResponse response = new TrainingPlanResponse();
+        BeanUtils.copyProperties(entity, response);
+        return R.success(response);
     }
 
     /**
@@ -306,21 +320,16 @@ public class TrainingPlanController {
         boolean result = trainingPlanService.updateById(entity); // (A) 第一次数据库操作：更新培训计划本身
         if (result) {
             // (B) 开始处理教员关联逻辑
+            // 删除原有关联
+            trainingPlanInstructorService.delete(entity.getPlanId()); // (C) 第二次数据库操作：删除旧的教员关联
+            // 添加主责教员
+            TrainingPlanInstructor tp = new TrainingPlanInstructor();
+            tp.setPlanId(entity.getPlanId());
+            tp.setInstructorId(request.getChiefInstructorId());
+            tp.setStatus("0");
+            tp.setIsChief("1");
+            trainingPlanInstructorService.save(tp); // (D) 第三次数据库操作：保存主责教员（这里可能因重复插入而抛异常）
             if (request.getInstructorIds() != null) {
-                // 删除原有关联
-                // 注意：您代码中依然使用的是 trainingPlanInstructorService.delete(entity.getPlanId());
-                // 如果这是一个自定义方法且没有明确的条件，可能存在风险。
-                // Mybatis-Plus 推荐使用 lambdaUpdate().eq(...).remove()
-                trainingPlanInstructorService.delete(entity.getPlanId()); // (C) 第二次数据库操作：删除旧的教员关联
-
-                // 添加主责教员
-                TrainingPlanInstructor tp = new TrainingPlanInstructor();
-                tp.setPlanId(entity.getPlanId());
-                tp.setInstructorId(request.getChiefInstructorId());
-                tp.setStatus("0");
-                tp.setIsChief("1");
-                trainingPlanInstructorService.save(tp); // (D) 第三次数据库操作：保存主责教员（这里可能因重复插入而抛异常）
-
                 // 添加新的关联
                 for (Long instructorId : request.getInstructorIds()) {
                     TrainingPlanInstructor tpi = new TrainingPlanInstructor();
