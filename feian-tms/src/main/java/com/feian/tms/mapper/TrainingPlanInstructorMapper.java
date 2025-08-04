@@ -2,6 +2,7 @@ package com.feian.tms.mapper;
 
 import com.feian.tms.domain.TrainingPlanInstructor;
 import com.github.yulichang.base.MPJBaseMapper;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -12,5 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface TrainingPlanInstructorMapper extends MPJBaseMapper<TrainingPlanInstructor> {
-
+     @Delete("delete from tms_training_plan_instructor where plan_id=#{planId}")
+    void deleteNew(Long planId);
 }

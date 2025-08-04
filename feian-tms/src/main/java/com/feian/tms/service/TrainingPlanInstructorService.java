@@ -11,4 +11,5 @@ import com.github.yulichang.base.MPJBaseService;
  */
 public interface TrainingPlanInstructorService extends MPJBaseService<TrainingPlanInstructor> {
 
+    void delete(Long planId);
 }

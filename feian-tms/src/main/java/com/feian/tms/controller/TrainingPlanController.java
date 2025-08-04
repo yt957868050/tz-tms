@@ -306,16 +306,25 @@ public class TrainingPlanController {
             // 更新教员关联关系
             if (request.getInstructorIds() != null) {
                 // 删除原有关联
-                trainingPlanInstructorService.lambdaUpdate()
-                        .eq(TrainingPlanInstructor::getPlanId, entity.getPlanId())
-                        .remove();
-                
+                trainingPlanInstructorService.delete(entity.getPlanId());
+
+//                trainingPlanInstructorService.lambdaUpdate()
+//                        .eq(TrainingPlanInstructor::getPlanId, entity.getPlanId())
+//                        .remove();
+                //添加主责教员
+                TrainingPlanInstructor tp = new TrainingPlanInstructor();
+                tp.setPlanId(entity.getPlanId());
+                tp.setInstructorId(request.getChiefInstructorId());
+                tp.setStatus("0");
+                tp.setIsChief("1");
+                trainingPlanInstructorService.save(tp);
+
                 // 添加新的关联
                 for (Long instructorId : request.getInstructorIds()) {
                     TrainingPlanInstructor tpi = new TrainingPlanInstructor();
                     tpi.setPlanId(entity.getPlanId());
                     tpi.setInstructorId(instructorId);
-                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
+//                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
                     tpi.setStatus("0");
                     trainingPlanInstructorService.save(tpi);
                 }

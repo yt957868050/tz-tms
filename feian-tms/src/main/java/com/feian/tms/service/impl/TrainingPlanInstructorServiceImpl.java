@@ -5,6 +5,7 @@ import com.feian.tms.mapper.TrainingPlanInstructorMapper;
 import com.feian.tms.service.TrainingPlanInstructorService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,5 +17,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class TrainingPlanInstructorServiceImpl extends MPJBaseServiceImpl<TrainingPlanInstructorMapper, TrainingPlanInstructor> implements TrainingPlanInstructorService {
-
+   @Autowired
+   TrainingPlanInstructorMapper trainingPlanInstructorMapper;
+    @Override
+    public void delete(Long planId) {
+        trainingPlanInstructorMapper.deleteNew(planId);
+    }
 }
