@@ -3,6 +3,7 @@ package com.feian.tms.mapper;
 import com.feian.tms.domain.TrainingClass;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ import java.util.List;
 public interface TrainingClassMapper extends MPJBaseMapper<TrainingClass> {
 
     void deleteBatch(List<Long> idList);
+    @Select("select count(0) from tms_class_student where training_class_id=#{trainingClassId}")
+    Integer getStudentCountById(Long trainingClassId);
 }

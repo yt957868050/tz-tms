@@ -11,4 +11,5 @@ import com.github.yulichang.base.MPJBaseService;
  */
 public interface TrainingAbilityService extends MPJBaseService<TrainingAbility> {
 
+
 }

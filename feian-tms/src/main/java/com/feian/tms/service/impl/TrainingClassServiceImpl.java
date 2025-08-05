@@ -26,4 +26,9 @@ public class TrainingClassServiceImpl extends MPJBaseServiceImpl<TrainingClassMa
         trainingClassMapper.deleteBatch(idList);
         return true;
     }
+
+    @Override
+    public Integer getStudentCountById(Long trainingClassId) {
+        return trainingClassMapper.getStudentCountById(trainingClassId);
+    }
 }

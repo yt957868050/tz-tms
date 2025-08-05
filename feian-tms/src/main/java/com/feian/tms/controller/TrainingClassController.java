@@ -117,7 +117,7 @@ public class TrainingClassController {
                             response.setPrimaryInstructorName(instructor.getInstructorName());
                         }
                     }
-                    
+                    response.setActualStudentCount(trainingClassService.getStudentCountById(response.getTrainingClassId()));
                     return response;
                 })
                 .toList();
