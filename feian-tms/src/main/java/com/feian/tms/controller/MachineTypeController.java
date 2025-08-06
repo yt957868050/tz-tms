@@ -61,6 +61,8 @@ public class MachineTypeController {
                 .orderByDesc(MachineType::getCreateTime);
         
         List<MachineType> list = queryWrapper.list();
+
+        PageInfo<MachineType> pageInfo = new PageInfo<>(list);
         
         // 转换为响应对象
         var responseList = list.stream()
@@ -70,9 +72,13 @@ public class MachineTypeController {
                     return response;
                 })
                 .toList();
-        
+
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<MachineTypeResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
+
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**
