@@ -3,6 +3,8 @@ package com.feian.tms.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.common.utils.PageUtils;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.domain.TrainingOutline;
 import com.feian.tms.domain.MachineType;
 import com.feian.tms.domain.Major;
@@ -14,6 +16,7 @@ import com.feian.tms.service.TrainingOutlineService;
 import com.feian.tms.service.MachineTypeService;
 import com.feian.tms.service.MajorService;
 import com.feian.tms.service.TrainingAbilityService;
+import com.github.pagehelper.PageInfo;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -81,7 +84,13 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
     }
 
     @Override
-    public List<TrainingOutlineResponse> selectTrainingOutlineList(TrainingOutlineRequest request) {
+    public PageInfo<TrainingOutlineResponse> selectTrainingOutlineList(PageRequest<TrainingOutlineRequest> pageRequest) {
+
+        TrainingOutlineRequest request = pageRequest.getQuery();
+        if (request == null) {
+            request = new TrainingOutlineRequest();
+        }
+
         LambdaQueryWrapper<TrainingOutline> wrapper = Wrappers.lambdaQuery();
         
         // 查询条件（同分页查询）
@@ -110,8 +119,20 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
         // 按创建时间倒序
         wrapper.orderByDesc(TrainingOutline::getCreateTime);
 
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+
         List<TrainingOutline> list = this.list(wrapper);
-        return list.stream().map(this::convertToResponse).collect(Collectors.toList());
+
+        PageInfo<TrainingOutline> page = new PageInfo<>(list);
+
+        List<TrainingOutlineResponse> resltList = list.stream().map(this::convertToResponse).toList();
+
+        PageInfo<TrainingOutlineResponse> result = new PageInfo<>(resltList);
+
+        BeanUtils.copyProperties(page, result, "list");
+
+        return result;
     }
 
     @Override
@@ -180,7 +201,7 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
 
     @Override
     public List<TrainingOutlineResponse> exportTrainingOutlineList(TrainingOutlineRequest request) {
-        return selectTrainingOutlineList(request);
+        return null;//selectTrainingOutlineList(request);
     }
 
     @Override

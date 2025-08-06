@@ -1,8 +1,10 @@
 package com.feian.tms.service;
 
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.domain.TrainingOutline;
 import com.feian.tms.dto.request.TrainingOutlineRequest;
 import com.feian.tms.dto.response.TrainingOutlineResponse;
+import com.github.pagehelper.PageInfo;
 import com.github.yulichang.base.MPJBaseService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -28,10 +30,10 @@ public interface TrainingOutlineService extends MPJBaseService<TrainingOutline> 
     /**
      * 查询培训大纲列表
      * 
-     * @param request 查询条件
+     * @param pageRequest 查询条件
      * @return 培训大纲列表
      */
-    List<TrainingOutlineResponse> selectTrainingOutlineList(TrainingOutlineRequest request);
+    PageInfo<TrainingOutlineResponse> selectTrainingOutlineList(PageRequest<TrainingOutlineRequest> pageRequest);
 
     /**
      * 根据ID查询培训大纲详情

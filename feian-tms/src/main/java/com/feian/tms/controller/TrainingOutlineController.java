@@ -51,18 +51,11 @@ public class TrainingOutlineController {
     @PostMapping("/list")
     @Operation(summary = "查询培训大纲列表", description = "根据查询条件分页查询培训大纲列表")
     public R<PageInfo<TrainingOutlineResponse>> list(@RequestBody PageRequest<TrainingOutlineRequest> pageRequest) {
-        // 启动分页
-        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
-        
-        TrainingOutlineRequest query = pageRequest.getQuery();
-        if (query == null) {
-            query = new TrainingOutlineRequest();
-        }
-        
-        List<TrainingOutlineResponse> list = trainingOutlineService.selectTrainingOutlineList(query);
+
+        PageInfo<TrainingOutlineResponse> page = trainingOutlineService.selectTrainingOutlineList(pageRequest);
         
         // 返回分页信息
-        return R.success(new PageInfo<>(list));
+        return R.success(page);
     }
 
     /**
