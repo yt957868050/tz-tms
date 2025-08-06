@@ -81,7 +81,10 @@ public class ClassStudentServiceImpl extends MPJBaseServiceImpl<ClassStudentMapp
                    .ge(query.getEnrollTime() != null, ClassStudent::getEnrollTime, query.getEnrollTime())
                    .eq(query.getStudentStatus() != null, ClassStudent::getStudentStatus, query.getStudentStatus());
         }
-        
+        wrapper.eq(Student::getIsDeleted, 0)
+                .eq(ClassStudent::getIsDeleted, 0)
+                .eq(TrainingClass::getIsDeleted, 0);
+
         wrapper.orderByDesc(ClassStudent::getEnrollTime);
 
         // 执行查询

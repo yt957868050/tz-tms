@@ -1,9 +1,11 @@
 package com.feian.tms.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.domain.Courseware;
 import com.feian.tms.dto.request.CoursewareRequest;
 import com.feian.tms.dto.response.CoursewareResponse;
+import com.github.pagehelper.PageInfo;
 import com.github.yulichang.base.MPJBaseService;
 import jakarta.validation.constraints.NotBlank;
 
@@ -25,7 +27,7 @@ public interface CoursewareService extends MPJBaseService<Courseware> {
     /**
      * 查询课件列表（带关联信息）
      */
-    List<CoursewareResponse> selectCoursewareList(CoursewareRequest request);
+    PageInfo<CoursewareResponse> selectCoursewareList(PageRequest<CoursewareRequest> pageRequest);
 
     /**
      * 根据ID查询课件详情（带关联信息）

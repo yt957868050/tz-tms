@@ -110,4 +110,8 @@ public class TrainingClass extends BaseEntity {
     /** 班次学员列表 */
     @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private List<ClassStudent> classStudentList;
+
+    /** 删除标记（0正常 1删除） */
+    @Excel(name = "删除标记", readConverterExp = "0=正常,1=删除")
+    private Integer isDeleted;
 }

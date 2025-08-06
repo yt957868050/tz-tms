@@ -93,6 +93,38 @@ public class StudentResponse {
     @Schema(description = "关联的机型列表")
     private List<MachineTypeInfo> machineTypes;
 
+    @Schema(description = "民族", example = "汉族")
+    private String nation;
+
+    @Schema(description = "参加工作时间", example = "2015-09-01")
+    private Date workStartDate;
+
+    @Schema(description = "工作单位", example = "XX航空公司")
+    private String workUnit;
+
+    @Schema(description = "文化程度", example = "本科")
+    private String educationLevel;
+
+    @Schema(description = "毕业院校", example = "XX航空航天大学")
+    private String graduateSchool;
+
+    @Schema(description = "所学专业", example = "飞行技术")
+    private String major;
+
+    @Schema(description = "英语水平", example = "CET-4")
+    private String englishLevel;
+
+    @Schema(description = "诚信记录分", example = "100")
+    private Integer integrityScore;
+
+    @Schema(description = "执照类型", example = "私用驾驶员执照")
+    private String licenseType;
+
+    @Schema(description = "执照编号", example = "A1234567")
+    private String licenseNumber;
+
+    @Schema(description = "机型签署情况", example = "波音737、空客A320")
+    private String aircraftEndorsement;
     /**
      * 机型信息对象
      */

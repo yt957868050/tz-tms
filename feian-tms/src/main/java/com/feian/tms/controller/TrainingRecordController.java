@@ -70,7 +70,7 @@ public class TrainingRecordController {
                 .orderByDesc(TrainingRecord::getTrainingDate);
         
         List<TrainingRecord> list = queryWrapper.list();
-        
+        PageInfo<TrainingRecord> pageInfo = new PageInfo<>(list);
         // 转换为响应对象并填充关联字段
         var responseList = list.stream()
                 .map(entity -> {
@@ -110,9 +110,11 @@ public class TrainingRecordController {
                     return response;
                 })
                 .toList();
-        
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<TrainingRecordResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**

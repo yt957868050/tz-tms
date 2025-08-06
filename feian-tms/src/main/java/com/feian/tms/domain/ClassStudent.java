@@ -1,6 +1,7 @@
 package com.feian.tms.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.feian.common.annotation.Excel;
 import com.feian.tms.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -52,4 +53,6 @@ public class ClassStudent extends BaseEntity {
     /** 班次名称 */
     @TableField(exist = false)
     private String className;
+
+
 }

@@ -3,6 +3,7 @@ package com.feian.tms.controller;
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.request.IdsRequest;
+import com.feian.tms.service.*;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingClass;
@@ -11,12 +12,6 @@ import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.TrainingClassRequest;
 import com.feian.tms.dto.response.TrainingClassResponse;
 import com.feian.tms.excel.TrainingClassExcel;
-import com.feian.tms.service.TrainingClassService;
-import com.feian.tms.service.TrainingPlanService;
-import com.feian.tms.service.MachineTypeService;
-import com.feian.tms.service.MajorService;
-import com.feian.tms.service.TrainingAbilityService;
-import com.feian.tms.service.InstructorService;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,7 +41,7 @@ public class TrainingClassController {
     private final MajorService majorService;
     private final TrainingAbilityService trainingAbilityService;
     private final InstructorService instructorService;
-
+    private final ClassStudentService classStudentService;
     /**
      * 查询培训班次管理列表
      */
@@ -75,7 +70,7 @@ public class TrainingClassController {
                 .orderByDesc(TrainingClass::getCreateTime);
         
         List<TrainingClass> list = queryWrapper.list();
-        
+        PageInfo<TrainingClass> pageInfo = new PageInfo<>(list);
         // 转换为响应对象
         var responseList = list.stream()
                 .map(entity -> {
@@ -121,9 +116,11 @@ public class TrainingClassController {
                     return response;
                 })
                 .toList();
-        
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<TrainingClassResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**
@@ -226,6 +223,7 @@ public class TrainingClassController {
     @Operation(summary = "删除培训班次", description = "根据ID删除培训班次信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
         boolean result = trainingClassService.removeByIds(idsDeleteRequest.getIdList());
+        classStudentService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

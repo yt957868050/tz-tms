@@ -53,8 +53,9 @@ public class ClassStudentController {
         
         // 使用Service方法进行连表查询
         List<ClassStudentResponse> responseList = classStudentService.getClassStudentListWithDetails(query);
-        
-        return R.success(new PageInfo<>(responseList));
+        PageInfo<ClassStudentResponse> result = new PageInfo<>(responseList);
+
+        return R.success(result);
     }
 
     /**

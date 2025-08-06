@@ -86,7 +86,7 @@ public class TrainingPlanController {
                 .orderByDesc(TrainingPlan::getCreateTime);
         
         List<TrainingPlan> list = queryWrapper.list();
-        
+        PageInfo<TrainingPlan> pageInfo = new PageInfo<>(list);
         // 为每个计划查询关联的教员信息
         var responseList = list.stream()
                 .map(entity -> {
@@ -153,9 +153,11 @@ public class TrainingPlanController {
                     return response;
                 })
                 .toList();
-        
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<TrainingPlanResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.feian.common.annotation.DataScope;
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.request.IdsRequest;
+import com.feian.tms.service.ClassStudentService;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.Student;
@@ -44,6 +45,7 @@ public class StudentController {
     private final StudentService studentService;
     private final IStudentMachineTypeService studentMachineTypeService;
     private final MajorService majorService;
+    private final ClassStudentService classStudentService;
 
     /**
      * 查询学员信息列表
@@ -75,7 +77,7 @@ public class StudentController {
                 .orderByDesc(Student::getCreateTime);
         
         List<Student> list = queryWrapper.list();
-        
+        PageInfo<Student> pageInfo = new PageInfo<>(list);
         // 转换为响应对象
         var responseList = list.stream()
                 .map(entity -> {
@@ -108,13 +110,15 @@ public class StudentController {
                             response.setPrimaryMajorName(major.getMajorName());
                         }
                     }
-                    
+
                     return response;
                 })
                 .toList();
-        
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<StudentResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**
@@ -208,6 +212,7 @@ public class StudentController {
     @Operation(summary = "删除学员", description = "根据ID删除学员信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
         boolean result = studentService.removeByIds(idsDeleteRequest.getIdList());
+        classStudentService.removeByIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

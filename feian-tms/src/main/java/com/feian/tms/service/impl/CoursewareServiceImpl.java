@@ -3,17 +3,20 @@ package com.feian.tms.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.feian.tms.domain.Courseware;
-import com.feian.tms.domain.MachineType;
-import com.feian.tms.domain.Major;
-import com.feian.tms.domain.TrainingType;
+import com.feian.common.utils.PageUtils;
+import com.feian.tms.common.PageRequest;
+import com.feian.tms.domain.*;
+import com.feian.tms.dto.query.ClassStudentQuery;
 import com.feian.tms.dto.request.CoursewareRequest;
 import com.feian.tms.dto.response.CoursewareResponse;
+import com.feian.tms.dto.response.TrainingOutlineResponse;
 import com.feian.tms.mapper.CoursewareMapper;
 import com.feian.tms.mapper.MachineTypeMapper;
 import com.feian.tms.mapper.MajorMapper;
 import com.feian.tms.mapper.TrainingTypeMapper;
+import com.feian.tms.service.CoursewareFileService;
 import com.feian.tms.service.CoursewareService;
+import com.github.pagehelper.PageInfo;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -34,7 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CoursewareServiceImpl extends MPJBaseServiceImpl<CoursewareMapper, Courseware> implements CoursewareService {
-
+    private final CoursewareFileService coursewareFileService;
     private final CoursewareMapper coursewareMapper;
     private final MachineTypeMapper machineTypeMapper;
     private final MajorMapper majorMapper;
@@ -62,15 +65,34 @@ public class CoursewareServiceImpl extends MPJBaseServiceImpl<CoursewareMapper, 
     }
 
     @Override
-    public List<CoursewareResponse> selectCoursewareList(CoursewareRequest request) {
+    public PageInfo<CoursewareResponse> selectCoursewareList(PageRequest<CoursewareRequest> pageRequest) {
+        // 启动分页
+        PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+
+        CoursewareRequest request = pageRequest.getQuery();
+        if (request == null) {
+            request = new CoursewareRequest();
+        }
         LambdaQueryWrapper<Courseware> wrapper = buildQueryWrapper(request);
         List<Courseware> list = this.list(wrapper);
+        PageInfo<Courseware> page = new PageInfo<>(list);
         List<CoursewareResponse> responses = list.stream().map(this::convertToResponse).collect(Collectors.toList());
         
         // 批量填充关联信息
         fillRelationNames(responses);
-        
-        return responses;
+
+        // 为每个课件查询关联的文件
+        responses.forEach(response -> {
+            var files = coursewareFileService.lambdaQuery()
+                    .eq(CoursewareFile::getCoursewareId, response.getCoursewareId())
+                    .eq(CoursewareFile::getStatus, "0")
+                    .orderByAsc(CoursewareFile::getOrderNum)
+                    .list();
+            response.setFiles(files);
+        });
+        PageInfo<CoursewareResponse> result = new PageInfo<>(responses);
+        BeanUtils.copyProperties(page, result, "list");
+        return result;
     }
 
     @Override

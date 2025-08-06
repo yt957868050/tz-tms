@@ -66,7 +66,7 @@ public class InstructorController {
                 .orderByDesc(Instructor::getCreateTime);
         
         List<Instructor> list = queryWrapper.list();
-        
+        PageInfo<Instructor> pageInfo = new PageInfo<>(list);
         // 转换为响应对象
         var responseList = list.stream()
                 .map(entity -> {
@@ -75,9 +75,11 @@ public class InstructorController {
                     return response;
                 })
                 .toList();
-        
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<InstructorResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**

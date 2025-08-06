@@ -106,7 +106,51 @@ public class Student extends BaseEntity {
     @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String primaryMajorName;
 
+    /** 民族 */
+    @Excel(name = "民族")
+    private String nation;
 
+    /** 参加工作时间 */
+    @Excel(name = "参加工作时间", width = 30, dateFormat = "yyyy-MM-dd")
+    private Date workStartDate;
 
+    /** 工作单位 */
+    @Excel(name = "工作单位")
+    private String workUnit;
 
+    /** 文化程度 */
+    @Excel(name = "文化程度")
+    private String educationLevel;
+
+    /** 毕业院校 */
+    @Excel(name = "毕业院校")
+    private String graduateSchool;
+
+    /** 所学专业 */
+    @Excel(name = "所学专业")
+    private String major;
+
+    /** 英语水平 */
+    @Excel(name = "英语水平")
+    private String englishLevel;
+
+    /** 诚信记录分 */
+    @Excel(name = "诚信记录分")
+    private Integer integrityScore;
+
+    /** 执照类型 */
+    @Excel(name = "执照类型")
+    private String licenseType;
+
+    /** 执照编号 */
+    @Excel(name = "执照编号")
+    private String licenseNumber;
+
+    /** 机型签署情况 */
+    @Excel(name = "机型签署情况")
+    private String aircraftEndorsement;
+
+    /** 删除标记（0正常 1删除） */
+    @Excel(name = "删除标记", readConverterExp = "0=正常,1=删除")
+    private Integer isDeleted;
 }

@@ -1,8 +1,10 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.domain.MachineType;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.request.IdsRequest;
+import com.feian.tms.dto.response.MachineTypeResponse;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.common.PageRequest;
@@ -62,7 +64,8 @@ public class MajorController {
                 .orderByDesc(Major::getCreateTime);
         
         List<Major> list = queryWrapper.list();
-        
+
+        PageInfo<Major> pageInfo = new PageInfo<>(list);
         // 转换为响应对象
         var responseList = list.stream()
                 .map(entity -> {
@@ -71,9 +74,12 @@ public class MajorController {
                     return response;
                 })
                 .toList();
-        
+        // 创建新的PageInfo并保留原有分页信息
+        PageInfo<MajorResponse> result = new PageInfo<>(responseList);
+        BeanUtils.copyProperties(pageInfo, result, "list");
+
         // 返回分页信息
-        return R.success(new PageInfo<>(responseList));
+        return R.success(result);
     }
 
     /**
