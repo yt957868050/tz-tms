@@ -1,6 +1,7 @@
 package com.feian.tms.excel;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.ContentRowHeight;
 import com.alibaba.excel.annotation.write.style.HeadRowHeight;
@@ -29,65 +30,61 @@ public class StudentExcel {
 
     @ExcelProperty(value = "专业", index = 3)
     @ColumnWidth(10)
-    private Long primaryMajorId;
+    private String primaryMajor;
 
-    @ExcelProperty(value = "所学专业", index = 4)
-    @ColumnWidth(15)
-    private String major;
-
-    @ExcelProperty(value = "民族", index = 5)
+    @ExcelProperty(value = "民族", index = 4)
     @ColumnWidth(10)
     private String nation;
 
-    @ExcelProperty(value = "出生年月", index = 6)
+    @ExcelProperty(value = "出生年月", index = 5)
     @ColumnWidth(15)
-    private Date birthDate;
+    private String birthDate;
 
-    @ExcelProperty(value = "身份证号", index = 7)
+    @ExcelProperty(value = "身份证号", index = 6)
     @ColumnWidth(20)
     private String idCard;
 
-    @ExcelProperty(value = "参加工作时间", index = 8)
+    @ExcelProperty(value = "参加工作时间", index = 7)
     @ColumnWidth(15)
-    private Date workStartDate;
+    private String workStartDate;
 
-    @ExcelProperty(value = "工作单位", index = 9)
+    @ExcelProperty(value = "工作单位", index = 8)
     @ColumnWidth(20)
     private String workUnit;
 
-    @ExcelProperty(value = "文化程度", index = 10)
+    @ExcelProperty(value = "文化程度", index = 9)
     @ColumnWidth(10)
     private String educationLevel;
 
-    @ExcelProperty(value = "毕业院校", index = 11)
+    @ExcelProperty(value = "毕业院校", index = 10)
     @ColumnWidth(20)
     private String graduateSchool;
 
-    @ExcelProperty(value = "所学专业", index = 12)
+    @ExcelProperty(value = "所学专业", index = 11)
     @ColumnWidth(15)
     private String majorStudied;
 
-    @ExcelProperty(value = "英语水平", index = 13)
+    @ExcelProperty(value = "英语水平", index = 12)
     @ColumnWidth(10)
     private String englishLevel;
 
-    @ExcelProperty(value = "诚信记录分", index = 14)
+    @ExcelProperty(value = "诚信记录分", index = 13)
     @ColumnWidth(10)
     private Integer integrityScore;
 
-    @ExcelProperty(value = "执照类型", index = 15)
+    @ExcelProperty(value = "执照类型", index = 14)
     @ColumnWidth(15)
     private String licenseType;
 
-    @ExcelProperty(value = "执照编号", index = 16)
+    @ExcelProperty(value = "执照编号", index = 15)
     @ColumnWidth(15)
     private String licenseNumber;
 
-    @ExcelProperty(value = "机型签署情况", index = 17)
+    @ExcelProperty(value = "机型签署情况", index = 16)
     @ColumnWidth(20)
     private String aircraftEndorsement;
 
-    @ExcelProperty(value = "工作经历", index = 18)
+    @ExcelProperty(value = "工作经历", index = 17)
     @ColumnWidth(30)
     private String workExperience;
 }

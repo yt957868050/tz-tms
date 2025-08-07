@@ -240,13 +240,12 @@ public class StudentController {
                     StudentExcel excel = new StudentExcel();
                     excel.setStudentName(entity.getStudentName());
                     excel.setStudentCode(entity.getStudentCode());
-                    excel.setGender(entity.getGender());
-                    excel.setPrimaryMajorId(entity.getPrimaryMajorId());
-                    excel.setMajor(entity.getMajor());
+                    excel.setGender(convertGender(entity.getGender()));
+                    excel.setPrimaryMajor(convertPrimaryMajor(String.valueOf(entity.getPrimaryMajorId())));
                     excel.setNation(entity.getNation());
-                    excel.setBirthDate(entity.getBirthDate());
+                    excel.setBirthDate(formatDate(entity.getBirthDate()));
                     excel.setIdCard(entity.getIdCard());
-                    excel.setWorkStartDate(entity.getWorkStartDate());
+                    excel.setWorkStartDate(formatDate(entity.getWorkStartDate()));
                     excel.setWorkUnit(entity.getWorkUnit());
                     excel.setEducationLevel(entity.getEducationLevel());
                     excel.setGraduateSchool(entity.getGraduateSchool());
@@ -295,16 +294,17 @@ public class StudentController {
                         Student entity = new Student();
                         entity.setStudentName(excel.getStudentName());
                         entity.setStudentCode(excel.getStudentCode());
-                        entity.setGender(excel.getGender());
-                        entity.setPrimaryMajorId(excel.getPrimaryMajorId());
-                        entity.setMajor(excel.getMajorStudied() != null ? excel.getMajorStudied() : excel.getMajor());
+                        entity.setGender(convertIGender(excel.getGender()));
+                        entity.setPrimaryMajorId(convertIPrimaryMajor(excel.getPrimaryMajor()));
+                        entity.setPrimaryMajorName(excel.getPrimaryMajor());
                         entity.setNation(excel.getNation());
-                        entity.setBirthDate(excel.getBirthDate());
+                        entity.setBirthDate(parseDate(excel.getBirthDate()));
                         entity.setIdCard(excel.getIdCard());
-                        entity.setWorkStartDate(excel.getWorkStartDate());
+                        entity.setWorkStartDate(parseDate(excel.getWorkStartDate()));
                         entity.setWorkUnit(excel.getWorkUnit());
                         entity.setEducationLevel(excel.getEducationLevel());
                         entity.setGraduateSchool(excel.getGraduateSchool());
+                        entity.setMajor(excel.getMajorStudied());
                         entity.setEnglishLevel(excel.getEnglishLevel());
                         entity.setIntegrityScore(excel.getIntegrityScore());
                         entity.setLicenseType(excel.getLicenseType());
@@ -324,18 +324,28 @@ public class StudentController {
     }
 
     /**
-     * 转换性别枚举
+     * 导出转换性别枚举
      */
     private String convertGender(String gender) {
         if (gender == null) return "";
         return switch (gender) {
             case "0" -> "男";
             case "1" -> "女";
-            case "2" -> "未知";
             default -> "";
         };
     }
 
+    /**
+     * 导入转换性别枚举
+     */
+    private String convertIGender(String gender) {
+        if (gender == null) return "";
+        return switch (gender) {
+            case "男" -> "0";
+            case "女" -> "1";
+            default -> "";
+        };
+    }
     /**
      * 转换学历枚举
      */
@@ -363,5 +373,51 @@ public class StudentController {
             case "3" -> "培训暂停";
             default -> "";
         };
+    }
+
+    /**
+     * 导出转换专业
+     */
+    private String convertPrimaryMajor(String primaryMajor) {
+        if (primaryMajor == null) return "";
+        return switch (primaryMajor) {
+            case "1" -> "空勤专业";
+            case "2" -> "地勤专业";
+            default -> "";
+        };
+    }
+    /**
+     * 导入转换专业
+     */
+    private Long convertIPrimaryMajor(String primaryMajor) {
+        if (primaryMajor == null) return 0L;
+        return switch (primaryMajor) {
+            case "空勤专业" -> 1L;
+            case "地勤专业" -> 2L;
+            default -> 0L;
+        };
+    }
+
+    /**
+     * 格式化日期为 yyyy/M/d 格式
+     */
+    private String formatDate(java.util.Date date) {
+        if (date == null) return "";
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/M/d");
+        return sdf.format(date);
+    }
+
+    /**
+     * 解析日期字符串为Date对象
+     */
+    private java.util.Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/M/d");
+            return sdf.parse(dateStr);
+        } catch (java.text.ParseException e) {
+            // 如果解析失败，返回null
+            return null;
+        }
     }
 }
