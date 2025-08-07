@@ -29,6 +29,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.alibaba.excel.read.listener.ReadListener;
+import com.alibaba.excel.context.AnalysisContext;
+import java.util.Collections;
+import java.util.ArrayList;
 
 /**
  * 学员信息管理Controller
@@ -212,7 +218,8 @@ public class StudentController {
     @Operation(summary = "删除学员", description = "根据ID删除学员信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
         boolean result = studentService.removeByIds(idsDeleteRequest.getIdList());
-        classStudentService.removeByIds(idsDeleteRequest.getIdList());
+        classStudentService.removeStudentByIds(idsDeleteRequest.getIdList());
+
         if (result) {
             return R.success();
         }
@@ -226,38 +233,94 @@ public class StudentController {
     @Operation(summary = "导出学员列表", description = "根据查询条件导出学员列表到Excel")
     public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
         // 根据ID查询所有数据（不分页）
-             List<Student> list = studentService.studentListByIds(idsRequest.getIdList());
-//        var queryWrapper = studentService.lambdaQuery()
-//                .like(query.getStudentName() != null, Student::getStudentName, query.getStudentName())
-//                .like(query.getStudentCode() != null, Student::getStudentCode, query.getStudentCode())
-//                .eq(query.getGender() != null, Student::getGender, query.getGender())
-//                .like(query.getPhoneNumber() != null, Student::getPhoneNumber, query.getPhoneNumber())
-//                .like(query.getDepartment() != null, Student::getDepartment, query.getDepartment())
-//                .eq(query.getPrimaryMachineTypeId() != null, Student::getPrimaryMachineTypeId, query.getPrimaryMachineTypeId())
-//                .eq(query.getPrimaryMajorId() != null, Student::getPrimaryMajorId, query.getPrimaryMajorId())
-//                .eq(query.getEducation() != null, Student::getEducation, query.getEducation())
-//                .eq(query.getTrainingStatus() != null, Student::getTrainingStatus, query.getTrainingStatus())
-//                .eq(query.getStatus() != null, Student::getStatus, query.getStatus())
-//                .orderByDesc(Student::getCreateTime);
-        
-//        List<Student> list = queryWrapper.list();
-        
+        List<Student> list = studentService.studentListByIds(idsRequest.getIdList());
         // 转换为导出对象
         List<StudentExcel> excelList = list.stream()
                 .map(entity -> {
                     StudentExcel excel = new StudentExcel();
-                    BeanUtils.copyProperties(entity, excel);
-                    // 转换枚举值为中文显示
-                    excel.setGenderName(convertGender(entity.getGender()));
-                    excel.setEducationName(convertEducation(entity.getEducation()));
-                    excel.setTrainingStatusName(convertTrainingStatus(entity.getTrainingStatus()));
-                    excel.setStatusName("0".equals(entity.getStatus()) ? "正常" : "停用");
+                    excel.setStudentName(entity.getStudentName());
+                    excel.setStudentCode(entity.getStudentCode());
+                    excel.setGender(entity.getGender());
+                    excel.setPrimaryMajorId(entity.getPrimaryMajorId());
+                    excel.setMajor(entity.getMajor());
+                    excel.setNation(entity.getNation());
+                    excel.setBirthDate(entity.getBirthDate());
+                    excel.setIdCard(entity.getIdCard());
+                    excel.setWorkStartDate(entity.getWorkStartDate());
+                    excel.setWorkUnit(entity.getWorkUnit());
+                    excel.setEducationLevel(entity.getEducationLevel());
+                    excel.setGraduateSchool(entity.getGraduateSchool());
+                    excel.setMajorStudied(entity.getMajor());
+                    excel.setEnglishLevel(entity.getEnglishLevel());
+                    excel.setIntegrityScore(entity.getIntegrityScore());
+                    excel.setLicenseType(entity.getLicenseType());
+                    excel.setLicenseNumber(entity.getLicenseNumber());
+                    excel.setAircraftEndorsement(entity.getAircraftEndorsement());
+                    // workExperience用remark字段
+                    excel.setWorkExperience(entity.getRemark());
                     return excel;
                 })
                 .toList();
-        
         // 使用EasyExcel导出
         EasyExcelUtil.exportExcel(response, "学员信息管理", "学员信息列表", StudentExcel.class, excelList);
+    }
+
+    /**
+     * 下载学员导入模板
+     */
+    @PostMapping("/importTemplate")
+    @Operation(summary = "下载学员导入模板", description = "下载学员信息Excel导入模板")
+    public void importTemplate(HttpServletResponse response) {
+        // 生成空数据模板
+        List<StudentExcel> emptyList = java.util.Collections.emptyList();
+        EasyExcelUtil.exportExcel(response, "学员信息导入模板", "学员信息", StudentExcel.class, emptyList);
+    }
+
+    /**
+     * 导入学员信息
+     */
+    @PostMapping("/importData")
+    @Operation(summary = "导入学员信息", description = "通过Excel批量导入学员信息")
+    public R<String> importData(@RequestParam("file") MultipartFile file) {
+        try {
+            ReadListener<StudentExcel> listener = new ReadListener<StudentExcel>() {
+                private final java.util.List<StudentExcel> dataList = new java.util.ArrayList<>();
+                @Override
+                public void invoke(StudentExcel data, AnalysisContext context) {
+                    dataList.add(data);
+                }
+                @Override
+                public void doAfterAllAnalysed(AnalysisContext context) {
+                    for (StudentExcel excel : dataList) {
+                        Student entity = new Student();
+                        entity.setStudentName(excel.getStudentName());
+                        entity.setStudentCode(excel.getStudentCode());
+                        entity.setGender(excel.getGender());
+                        entity.setPrimaryMajorId(excel.getPrimaryMajorId());
+                        entity.setMajor(excel.getMajorStudied() != null ? excel.getMajorStudied() : excel.getMajor());
+                        entity.setNation(excel.getNation());
+                        entity.setBirthDate(excel.getBirthDate());
+                        entity.setIdCard(excel.getIdCard());
+                        entity.setWorkStartDate(excel.getWorkStartDate());
+                        entity.setWorkUnit(excel.getWorkUnit());
+                        entity.setEducationLevel(excel.getEducationLevel());
+                        entity.setGraduateSchool(excel.getGraduateSchool());
+                        entity.setEnglishLevel(excel.getEnglishLevel());
+                        entity.setIntegrityScore(excel.getIntegrityScore());
+                        entity.setLicenseType(excel.getLicenseType());
+                        entity.setLicenseNumber(excel.getLicenseNumber());
+                        entity.setAircraftEndorsement(excel.getAircraftEndorsement());
+                        // workExperience字段Student实体没有，暂存到remark
+                        entity.setRemark(excel.getWorkExperience());
+                        studentService.save(entity);
+                    }
+                }
+            };
+            EasyExcelUtil.readExcel(file.getInputStream(), StudentExcel.class, listener);
+            return R.success("导入成功");
+        } catch (Exception e) {
+            return R.fail("导入失败: " + e.getMessage());
+        }
     }
 
     /**

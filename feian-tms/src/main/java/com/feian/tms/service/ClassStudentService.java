@@ -29,4 +29,10 @@ public interface ClassStudentService extends MPJBaseService<ClassStudent> {
      * @return 班次学员关联列表
      */
     List<ClassStudentResponse> getClassStudentListWithDetails(com.feian.tms.dto.query.ClassStudentQuery query);
+
+    /**
+     * 根据学员id删除学员班次关联
+     * @param idList
+     */
+    void removeStudentByIds(List<Long> idList);
 }

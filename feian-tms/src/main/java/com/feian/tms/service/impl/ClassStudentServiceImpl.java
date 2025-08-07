@@ -29,6 +29,7 @@ public class ClassStudentServiceImpl extends MPJBaseServiceImpl<ClassStudentMapp
 
     private final StudentService studentService;
     private final TrainingClassService trainingClassService;
+    private final ClassStudentMapper classStudentMapper;
 
     @Override
     public List<ClassStudentResponse> getAvailableStudentsForClass(Long trainingClassId) {
@@ -96,6 +97,11 @@ public class ClassStudentServiceImpl extends MPJBaseServiceImpl<ClassStudentMapp
         });
 
         return results;
+    }
+
+    @Override
+    public void removeStudentByIds(List<Long> idList) {
+        classStudentMapper.remremoveStudentByIds(idList);
     }
 
     /**

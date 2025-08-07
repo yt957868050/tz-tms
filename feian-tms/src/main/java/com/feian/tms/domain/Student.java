@@ -39,7 +39,7 @@ public class Student extends BaseEntity {
     private String studentName;
 
     /** 性别（0男 1女 2未知） */
-    @Excel(name = "性别", readConverterExp = "0=男,1=女,2=未知")
+    @Excel(name = "性别", readConverterExp = "0=男,1=女")
     private String gender;
 
     /** 出生日期 */
