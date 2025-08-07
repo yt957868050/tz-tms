@@ -120,11 +120,9 @@ public class ClassStudentController {
     @PostMapping("/delete")
     @Operation(summary = "删除班次学员关联", description = "根据ID删除班次学员关联信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
-        boolean result = classStudentService.removeByIds(idsDeleteRequest.getIdList());
-        if (result) {
+       classStudentService.removeAllByIds(idsDeleteRequest.getIdList());
             return R.success();
-        }
-        return R.fail("删除班次学员关联失败");
+
     }
 
     /**

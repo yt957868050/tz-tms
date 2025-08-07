@@ -16,4 +16,7 @@ import java.util.List;
 public interface ClassStudentMapper extends MPJBaseMapper<ClassStudent> {
 
     void remremoveStudentByIds(List<Long> idList);
+
+
+    void removeAllByIds(List<Long> idList);
 }

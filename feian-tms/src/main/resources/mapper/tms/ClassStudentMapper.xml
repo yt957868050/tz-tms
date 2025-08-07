@@ -13,4 +13,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item}
         </foreach>
     </delete>
+    <delete id="removeAllByIds">
+        DELETE FROM tms_class_student
+        WHERE class_student_id IN
+        <foreach item="item" index="index" collection="idList"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
 </mapper>
