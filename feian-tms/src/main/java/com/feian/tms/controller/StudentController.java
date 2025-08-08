@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -278,18 +279,27 @@ public class StudentController {
     /**
      * 导入学员信息
      */
+    /**
+     * 导入学员信息
+     */
     @PostMapping("/importData")
     @Operation(summary = "导入学员信息", description = "通过Excel批量导入学员信息")
+    @Transactional(rollbackFor = Exception.class) // 添加事务注解，确保异常时回滚
     public R<String> importData(@RequestParam("file") MultipartFile file) {
         try {
             ReadListener<StudentExcel> listener = new ReadListener<StudentExcel>() {
-                private final java.util.List<StudentExcel> dataList = new java.util.ArrayList<>();
+                // 存储从Excel读取的数据
+                private final List<StudentExcel> dataList = new ArrayList<>();
+
                 @Override
                 public void invoke(StudentExcel data, AnalysisContext context) {
                     dataList.add(data);
                 }
+
                 @Override
                 public void doAfterAllAnalysed(AnalysisContext context) {
+                    // 收集所有需要保存的实体
+                    List<Student> entities = new ArrayList<>();
                     for (StudentExcel excel : dataList) {
                         Student entity = new Student();
                         entity.setStudentName(excel.getStudentName());
@@ -310,16 +320,19 @@ public class StudentController {
                         entity.setLicenseType(excel.getLicenseType());
                         entity.setLicenseNumber(excel.getLicenseNumber());
                         entity.setAircraftEndorsement(excel.getAircraftEndorsement());
-                        // workExperience字段Student实体没有，暂存到remark
                         entity.setRemark(excel.getWorkExperience());
-                        studentService.save(entity);
+                        entities.add(entity);
                     }
+                    // 批量保存到数据库
+                    studentService.saveBatch(entities);
                 }
             };
             EasyExcelUtil.readExcel(file.getInputStream(), StudentExcel.class, listener);
             return R.success("导入成功");
         } catch (Exception e) {
-            return R.fail("导入失败: " + e.getMessage());
+            // 捕获异常，抛出运行时异常，让Spring事务管理器进行回滚
+            // 提示：你可能需要根据业务逻辑，对 e.getMessage() 进行更友好的封装
+            throw new RuntimeException("导入失败: " + e.getMessage(), e);
         }
     }
 
