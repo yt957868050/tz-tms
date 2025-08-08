@@ -109,6 +109,11 @@ public class ClassStudentServiceImpl extends MPJBaseServiceImpl<ClassStudentMapp
         classStudentMapper.removeAllByIds(idList);
     }
 
+    @Override
+    public void removeByClassIds(List<Long> idList) {
+        classStudentMapper.removeByClassIds(idList);
+    }
+
 
     /**
      * 转换学员状态枚举

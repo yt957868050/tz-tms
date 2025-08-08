@@ -11,4 +11,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{outlineId}
         </foreach>
     </delete>
+    <select id="trainingOutlineList" resultType="com.feian.tms.domain.TrainingOutline">
+        select * from tms_training_outline where is_deleted=0
+    </select>
 </mapper>

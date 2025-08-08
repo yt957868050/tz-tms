@@ -21,5 +21,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item}
         </foreach>
     </delete>
+    <delete id="removeByClassIds">
+        DELETE FROM tms_class_student
+        WHERE training_class_id IN
+        <foreach item="item" index="index" collection="idList"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
 
 </mapper>

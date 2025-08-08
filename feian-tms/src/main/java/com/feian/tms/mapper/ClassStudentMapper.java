@@ -19,4 +19,6 @@ public interface ClassStudentMapper extends MPJBaseMapper<ClassStudent> {
 
 
     void removeAllByIds(List<Long> idList);
+
+    void removeByClassIds(List<Long> idList);
 }

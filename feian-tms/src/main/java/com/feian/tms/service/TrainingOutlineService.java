@@ -121,4 +121,6 @@ public interface TrainingOutlineService extends MPJBaseService<TrainingOutline> 
     TrainingOutlineResponse downloadOutlineFile(Long outlineId);
 
     boolean deleteBatch(List<Long> idList);
+
+    List<TrainingOutline> trainingOutlineList();
 }

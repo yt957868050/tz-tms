@@ -74,4 +74,6 @@ public interface TrainingOutlineMapper extends MPJBaseMapper<TrainingOutline> {
                                        @Param("trainingAbilityId") Long trainingAbilityId);
 
     void deleteBatch(List<Long> idList);
+
+    List<TrainingOutline> trainingOutlineList();
 }

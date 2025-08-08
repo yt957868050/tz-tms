@@ -220,6 +220,11 @@ public class TrainingOutlineServiceImpl extends MPJBaseServiceImpl<TrainingOutli
         return true;
     }
 
+    @Override
+    public List<TrainingOutline> trainingOutlineList() {
+        return trainingOutlineMapper.trainingOutlineList();
+    }
+
     /**
      * 转换实体为响应对象
      */
