@@ -23,4 +23,6 @@ public interface StudentMapper extends MPJBaseMapper<Student> {
     void setPrimaryMajor(Long studentId, Long primaryMajorId);
 
     List<Student> studentListByIds(List<Long> idList);
+
+    List<Student> studentList();
 }

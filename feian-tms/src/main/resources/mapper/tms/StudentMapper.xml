@@ -29,4 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{studentId}
         </foreach>
     </select>
+    <select id="studentList" resultType="com.feian.tms.domain.Student">
+        select * from tms_student where is_deleted=0
+    </select>
 </mapper>

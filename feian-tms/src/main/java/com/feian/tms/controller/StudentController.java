@@ -233,8 +233,32 @@ public class StudentController {
     @PostMapping("/export")
     @Operation(summary = "导出学员列表", description = "根据查询条件导出学员列表到Excel")
     public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
-        // 根据ID查询所有数据（不分页）
-        List<Student> list = studentService.studentListByIds(idsRequest.getIdList());
+        List<Student> list;
+        // 1. 获取原始的 id 对象
+        Object id = idsRequest.getId();
+        // 2. 创建一个 Long 列表用于安全存储 ID
+        List<Long> idList = new ArrayList<>();
+        // 3. 根据 id 的类型进行不同的处理
+        if (id instanceof List) {
+            // 如果 id 是一个列表，遍历它并安全地转换为 Long
+            List<?> rawList = (List<?>) id;
+            for (Object obj : rawList) {
+                if (obj instanceof Number) {
+                    // 安全地将每个数字元素转换为 Long
+                    idList.add(((Number) obj).longValue());
+                }
+                // 如果列表里有非数字元素，这里会忽略它们
+            }
+        } else if (id instanceof Number) {
+            // 如果 id 是一个单独的数字
+            idList.add(((Number) id).longValue());
+        }
+        if(idList.size() == 1 && idList.get(0) == 0L){
+            list =studentService.studentList();
+        }else {
+            // 根据ID查询所有数据（不分页）
+             list = studentService.studentListByIds(idsRequest.getIdList());
+        }
         // 转换为导出对象
         List<StudentExcel> excelList = list.stream()
                 .map(entity -> {

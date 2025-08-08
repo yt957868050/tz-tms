@@ -42,4 +42,13 @@ public class StudentServiceImpl extends MPJBaseServiceImpl<StudentMapper, Studen
         return studentMapper.studentListByIds(idList);
     }
 
+    /**
+     * 查询所有学员
+     * @return
+     */
+
+    public List<Student> studentList() {
+        return studentMapper.studentList();
+    }
+
 }
