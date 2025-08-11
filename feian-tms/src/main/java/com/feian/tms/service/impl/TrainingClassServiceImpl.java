@@ -31,4 +31,9 @@ public class TrainingClassServiceImpl extends MPJBaseServiceImpl<TrainingClassMa
     public Integer getStudentCountById(Long trainingClassId) {
         return trainingClassMapper.getStudentCountById(trainingClassId);
     }
+
+    @Override
+    public List<TrainingClass> trainingClassList() {
+        return trainingClassMapper.trainingClassList();
+    }
 }

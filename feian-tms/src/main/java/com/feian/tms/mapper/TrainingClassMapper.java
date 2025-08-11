@@ -19,4 +19,6 @@ public interface TrainingClassMapper extends MPJBaseMapper<TrainingClass> {
     void deleteBatch(List<Long> idList);
     @Select("select count(0) from tms_class_student where training_class_id=#{trainingClassId} and is_deleted=0")
     Integer getStudentCountById(Long trainingClassId);
+    @Select("select * from tms_training_class where is_deleted=0")
+    List<TrainingClass> trainingClassList();
 }

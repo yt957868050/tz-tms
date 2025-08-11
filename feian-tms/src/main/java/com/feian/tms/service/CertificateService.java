@@ -36,4 +36,6 @@ public interface CertificateService extends MPJBaseService<Certificate> {
      * @return
      */
     boolean deleteBatch(List<Long> id);
+
+    List<Certificate> certificateList();
 }

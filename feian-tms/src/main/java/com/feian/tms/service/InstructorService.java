@@ -14,4 +14,6 @@ import java.util.List;
 public interface InstructorService extends MPJBaseService<Instructor> {
 
     boolean deleteBatch(List<Long> idList);
+
+    List<Instructor> instructorList();
 }

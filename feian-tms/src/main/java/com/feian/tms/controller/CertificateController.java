@@ -2,10 +2,7 @@ package com.feian.tms.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
-import com.feian.tms.domain.Certificate;
-import com.feian.tms.domain.MachineType;
-import com.feian.tms.domain.Major;
-import com.feian.tms.domain.Student;
+import com.feian.tms.domain.*;
 import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
 import com.feian.tms.dto.request.IdRequest;
@@ -31,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -250,8 +248,32 @@ public class CertificateController {
     @PostMapping("/export")
     @Operation(summary = "导出证书列表", description = "根据查询条件导出证书列表到Excel")
     public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
-        // 根据id查询所有数据（不分页）
-        List<Certificate> list=certificateService.listByIds(idsRequest.getIdList());
+        List<Certificate> list;
+        // 1. 获取原始的 id 对象
+        Object id = idsRequest.getId();
+        // 2. 创建一个 Long 列表用于安全存储 ID
+        List<Long> idList = new ArrayList<>();
+        // 3. 根据 id 的类型进行不同的处理
+        if (id instanceof List) {
+            // 如果 id 是一个列表，遍历它并安全地转换为 Long
+            List<?> rawList = (List<?>) id;
+            for (Object obj : rawList) {
+                if (obj instanceof Number) {
+                    // 安全地将每个数字元素转换为 Long
+                    idList.add(((Number) obj).longValue());
+                }
+                // 如果列表里有非数字元素，这里会忽略它们
+            }
+        } else if (id instanceof Number) {
+            // 如果 id 是一个单独的数字
+            idList.add(((Number) id).longValue());
+        }
+        if(idList.size() == 1 && idList.get(0) == 0L){
+            list =certificateService.certificateList();
+        }else {
+            // 根据ID查询所有数据（不分页）
+            list =certificateService.listByIds(idsRequest.getIdList());
+        }
 //        var queryWrapper = certificateService.lambdaQuery()
 //                .in(Certificate::getCertificateId, idsRequest.getIdList());
 //        var queryWrapper = certificateService.lambdaQuery()

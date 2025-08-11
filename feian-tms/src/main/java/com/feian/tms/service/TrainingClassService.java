@@ -16,4 +16,6 @@ public interface TrainingClassService extends MPJBaseService<TrainingClass> {
     boolean deleteBatch(List<Long> idList);
 
     Integer getStudentCountById(Long trainingClassId);
+
+    List<TrainingClass> trainingClassList();
 }

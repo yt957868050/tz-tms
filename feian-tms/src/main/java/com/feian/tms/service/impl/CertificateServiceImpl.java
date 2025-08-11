@@ -103,4 +103,9 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
 
         return true;
     }
+
+    @Override
+    public List<Certificate> certificateList() {
+        return certificateMapper.certificateList();
+    }
 }

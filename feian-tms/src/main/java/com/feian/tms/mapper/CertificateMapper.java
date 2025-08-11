@@ -8,6 +8,7 @@ import com.github.pagehelper.Page;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -42,4 +43,6 @@ public interface CertificateMapper extends MPJBaseMapper<Certificate> {
      * @param id
      */
     void deleteBatch(List<Long> id);
+    @Select("select * from tms_certificate where is_deleted=0")
+    List<Certificate> certificateList();
 }

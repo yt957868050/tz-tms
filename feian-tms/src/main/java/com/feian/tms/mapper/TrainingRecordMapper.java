@@ -3,6 +3,9 @@ package com.feian.tms.mapper;
 import com.feian.tms.domain.TrainingRecord;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 培训记录Mapper接口
@@ -12,5 +15,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface TrainingRecordMapper extends MPJBaseMapper<TrainingRecord> {
-
+    @Select("select * from tms_training_record where is_deleted=0")
+    List<TrainingRecord> trainingRecordList();
 }

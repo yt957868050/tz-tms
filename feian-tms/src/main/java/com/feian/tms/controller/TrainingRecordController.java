@@ -1,6 +1,7 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.domain.TrainingClass;
 import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
@@ -24,6 +25,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -223,8 +226,32 @@ public class TrainingRecordController {
     @PostMapping("/export")
     @Operation(summary = "导出培训记录列表", description = "根据查询条件导出培训记录列表到Excel")
     public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
-        // 根据ID查询所有数据（不分页）
-        List<TrainingRecord> list =trainingRecordService.listByIds(idsRequest.getIdList());
+        List<TrainingRecord> list;
+        // 1. 获取原始的 id 对象
+        Object id = idsRequest.getId();
+        // 2. 创建一个 Long 列表用于安全存储 ID
+        List<Long> idList = new ArrayList<>();
+        // 3. 根据 id 的类型进行不同的处理
+        if (id instanceof List) {
+            // 如果 id 是一个列表，遍历它并安全地转换为 Long
+            List<?> rawList = (List<?>) id;
+            for (Object obj : rawList) {
+                if (obj instanceof Number) {
+                    // 安全地将每个数字元素转换为 Long
+                    idList.add(((Number) obj).longValue());
+                }
+                // 如果列表里有非数字元素，这里会忽略它们
+            }
+        } else if (id instanceof Number) {
+            // 如果 id 是一个单独的数字
+            idList.add(((Number) id).longValue());
+        }
+        if(idList.size() == 1 && idList.get(0) == 0L){
+            list =trainingRecordService.trainingRecordList();
+        }else {
+            // 根据ID查询所有数据（不分页）
+            list =trainingRecordService.listByIds(idsRequest.getIdList());
+        }
 //        var queryWrapper = trainingRecordService.lambdaQuery()
 //                .eq(query.getStudentId() != null, TrainingRecord::getStudentId, query.getStudentId())
 //                .eq(query.getTrainingClassId() != null, TrainingRecord::getTrainingClassId, query.getTrainingClassId())

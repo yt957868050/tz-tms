@@ -7,6 +7,8 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 培训记录Service业务层处理
  * 
@@ -17,4 +19,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TrainingRecordServiceImpl extends MPJBaseServiceImpl<TrainingRecordMapper, TrainingRecord> implements TrainingRecordService {
 
+    private final TrainingRecordMapper trainingRecordMapper;
+
+    @Override
+    public List<TrainingRecord> trainingRecordList() {
+        return trainingRecordMapper.trainingRecordList();
+    }
 }

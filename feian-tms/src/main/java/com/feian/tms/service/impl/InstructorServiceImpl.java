@@ -26,4 +26,12 @@ public class InstructorServiceImpl extends MPJBaseServiceImpl<InstructorMapper, 
         instructorMapper.deleteBatch(idList);
         return true;
     }
+
+    /**
+     * 搜索所有教员
+     * @return
+     */
+    public List<Instructor> instructorList() {
+        return instructorMapper.instructorList();
+    }
 }
