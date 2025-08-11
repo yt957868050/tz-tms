@@ -192,6 +192,7 @@ public class CoursewareController {
     @Operation(summary = "删除课件", description = "根据ID删除课件信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
         boolean result = coursewareService.removeByIds(idsDeleteRequest.getIdList());
+        coursewareFileService.removeByCoursewareIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }

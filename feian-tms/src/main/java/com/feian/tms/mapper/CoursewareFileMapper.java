@@ -4,6 +4,8 @@ import com.feian.tms.domain.CoursewareFile;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 课件文件Mapper接口
  * 
@@ -13,4 +15,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface CoursewareFileMapper extends MPJBaseMapper<CoursewareFile> {
 
+    void removeByCoursewareIds(List<Long> idList);
 }

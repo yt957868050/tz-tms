@@ -5,7 +5,10 @@ import com.feian.tms.mapper.CoursewareFileMapper;
 import com.feian.tms.service.CoursewareFileService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 课件文件Service业务层处理
@@ -16,5 +19,13 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CoursewareFileServiceImpl extends MPJBaseServiceImpl<CoursewareFileMapper, CoursewareFile> implements CoursewareFileService {
-
+    @Autowired
+    CoursewareFileMapper coursewareFileMapper;
+    /**
+     * 删除课件时删除课件文件关联
+     * @param idList
+     */
+    public void removeByCoursewareIds(List<Long> idList) {
+        coursewareFileMapper.removeByCoursewareIds(idList);
+    }
 }
