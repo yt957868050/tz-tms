@@ -84,6 +84,14 @@ public class Courseware extends BaseEntity {
     @Excel(name = "排序")
     private Integer orderNum;
 
+    /** 教员ID */
+    @Excel(name = "教员ID")
+    private Long instructorId;
+
+    /** 教员姓名 */
+    @Excel(name = "教员姓名")
+    private String instructorName;
+
     /** 机型名称 */
     @TableField(exist = false)
     private String machineTypeName;
@@ -95,5 +103,7 @@ public class Courseware extends BaseEntity {
     /** 培训类型名称 */
     @TableField(exist = false)
     private String trainingTypeName;
+
+
 
 }

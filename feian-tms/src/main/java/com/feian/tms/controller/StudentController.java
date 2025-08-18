@@ -2,6 +2,7 @@ package com.feian.tms.controller;
 
 import com.feian.common.annotation.DataScope;
 import com.feian.common.utils.PageUtils;
+import com.feian.framework.web.service.TokenService;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.request.IdsRequest;
 import com.feian.tms.service.ClassStudentService;
@@ -22,9 +23,11 @@ import com.feian.tms.domain.Major;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,14 +56,16 @@ public class StudentController {
     private final IStudentMachineTypeService studentMachineTypeService;
     private final MajorService majorService;
     private final ClassStudentService classStudentService;
-
+    @Autowired
+    private TokenService tokenService;
     /**
      * 查询学员信息列表
      */
     @PostMapping("/list")
     @Operation(summary = "查询学员信息列表", description = "根据查询条件分页查询学员信息列表")
     @DataScope(enableMachineTypeFilter = true, studentAlias = "s")
-    public R<PageInfo<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest) {
+    public R<PageInfo<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest, HttpServletRequest request) {
+
         // 启动分页
         PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         

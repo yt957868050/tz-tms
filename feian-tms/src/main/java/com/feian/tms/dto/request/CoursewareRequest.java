@@ -71,6 +71,12 @@ public class CoursewareRequest {
     /** 备注 */
     private String remark;
 
+    /** 教员ID */
+    private Long instructorId;
+
+    /** 教员姓名 */
+    private String instructorName;
+
     /** 关联的文件列表 */
     private List<CoursewareFile> files;
 }

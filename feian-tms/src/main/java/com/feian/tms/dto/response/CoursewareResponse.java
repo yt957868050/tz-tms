@@ -67,6 +67,13 @@ public class CoursewareResponse {
     /** 培训类型名称 */
     private String trainingTypeName;
 
+    /** 教员ID */
+    private Long instructorId;
+
+    /** 教员姓名 */
+    private String instructorName;
+
+
     /** 创建者 */
     private String createBy;
 
