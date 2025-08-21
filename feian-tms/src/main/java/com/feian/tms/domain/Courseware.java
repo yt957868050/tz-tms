@@ -52,13 +52,13 @@ public class Courseware extends BaseEntity {
     @Excel(name = "培训类型ID")
     private Long trainingTypeId;
 
-    /** 理论培训时长(小时) */
+    /** 理论培训时长(分钟) */
     @Excel(name = "理论培训时长")
-    private BigDecimal theoryHours;
+    private BigDecimal theoryMinutes;
 
-    /** 实践培训时长(小时) */
+    /** 实践培训时长(分钟) */
     @Excel(name = "实践培训时长")
-    private BigDecimal practiceHours;
+    private BigDecimal practiceMinutes;
 
     /** 课程描述 */
     @Excel(name = "课程描述")
@@ -104,6 +104,16 @@ public class Courseware extends BaseEntity {
     @TableField(exist = false)
     private String trainingTypeName;
 
+    /** 课程序数（每天的第n节课） */
+    @TableField(exist = false)
+    private Long  timeId;
 
+    /** 课程时段，上午为1，下午为2 */
+    @TableField(exist = false)
+    private Long dayTime;
+
+    /** 排课天数（第几天，从1开始） */
+    @TableField(exist = false)
+    private Long dayNumber;
 
 }

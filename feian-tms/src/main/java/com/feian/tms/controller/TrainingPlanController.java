@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.domain.*;
 import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.ScheduleRequest;
+import com.feian.tms.dto.response.ScheduleResponse;
+import com.feian.tms.service.*;
 import com.github.pagehelper.PageInfo;
 import java.time.ZoneId;
 import com.feian.tms.common.PageRequest;
@@ -12,15 +15,6 @@ import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.TrainingPlanRequest;
 import com.feian.tms.dto.response.TrainingPlanResponse;
 import com.feian.tms.dto.response.InstructorResponse;
-import com.feian.tms.service.TrainingPlanService;
-import com.feian.tms.service.TrainingPlanInstructorService;
-import com.feian.tms.service.InstructorService;
-import com.feian.tms.service.MachineTypeService;
-import com.feian.tms.service.MajorService;
-import com.feian.tms.service.TrainingAbilityService;
-import com.feian.tms.service.TrainingPlanScheduleService;
-import com.feian.tms.service.TrainingClassService;
-import com.feian.tms.service.CoursewareService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +51,7 @@ public class TrainingPlanController {
     private final TrainingPlanScheduleService trainingPlanScheduleService;
     private final TrainingClassService trainingClassService;
     private final CoursewareService coursewareService;
+    private final ScheduleService scheduleService;
 
     /**
      * 查询培训计划列表
@@ -369,259 +364,6 @@ public class TrainingPlanController {
     }
 
     /**
-     * 自动排课功能
-     */
-    @PostMapping("/auto-schedule")
-    @Operation(summary = "自动排课", description = "根据培训计划自动生成课程安排")
-    public R<Map<String, Object>> autoSchedule(@RequestBody TrainingPlanRequest request) {
-        try {
-            // 1. 创建培训计划
-                TrainingPlan trainingPlan = new TrainingPlan();
-                BeanUtils.copyProperties(request, trainingPlan);
-            // 生成计划编号
-            trainingPlan.setPlanCode("null");
-            trainingPlan.setPlanName(generatePlanName(request.getMachineTypeId(), request.getMajorId(), request.getTrainingAbilityId()));
-            trainingPlan.setPlanStatus("0"); // 草稿状态
-            trainingPlan.setScheduleGenerated("0"); // 未生成课表
-            trainingPlan.setStatus("0"); // 正常状态
-            
-            // 保存培训计划
-            if(request.getPlanId() == null) {
-                trainingPlanService.save(trainingPlan);
-            }
-            // 2. 生成班次编号（年份+序号）
-            String classCode = generateClassCode();
-
-            // 创建培训班次
-            TrainingClass trainingClass = new TrainingClass();
-            trainingClass.setClassCode(classCode);
-            trainingClass.setClassName(trainingPlan.getPlanName() + "-" + classCode + "班");
-            trainingClass.setTrainingPlanId(trainingPlan.getPlanId());
-            trainingClass.setMachineTypeId(request.getMachineTypeId());
-            trainingClass.setMajorId(request.getMajorId());
-            trainingClass.setTrainingAbilityId(request.getTrainingAbilityId());
-            trainingClass.setPlanStartTime(request.getStartDate());
-            trainingClass.setStatus("0"); // 待开班
-
-            trainingClassService.save(trainingClass);
-            
-            // 3. 自动生成课程安排
-            List<TrainingPlanSchedule> schedules = generateAutoSchedule(trainingPlan, request.getStartDate());
-            
-            // 批量保存课程安排
-            if (!schedules.isEmpty()) {
-                trainingPlanScheduleService.saveBatch(schedules);
-            }
-            
-            // 4. 更新培训计划状态
-            trainingPlan.setScheduleGenerated("1");
-            trainingPlan.setClassScheduleName(trainingClass.getClassName() + "-课程表");
-            trainingPlan.setTeachingScheduleName(trainingClass.getClassName() + "-教学进度安排表");
-            trainingPlan.setPracticalProjectListName(trainingClass.getClassName() + "-实作项目清单");
-            if(request.getPlanCode()!=null){
-            trainingPlan.setPlanCode(request.getPlanCode());}
-            trainingPlanService.updateById(trainingPlan);
-            
-            // 5. 保存责任教员关系
-            if (request.getInstructorIds() != null && !request.getInstructorIds().isEmpty()) {
-                for (Long instructorId : request.getInstructorIds()) {
-                    TrainingPlanInstructor tpi = new TrainingPlanInstructor();
-                    tpi.setPlanId(trainingPlan.getPlanId());
-                    tpi.setInstructorId(instructorId);
-                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
-                    tpi.setStatus("0");
-                    trainingPlanInstructorService.save(tpi);
-                }
-            }
-            
-            // 6. 返回生成的表格名称
-            Map<String, Object> result = new HashMap<>();
-            result.put("planId", trainingPlan.getPlanId());
-            result.put("classCode", classCode);
-            result.put("classScheduleName", trainingPlan.getClassScheduleName());
-            result.put("teachingScheduleName", trainingPlan.getTeachingScheduleName());
-            result.put("practicalProjectListName", trainingPlan.getPracticalProjectListName());
-            result.put("totalDays", calculateTotalDays(schedules));
-            
-            return R.success(result);
-            
-        } catch (Exception e) {
-            return R.fail("自动排课失败：" + e.getMessage());
-        }
-    }
-    
-    /**
-     * 生成课程安排
-     */
-    private List<TrainingPlanSchedule> generateAutoSchedule(TrainingPlan trainingPlan, Date startDate) {
-        List<TrainingPlanSchedule> schedules = new ArrayList<>();
-        
-        // 获取机型相关的课件
-        var coursewareList = coursewareService.lambdaQuery()
-                .eq(Courseware::getMachineTypeId, trainingPlan.getMachineTypeId())
-                .eq(Courseware::getMajorId, trainingPlan.getMajorId())
-                .eq(Courseware::getStatus, "0")
-                .orderByAsc(Courseware::getOrderNum)
-                .list();
-        
-        LocalDate currentDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        int dayNumber = 1;
-        
-        // 每天7小时，上午3.5小时，下午3.5小时
-        BigDecimal dailyHours = new BigDecimal("7.0");
-        BigDecimal morningHours = new BigDecimal("3.5");
-        BigDecimal afternoonHours = new BigDecimal("3.5");
-        
-        for (var courseware : coursewareList) {
-            // 理论课安排
-            if (courseware.getTheoryHours() != null && courseware.getTheoryHours().compareTo(BigDecimal.ZERO) > 0) {
-                TrainingPlanSchedule theorySchedule = new TrainingPlanSchedule();
-                theorySchedule.setPlanId(trainingPlan.getPlanId());
-                theorySchedule.setScheduleType("class_schedule");
-                theorySchedule.setDayNumber(dayNumber);
-                theorySchedule.setTimeSlot("08:30-12:00");
-                theorySchedule.setCoursewareId(courseware.getCoursewareId());
-                theorySchedule.setCourseName(courseware.getCourseName());
-                theorySchedule.setCourseType("1"); // 理论
-                theorySchedule.setCourseHours(morningHours);
-                theorySchedule.setCourseContent("理论学习：" + courseware.getCourseName());
-                theorySchedule.setStatus("0");
-                schedules.add(theorySchedule);
-            }
-            
-            // 实践课安排
-            if (courseware.getPracticeHours() != null && courseware.getPracticeHours().compareTo(BigDecimal.ZERO) > 0) {
-                TrainingPlanSchedule practiceSchedule = new TrainingPlanSchedule();
-                practiceSchedule.setPlanId(trainingPlan.getPlanId());
-                practiceSchedule.setScheduleType("class_schedule");
-                practiceSchedule.setDayNumber(dayNumber);
-                practiceSchedule.setTimeSlot("14:00-17:30");
-                practiceSchedule.setCoursewareId(courseware.getCoursewareId());
-                practiceSchedule.setCourseName(courseware.getCourseName());
-                practiceSchedule.setCourseType("2"); // 实践
-                practiceSchedule.setCourseHours(afternoonHours);
-                practiceSchedule.setCourseContent("实践训练：" + courseware.getCourseName());
-                practiceSchedule.setStatus("0");
-                schedules.add(practiceSchedule);
-            }
-            
-            dayNumber++;
-        }
-        
-        return schedules;
-    }
-    
-    /**
-     * 生成计划编号
-     */
-    private String generatePlanCode(Long machineTypeId, Long majorId, Long trainingAbilityId) {
-        String year = String.valueOf(LocalDate.now().getYear());
-        
-        // 查询当年已有的计划数量
-        long count = trainingPlanService.lambdaQuery()
-                .eq(TrainingPlan::getMachineTypeId, machineTypeId)
-                .eq(TrainingPlan::getMajorId, majorId)
-                .eq(TrainingPlan::getTrainingAbilityId, trainingAbilityId)
-                .like(TrainingPlan::getPlanCode, year)
-                .count();
-        
-        return String.format("%s-%s-%03d", year, "PLAN", count + 1);
-    }
-    
-    /**
-     * 生成计划名称
-     */
-    private String generatePlanName(Long machineTypeId, Long majorId, Long trainingAbilityId) {
-        var machineType = machineTypeService.getById(machineTypeId);
-        var major = majorService.getById(majorId);
-        var trainingAbility = trainingAbilityService.getById(trainingAbilityId);
-        
-        return String.format("%s-%s-%s-培训计划", 
-                machineType != null ? machineType.getMachineTypeName() : "",
-                major != null ? major.getMajorName() : "",
-                trainingAbility != null ? trainingAbility.getAbilityName() : "");
-    }
-    
-    /**
-     * 生成班次编号（年份+序号顺延）
-     */
-    private String generateClassCode() {
-        String year = String.valueOf(LocalDate.now().getYear());
-        
-        // 查询当年已有的班次数量
-        long count = trainingClassService.lambdaQuery()
-                .like(TrainingClass::getClassCode, year)
-                .count();
-        
-        return String.format("%s-%03d", year, count + 1);
-    }
-    
-    /**
-     * 计算总天数
-     */
-    private int calculateTotalDays(List<TrainingPlanSchedule> schedules) {
-        return (int) schedules.stream()
-                .mapToInt(TrainingPlanSchedule::getDayNumber)
-                .max()
-                .orElse(0);
-    }
-    
-    /**
-     * 获取课程表详情
-     */
-    @PostMapping("/schedule-detail")
-    @Operation(summary = "获取课程表详情", description = "根据计划ID获取详细的课程安排")
-    public R<Map<String, Object>> getScheduleDetail(@RequestBody IdRequest request) {
-        try {
-            // 获取培训计划信息
-            TrainingPlan trainingPlan = trainingPlanService.getById(request.getId());
-            if (trainingPlan == null) {
-                return R.fail("培训计划不存在");
-            }
-            
-            // 获取课程安排列表
-            List<TrainingPlanSchedule> schedules = trainingPlanScheduleService.lambdaQuery()
-                    .eq(TrainingPlanSchedule::getPlanId, request.getId())
-                    .eq(TrainingPlanSchedule::getStatus, "0")
-                    .orderByAsc(TrainingPlanSchedule::getDayNumber)
-                    .orderByAsc(TrainingPlanSchedule::getTimeSlot)
-                    .list();
-            
-            // 按类型分组
-            Map<String, List<TrainingPlanSchedule>> groupedSchedules = schedules.stream()
-                    .collect(Collectors.groupingBy(TrainingPlanSchedule::getScheduleType));
-            
-            Map<String, Object> result = new HashMap<>();
-            result.put("planInfo", trainingPlan);
-            result.put("classSchedule", groupedSchedules.get("class_schedule")); // 班次课程表
-            result.put("teachingSchedule", groupedSchedules.get("teaching_schedule")); // 教学进度安排表
-            result.put("practicalProject", groupedSchedules.get("practical_project")); // 实作项目清单
-            
-            return R.success(result);
-            
-        } catch (Exception e) {
-            return R.fail("获取课程表详情失败：" + e.getMessage());
-        }
-    }
-    
-    /**
-     * 修改课程安排
-     */
-    @PostMapping("/update-schedule")
-    @Operation(summary = "修改课程安排", description = "修改特定的课程安排")
-    public R<Void> updateSchedule(@RequestBody TrainingPlanSchedule schedule) {
-        try {
-            boolean result = trainingPlanScheduleService.updateById(schedule);
-            if (result) {
-                return R.success();
-            }
-            return R.fail("修改课程安排失败");
-        } catch (Exception e) {
-            return R.fail("修改课程安排失败：" + e.getMessage());
-        }
-    }
-
-    /**
      * 转换计划状态
      */
     private String convertPlanStatus(String planStatus) {
@@ -634,4 +376,280 @@ public class TrainingPlanController {
             default -> "";
         };
     }
+
+    /**
+     * 自动排课-理论功能
+     */
+    @PostMapping("/auto-schedule-theory")
+    @Operation(summary = "自动排课-理论", description = "根据培训计划自动生成理论课程安排")
+    public void autoSchedule(@RequestBody ScheduleRequest request) {
+       scheduleService.autoScheduleTheory(request);;
+    }
+
+    /**
+     * 获取理论理论功能
+     */
+    @PostMapping("/schedule-theory-detail")
+    @Operation(summary = "获取理论理论课表", description = "根据培训计划自动生成理论课程安排")
+    public R<ScheduleResponse> getTheorySchedule(@RequestBody ScheduleRequest request) {
+        ScheduleResponse response=scheduleService.getTheorySchedule(request);
+        return R.success(response);
+    }
+
+
+
+//    /**
+//     * 自动排课功能
+//     */
+//    @PostMapping("/auto-schedule")
+//    @Operation(summary = "自动排课", description = "根据培训计划自动生成课程安排")
+//    public R<Map<String, Object>> autoSchedule(@RequestBody TrainingPlanRequest request) {
+//        try {
+//            // 1. 创建培训计划
+//                TrainingPlan trainingPlan = new TrainingPlan();
+//                BeanUtils.copyProperties(request, trainingPlan);
+//            // 生成计划编号
+//            trainingPlan.setPlanCode("null");
+//            trainingPlan.setPlanName(generatePlanName(request.getMachineTypeId(), request.getMajorId(), request.getTrainingAbilityId()));
+//            trainingPlan.setPlanStatus("0"); // 草稿状态
+//            trainingPlan.setScheduleGenerated("0"); // 未生成课表
+//            trainingPlan.setStatus("0"); // 正常状态
+//
+//            // 保存培训计划
+//            if(request.getPlanId() == null) {
+//                trainingPlanService.save(trainingPlan);
+//            }
+//            // 2. 生成班次编号（年份+序号）
+//            String classCode = generateClassCode();
+//
+//            // 创建培训班次
+//            TrainingClass trainingClass = new TrainingClass();
+//            trainingClass.setClassCode(classCode);
+//            trainingClass.setClassName(trainingPlan.getPlanName() + "-" + classCode + "班");
+//            trainingClass.setTrainingPlanId(trainingPlan.getPlanId());
+//            trainingClass.setMachineTypeId(request.getMachineTypeId());
+//            trainingClass.setMajorId(request.getMajorId());
+//            trainingClass.setTrainingAbilityId(request.getTrainingAbilityId());
+//            trainingClass.setPlanStartTime(request.getStartDate());
+//            trainingClass.setStatus("0"); // 待开班
+//
+//            trainingClassService.save(trainingClass);
+//
+//            // 3. 自动生成课程安排
+//            List<TrainingPlanSchedule> schedules = generateAutoSchedule(trainingPlan, request.getStartDate());
+//
+//            // 批量保存课程安排
+//            if (!schedules.isEmpty()) {
+//                trainingPlanScheduleService.saveBatch(schedules);
+//            }
+//
+//            // 4. 更新培训计划状态
+//            trainingPlan.setScheduleGenerated("1");
+//            trainingPlan.setClassScheduleName(trainingClass.getClassName() + "-课程表");
+//            trainingPlan.setTeachingScheduleName(trainingClass.getClassName() + "-教学进度安排表");
+//            trainingPlan.setPracticalProjectListName(trainingClass.getClassName() + "-实作项目清单");
+//            if(request.getPlanCode()!=null){
+//            trainingPlan.setPlanCode(request.getPlanCode());}
+//            trainingPlanService.updateById(trainingPlan);
+//
+//            // 5. 保存责任教员关系
+//            if (request.getInstructorIds() != null && !request.getInstructorIds().isEmpty()) {
+//                for (Long instructorId : request.getInstructorIds()) {
+//                    TrainingPlanInstructor tpi = new TrainingPlanInstructor();
+//                    tpi.setPlanId(trainingPlan.getPlanId());
+//                    tpi.setInstructorId(instructorId);
+//                    tpi.setIsChief(instructorId.equals(request.getChiefInstructorId()) ? "1" : "0");
+//                    tpi.setStatus("0");
+//                    trainingPlanInstructorService.save(tpi);
+//                }
+//            }
+//
+//            // 6. 返回生成的表格名称
+//            Map<String, Object> result = new HashMap<>();
+//            result.put("planId", trainingPlan.getPlanId());
+//            result.put("classCode", classCode);
+//            result.put("classScheduleName", trainingPlan.getClassScheduleName());
+//            result.put("teachingScheduleName", trainingPlan.getTeachingScheduleName());
+//            result.put("practicalProjectListName", trainingPlan.getPracticalProjectListName());
+//            result.put("totalDays", calculateTotalDays(schedules));
+//
+//            return R.success(result);
+//
+//        } catch (Exception e) {
+//            return R.fail("自动排课失败：" + e.getMessage());
+//        }
+//    }
+
+//    /**
+//     * 生成课程安排
+//     */
+//    private List<TrainingPlanSchedule> generateAutoSchedule(TrainingPlan trainingPlan, Date startDate) {
+//        List<TrainingPlanSchedule> schedules = new ArrayList<>();
+//
+//        // 获取机型相关的课件
+//        var coursewareList = coursewareService.lambdaQuery()
+//                .eq(Courseware::getMachineTypeId, trainingPlan.getMachineTypeId())
+//                .eq(Courseware::getMajorId, trainingPlan.getMajorId())
+//                .eq(Courseware::getStatus, "0")
+//                .orderByAsc(Courseware::getOrderNum)
+//                .list();
+//
+//        LocalDate currentDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//        int dayNumber = 1;
+//
+//        // 每天7小时，上午3.5小时，下午3.5小时
+//        BigDecimal dailyHours = new BigDecimal("7.0");
+//        BigDecimal morningHours = new BigDecimal("3.5");
+//        BigDecimal afternoonHours = new BigDecimal("3.5");
+//
+//        for (var courseware : coursewareList) {
+//            // 理论课安排
+//            if (courseware.getTheoryHours() != null && courseware.getTheoryHours().compareTo(BigDecimal.ZERO) > 0) {
+//                TrainingPlanSchedule theorySchedule = new TrainingPlanSchedule();
+//                theorySchedule.setPlanId(trainingPlan.getPlanId());
+//                theorySchedule.setScheduleType("class_schedule");
+//                theorySchedule.setDayNumber(dayNumber);
+//                theorySchedule.setTimeSlot("08:30-12:00");
+//                theorySchedule.setCoursewareId(courseware.getCoursewareId());
+//                theorySchedule.setCourseName(courseware.getCourseName());
+//                theorySchedule.setCourseType("1"); // 理论
+//                theorySchedule.setCourseHours(morningHours);
+//                theorySchedule.setCourseContent("理论学习：" + courseware.getCourseName());
+//                theorySchedule.setStatus("0");
+//                schedules.add(theorySchedule);
+//            }
+//
+//            // 实践课安排
+//            if (courseware.getPracticeHours() != null && courseware.getPracticeHours().compareTo(BigDecimal.ZERO) > 0) {
+//                TrainingPlanSchedule practiceSchedule = new TrainingPlanSchedule();
+//                practiceSchedule.setPlanId(trainingPlan.getPlanId());
+//                practiceSchedule.setScheduleType("class_schedule");
+//                practiceSchedule.setDayNumber(dayNumber);
+//                practiceSchedule.setTimeSlot("14:00-17:30");
+//                practiceSchedule.setCoursewareId(courseware.getCoursewareId());
+//                practiceSchedule.setCourseName(courseware.getCourseName());
+//                practiceSchedule.setCourseType("2"); // 实践
+//                practiceSchedule.setCourseHours(afternoonHours);
+//                practiceSchedule.setCourseContent("实践训练：" + courseware.getCourseName());
+//                practiceSchedule.setStatus("0");
+//                schedules.add(practiceSchedule);
+//            }
+//
+//            dayNumber++;
+//        }
+//
+//        return schedules;
+//    }
+//
+//    /**
+//     * 生成计划编号
+//     */
+//    private String generatePlanCode(Long machineTypeId, Long majorId, Long trainingAbilityId) {
+//        String year = String.valueOf(LocalDate.now().getYear());
+//
+//        // 查询当年已有的计划数量
+//        long count = trainingPlanService.lambdaQuery()
+//                .eq(TrainingPlan::getMachineTypeId, machineTypeId)
+//                .eq(TrainingPlan::getMajorId, majorId)
+//                .eq(TrainingPlan::getTrainingAbilityId, trainingAbilityId)
+//                .like(TrainingPlan::getPlanCode, year)
+//                .count();
+//
+//        return String.format("%s-%s-%03d", year, "PLAN", count + 1);
+//    }
+//
+//    /**
+//     * 生成计划名称
+//     */
+//    private String generatePlanName(Long machineTypeId, Long majorId, Long trainingAbilityId) {
+//        var machineType = machineTypeService.getById(machineTypeId);
+//        var major = majorService.getById(majorId);
+//        var trainingAbility = trainingAbilityService.getById(trainingAbilityId);
+//
+//        return String.format("%s-%s-%s-培训计划",
+//                machineType != null ? machineType.getMachineTypeName() : "",
+//                major != null ? major.getMajorName() : "",
+//                trainingAbility != null ? trainingAbility.getAbilityName() : "");
+//    }
+//
+//    /**
+//     * 生成班次编号（年份+序号顺延）
+//     */
+//    private String generateClassCode() {
+//        String year = String.valueOf(LocalDate.now().getYear());
+//
+//        // 查询当年已有的班次数量
+//        long count = trainingClassService.lambdaQuery()
+//                .like(TrainingClass::getClassCode, year)
+//                .count();
+//
+//        return String.format("%s-%03d", year, count + 1);
+//    }
+//
+//    /**
+//     * 计算总天数
+//     */
+//    private int calculateTotalDays(List<TrainingPlanSchedule> schedules) {
+//        return (int) schedules.stream()
+//                .mapToInt(TrainingPlanSchedule::getDayNumber)
+//                .max()
+//                .orElse(0);
+//    }
+//
+//    /**
+//     * 获取课程表详情
+//     */
+//    @PostMapping("/schedule-detail")
+//    @Operation(summary = "获取课程表详情", description = "根据计划ID获取详细的课程安排")
+//    public R<Map<String, Object>> getScheduleDetail(@RequestBody IdRequest request) {
+//        try {
+//            // 获取培训计划信息
+//            TrainingPlan trainingPlan = trainingPlanService.getById(request.getId());
+//            if (trainingPlan == null) {
+//                return R.fail("培训计划不存在");
+//            }
+//
+//            // 获取课程安排列表
+//            List<TrainingPlanSchedule> schedules = trainingPlanScheduleService.lambdaQuery()
+//                    .eq(TrainingPlanSchedule::getPlanId, request.getId())
+//                    .eq(TrainingPlanSchedule::getStatus, "0")
+//                    .orderByAsc(TrainingPlanSchedule::getDayNumber)
+//                    .orderByAsc(TrainingPlanSchedule::getTimeSlot)
+//                    .list();
+//
+//            // 按类型分组
+//            Map<String, List<TrainingPlanSchedule>> groupedSchedules = schedules.stream()
+//                    .collect(Collectors.groupingBy(TrainingPlanSchedule::getScheduleType));
+//
+//            Map<String, Object> result = new HashMap<>();
+//            result.put("planInfo", trainingPlan);
+//            result.put("classSchedule", groupedSchedules.get("class_schedule")); // 班次课程表
+//            result.put("teachingSchedule", groupedSchedules.get("teaching_schedule")); // 教学进度安排表
+//            result.put("practicalProject", groupedSchedules.get("practical_project")); // 实作项目清单
+//
+//            return R.success(result);
+//
+//        } catch (Exception e) {
+//            return R.fail("获取课程表详情失败：" + e.getMessage());
+//        }
+//    }
+//
+//    /**
+//     * 修改课程安排
+//     */
+//    @PostMapping("/update-schedule")
+//    @Operation(summary = "修改课程安排", description = "修改特定的课程安排")
+//    public R<Void> updateSchedule(@RequestBody TrainingPlanSchedule schedule) {
+//        try {
+//            boolean result = trainingPlanScheduleService.updateById(schedule);
+//            if (result) {
+//                return R.success();
+//            }
+//            return R.fail("修改课程安排失败");
+//        } catch (Exception e) {
+//            return R.fail("修改课程安排失败：" + e.getMessage());
+//        }
+//    }
+
+
 }

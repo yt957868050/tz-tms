@@ -38,10 +38,10 @@ public class CoursewareResponse {
     private Long trainingTypeId;
 
     /** 理论培训时长(小时) */
-    private BigDecimal theoryHours;
+    private BigDecimal theoryMinutes;
 
     /** 实践培训时长(小时) */
-    private BigDecimal practiceHours;
+    private BigDecimal practiceMinutes;
 
     /** 课程描述 */
     private String courseDesc;
