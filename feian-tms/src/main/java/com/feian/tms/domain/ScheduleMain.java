@@ -41,11 +41,11 @@ public class ScheduleMain extends BaseEntity {
 
     /** 课程类型，1是理论，2是实作 */
     @Excel(name = "课程类型", readConverterExp = "1=理论,2=实作")
-    private Integer courseType; // 对应 SQL 的 INT 类型
+    private Integer courseType;
 
     /** 排课日期，开始排课如2025/8/11 */
     @Excel(name = "排课日期")
-    private Date startDate; // 对应 SQL 的 DATE 类型
+    private Date startDate;
 
     /** 培训班级ID */
     @Excel(name = "培训班级ID")

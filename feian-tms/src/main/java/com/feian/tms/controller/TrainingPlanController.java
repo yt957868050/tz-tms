@@ -357,6 +357,17 @@ public class TrainingPlanController {
             trainingPlanInstructorService.lambdaUpdate()
                     .eq(TrainingPlanInstructor::getPlanId,idRequest.getId())
                     .remove();
+
+            //删除关联的课表
+            ScheduleRequest requestTheory=new ScheduleRequest();
+            ScheduleRequest requestPractical=new ScheduleRequest();
+            requestTheory.setPlanId(idRequest.getId());
+            requestTheory.setCourseType(1);
+            requestPractical.setPlanId(idRequest.getId());
+            requestPractical.setCourseType(2);
+            scheduleService.deleteSchedule(requestTheory);
+            scheduleService.deleteSchedule(requestPractical);
+
             
             return R.success();
         }
@@ -387,13 +398,25 @@ public class TrainingPlanController {
     }
 
     /**
-     * 获取理论理论功能
+     * 获取理论课表功能
      */
     @PostMapping("/schedule-theory-detail")
     @Operation(summary = "获取理论理论课表", description = "根据培训计划自动生成理论课程安排")
     public R<ScheduleResponse> getTheorySchedule(@RequestBody ScheduleRequest request) {
         ScheduleResponse response=scheduleService.getTheorySchedule(request);
         return R.success(response);
+    }
+
+    /**
+     * 删除课表
+     */
+    @PostMapping("/delete-schedule")
+    @Operation(summary = "删除课表", description = "根据对应理论或者实作课表")
+    public R<Void> deleteSchedule(@RequestBody ScheduleRequest request) {
+
+        scheduleService.deleteSchedule(request);
+
+        return R.success();
     }
 
 

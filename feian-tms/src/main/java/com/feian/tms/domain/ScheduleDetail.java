@@ -31,6 +31,10 @@ public class ScheduleDetail extends BaseEntity {
     @Excel(name = "排课主表ID")
     private Long scheduleMainId;
 
+    /** 课程类型，1是理论，2是实作 */
+    @Excel(name = "课程类型", readConverterExp = "1=理论,2=实作")
+    private Integer courseType;
+
     /** 课程日期，2025/8/11 */
     @Excel(name = "课程日期")
     private Date coursewareDate; // 对应 SQL 的 DATE 类型

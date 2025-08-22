@@ -56,7 +56,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         LambdaQueryWrapper<Courseware> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(Courseware::getMachineTypeId,request.getMachineTypeId())
                 .eq(Courseware::getMajorId,request.getMajorId())
-                .eq(Courseware::getTrainingType,"1")//理论课
+                .eq(Courseware::getIsDeleted,0)
+                .eq(Courseware::getTrainingType,request.getCourseType() == 1 ? "1" : (request.getCourseType() == 2 ? "2" : ""))//1为理论课，2为实作课
                 .orderByAsc(Courseware::getOrderNum);
 
         //使用一个LinkedList，方便在处理完一个课件后移除
@@ -127,6 +128,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             //关联主表ID
             detail.setScheduleMainId(scheduleMainId);
 
+            //映射排课类型
+            detail.setCourseType(request.getCourseType());
+
             //映射课程ID、教员ID、时间和时间段
             detail.setCoursewareId(course.getCoursewareId());
             detail.setInstructorId(course.getInstructorId());
@@ -191,7 +195,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         for (Map.Entry<Long, List<ScheduleDetail>> entry : coursesByDay.entrySet()) {
             ScheduleDayDTO dayDto = new ScheduleDayDTO();
             // 计算日期
-            Date courseDate = new Date(request.getStartDate().getTime() + TimeUnit.DAYS.toMillis(entry.getKey() - 1));
+            Date courseDate = new Date(scheduleMain.getStartDate().getTime() + TimeUnit.DAYS.toMillis(entry.getKey() - 1));
             dayDto.setDate(courseDate);
 
             // 将每日的ScheduleDetail列表映射为ScheduleCourseDTO列表
@@ -234,8 +238,21 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     }
 
+    /**
+     * 删除课表
+     * @param request
+     */
+    public void deleteSchedule(ScheduleRequest request) {
+        //获取主表ID
+        Long scheduleMainId=scheduleMainMapper.getIdByPlan(request.getPlanId(),request.getCourseType());
 
+        //根据主表ID和课程类型删除课程详细表
+        scheduleDetailMapper.deleteAll(scheduleMainId,request.getCourseType());
 
+        //根据主表ID删除主表
+        scheduleMainMapper.deleteAll(scheduleMainId);
+
+    }
 
 
 }

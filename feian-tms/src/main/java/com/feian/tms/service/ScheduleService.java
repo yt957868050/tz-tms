@@ -18,4 +18,10 @@ public interface ScheduleService {
      * @return
      */
     ScheduleResponse getTheorySchedule(ScheduleRequest request);
+
+    /**
+     * 删除课表
+     * @param request
+     */
+    void deleteSchedule(ScheduleRequest request);
 }
