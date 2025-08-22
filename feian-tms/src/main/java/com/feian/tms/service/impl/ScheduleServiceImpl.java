@@ -39,7 +39,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     private TrainingClassMapper trainingClassMapper;
     /**
-     * 理论排课功能
+     * 自动排课功能
      * @param request
      * @return
      */
@@ -79,7 +79,13 @@ public class ScheduleServiceImpl implements ScheduleService {
             Courseware currentCourse=coursewareList.get(0);
 
             //获取当前课件的剩余时长
-            BigDecimal courseRemainingMinutes=currentCourse.getTheoryMinutes();
+            BigDecimal courseRemainingMinutes;
+            if(request.getCourseType()==1) {
+                 courseRemainingMinutes = currentCourse.getTheoryMinutes();
+            }//是理论课件
+            else {
+                 courseRemainingMinutes = currentCourse.getPracticeMinutes();
+            }//是实作课件
 
             //循环直到当前课件的所有时长都排完
             while (courseRemainingMinutes.compareTo(BigDecimal.ZERO)>0){
@@ -150,7 +156,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     /**
-     * 查询理论课表
+     * 查询课表
      * @param request
      * @return
      */

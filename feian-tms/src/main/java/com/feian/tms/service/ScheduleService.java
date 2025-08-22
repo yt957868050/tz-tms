@@ -7,13 +7,13 @@ import com.feian.tms.dto.response.ScheduleResponse;
 
 public interface ScheduleService {
     /**
-     * 理论排课功能
+     * 自动排课功能
      * @param request
      */
     void autoScheduleTheory(ScheduleRequest request);
 
     /**
-     * 查询理论课表
+     * 查询课表
      * @param request
      * @return
      */

@@ -389,19 +389,19 @@ public class TrainingPlanController {
     }
 
     /**
-     * 自动排课-理论功能
+     * 自动排课功能
      */
-    @PostMapping("/auto-schedule-theory")
-    @Operation(summary = "自动排课-理论", description = "根据培训计划自动生成理论课程安排")
+    @PostMapping("/auto-schedule-new")
+    @Operation(summary = "自动排课", description = "根据培训计划自动生成课程安排")
     public void autoSchedule(@RequestBody ScheduleRequest request) {
        scheduleService.autoScheduleTheory(request);;
     }
 
     /**
-     * 获取理论课表功能
+     * 获取课表功能
      */
-    @PostMapping("/schedule-theory-detail")
-    @Operation(summary = "获取理论理论课表", description = "根据培训计划自动生成理论课程安排")
+    @PostMapping("/schedule-detail")
+    @Operation(summary = "获取课表", description = "获取课表详细信息")
     public R<ScheduleResponse> getTheorySchedule(@RequestBody ScheduleRequest request) {
         ScheduleResponse response=scheduleService.getTheorySchedule(request);
         return R.success(response);

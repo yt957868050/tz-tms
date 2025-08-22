@@ -64,7 +64,7 @@ public class StudentController {
     @PostMapping("/list")
     @Operation(summary = "查询学员信息列表", description = "根据查询条件分页查询学员信息列表")
     @DataScope(enableMachineTypeFilter = true, studentAlias = "s")
-    public R<PageInfo<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest, HttpServletRequest request) {
+    public R<PageInfo<StudentResponse>> list(@RequestBody PageRequest<StudentRequest> pageRequest) {
 
         // 启动分页
         PageUtils.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
