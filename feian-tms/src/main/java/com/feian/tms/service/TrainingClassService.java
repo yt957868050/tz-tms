@@ -18,4 +18,8 @@ public interface TrainingClassService extends MPJBaseService<TrainingClass> {
     Integer getStudentCountById(Long trainingClassId);
 
     List<TrainingClass> trainingClassList();
+
+    String getClassCode(Long trainingClassId);
+
+    String getClassName(Long trainingClassId);
 }

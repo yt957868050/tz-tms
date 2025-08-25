@@ -51,4 +51,14 @@ public class StudentServiceImpl extends MPJBaseServiceImpl<StudentMapper, Studen
         return studentMapper.studentList();
     }
 
+    @Override
+    public String getStudentName(Long StudentId) {
+        return studentMapper.getStudentName(StudentId);
+    }
+
+    @Override
+    public String getStudentCode(Long StudentId) {
+        return studentMapper.getStudentCode(StudentId);
+    }
+
 }

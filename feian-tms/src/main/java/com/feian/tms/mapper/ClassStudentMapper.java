@@ -3,6 +3,7 @@ package com.feian.tms.mapper;
 import com.feian.tms.domain.ClassStudent;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -21,4 +22,7 @@ public interface ClassStudentMapper extends MPJBaseMapper<ClassStudent> {
     void removeAllByIds(List<Long> idList);
 
     void removeByClassIds(List<Long> idList);
+
+    @Select("select * from tms_class_student")
+    List<ClassStudent> classStudentList();
 }

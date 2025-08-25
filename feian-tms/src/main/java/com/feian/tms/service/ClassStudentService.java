@@ -40,4 +40,6 @@ public interface ClassStudentService extends MPJBaseService<ClassStudent> {
     void removeAllByIds(List<Long> idList);
 
     void removeByClassIds(List<Long> idList);
+
+    List<ClassStudent> classStudentList();
 }

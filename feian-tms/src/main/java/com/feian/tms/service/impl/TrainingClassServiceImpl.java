@@ -36,4 +36,14 @@ public class TrainingClassServiceImpl extends MPJBaseServiceImpl<TrainingClassMa
     public List<TrainingClass> trainingClassList() {
         return trainingClassMapper.trainingClassList();
     }
+
+    @Override
+    public String getClassCode(Long trainingClassId) {
+        return trainingClassMapper.getClassCode(trainingClassId);
+    }
+
+    @Override
+    public String getClassName(Long trainingClassId) {
+        return trainingClassMapper.getClassName(trainingClassId);
+    }
 }

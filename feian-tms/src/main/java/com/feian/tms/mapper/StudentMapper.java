@@ -3,6 +3,7 @@ package com.feian.tms.mapper;
 import com.feian.tms.domain.Student;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -25,4 +26,8 @@ public interface StudentMapper extends MPJBaseMapper<Student> {
     List<Student> studentListByIds(List<Long> idList);
 
     List<Student> studentList();
+    @Select("select student_name from tms_student where student_id=#{StudentId}")
+    String getStudentName(Long StudentId);
+    @Select("select student_code from tms_student where student_id=#{StudentId}")
+    String getStudentCode(Long StudentId);
 }

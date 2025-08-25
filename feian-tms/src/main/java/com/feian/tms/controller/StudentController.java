@@ -287,6 +287,7 @@ public class StudentController {
                     excel.setAircraftEndorsement(entity.getAircraftEndorsement());
                     // workExperience用remark字段
                     excel.setWorkExperience(entity.getRemark());
+                    excel.setStatus(convertStatus(entity.getStatus()));
                     return excel;
                 })
                 .toList();
@@ -350,6 +351,7 @@ public class StudentController {
                         entity.setLicenseNumber(excel.getLicenseNumber());
                         entity.setAircraftEndorsement(excel.getAircraftEndorsement());
                         entity.setRemark(excel.getWorkExperience());
+                        entity.setStatus(convertStatus(excel.getStatus()));
                         entities.add(entity);
                     }
                     // 批量保存到数据库
@@ -461,5 +463,17 @@ public class StudentController {
             // 如果解析失败，返回null
             return null;
         }
+    }
+
+    /**
+     * 导出转换性别枚举
+     */
+    private String convertStatus(String status) {
+        if (status == null) return "";
+        return switch (status) {
+            case "0" -> "正常";
+            case "1" -> "停用";
+            default -> "";
+        };
     }
 }

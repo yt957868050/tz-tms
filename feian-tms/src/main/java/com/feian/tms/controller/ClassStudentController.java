@@ -4,12 +4,13 @@ import com.feian.common.utils.PageUtils;
 import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.ClassStudent;
+import com.feian.tms.domain.Student;
 import com.feian.tms.dto.query.ClassStudentQuery;
-import com.feian.tms.dto.request.IdsDeleteRequest;
+import com.feian.tms.dto.request.*;
+import com.feian.tms.excel.StudentExcel;
+import com.feian.tms.service.StudentService;
+import com.feian.tms.service.TrainingClassService;
 import com.github.pagehelper.PageInfo;
-import com.feian.tms.dto.request.IdRequest;
-import com.feian.tms.dto.request.ClassStudentRequest;
-import com.feian.tms.dto.request.ClassStudentBatchAddRequest;
 import com.feian.tms.dto.response.ClassStudentResponse;
 import com.feian.tms.excel.ClassStudentExcel;
 import com.feian.tms.service.ClassStudentService;
@@ -22,6 +23,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +40,9 @@ import java.util.List;
 public class ClassStudentController {
     
     private final ClassStudentService classStudentService;
+
+    private final TrainingClassService trainingClassService;
+    private final StudentService studentService;
 
     /**
      * 查询班次学员关联列表
@@ -126,35 +132,83 @@ public class ClassStudentController {
     }
 
     /**
-     * 导出班次学员关联列表（使用EasyExcel）
+     * 导出学员信息列表（使用EasyExcel）
      */
     @PostMapping("/export")
-    @Operation(summary = "导出班次学员关联列表", description = "根据查询条件导出班次学员关联列表到Excel")
-    public void export(HttpServletResponse response, @RequestBody ClassStudentQuery query) {
-        // 查询所有数据（不分页）
-        var queryWrapper = classStudentService.lambdaQuery()
-                .eq(query.getTrainingClassId() != null, ClassStudent::getTrainingClassId, query.getTrainingClassId())
-                .eq(query.getStudentId() != null, ClassStudent::getStudentId, query.getStudentId())
-                .ge(query.getEnrollTime() != null, ClassStudent::getEnrollTime, query.getEnrollTime())
-                .eq(query.getStudentStatus() != null, ClassStudent::getStudentStatus, query.getStudentStatus())
-                .orderByDesc(ClassStudent::getEnrollTime);
-        
-        List<ClassStudent> list = queryWrapper.list();
-        
+    @Operation(summary = "导出学员列表", description = "根据查询条件导出学员列表到Excel")
+    public void export(HttpServletResponse response, @RequestBody IdsRequest idsRequest) {
+        List<ClassStudent> list;
+        // 1. 获取原始的 id 对象
+        Object id = idsRequest.getId();
+        // 2. 创建一个 Long 列表用于安全存储 ID
+        List<Long> idList = new ArrayList<>();
+        // 3. 根据 id 的类型进行不同的处理
+        if (id instanceof List) {
+            // 如果 id 是一个列表，遍历它并安全地转换为 Long
+            List<?> rawList = (List<?>) id;
+            for (Object obj : rawList) {
+                if (obj instanceof Number) {
+                    // 安全地将每个数字元素转换为 Long
+                    idList.add(((Number) obj).longValue());
+                }
+                // 如果列表里有非数字元素，这里会忽略它们
+            }
+        } else if (id instanceof Number) {
+            // 如果 id 是一个单独的数字
+            idList.add(((Number) id).longValue());
+        }
+        if(idList.size() == 1 && idList.get(0) == 0L){
+            list =classStudentService.classStudentList();
+        }else {
+            // 根据ID查询所有数据（不分页）
+            list = classStudentService.classStudentList();
+        }
         // 转换为导出对象
         List<ClassStudentExcel> excelList = list.stream()
                 .map(entity -> {
                     ClassStudentExcel excel = new ClassStudentExcel();
-                    BeanUtils.copyProperties(entity, excel);
-                    // 转换学员状态显示文本
-                    excel.setStudentStatusName(convertStudentStatus(entity.getStudentStatus()));
+                    excel.setClassCode(trainingClassService.getClassCode(entity.getTrainingClassId()));
+                    excel.setClassName(trainingClassService.getClassName(entity.getTrainingClassId()));
+                    excel.setStudentName(studentService.getStudentName(entity.getStudentId()));
+                    excel.setStudentCode(studentService.getStudentCode(entity.getStudentId()));
                     return excel;
                 })
                 .toList();
-        
         // 使用EasyExcel导出
         EasyExcelUtil.exportExcel(response, "班次学员关联管理", "班次学员关联列表", ClassStudentExcel.class, excelList);
     }
+
+
+//    /**
+//     * 导出班次学员关联列表（使用EasyExcel）
+//     */
+//    @PostMapping("/export")
+//    @Operation(summary = "导出班次学员关联列表", description = "根据查询条件导出班次学员关联列表到Excel")
+//    public void export(HttpServletResponse response, @RequestBody ClassStudentQuery query) {
+//        // 查询所有数据（不分页）
+//        var queryWrapper = classStudentService.lambdaQuery()
+//                .eq(query.getTrainingClassId() != null, ClassStudent::getTrainingClassId, query.getTrainingClassId())
+//                .eq(query.getStudentId() != null, ClassStudent::getStudentId, query.getStudentId())
+//                .ge(query.getEnrollTime() != null, ClassStudent::getEnrollTime, query.getEnrollTime())
+//                .eq(query.getStudentStatus() != null, ClassStudent::getStudentStatus, query.getStudentStatus())
+//                .orderByDesc(ClassStudent::getEnrollTime);
+//
+//        List<ClassStudent> list = queryWrapper.list();
+//
+//        // 转换为导出对象
+//        List<ClassStudentExcel> excelList = list.stream()
+//                .map(entity -> {
+//                    ClassStudentExcel excel = new ClassStudentExcel();
+//                    BeanUtils.copyProperties(entity, excel);
+//                    // 转换学员状态显示文本
+//                    excel.setStudentStatusName(convertStudentStatus(entity.getStudentStatus()));
+//                    return excel;
+//                })
+//                .toList();
+//
+//        // 使用EasyExcel导出
+//        EasyExcelUtil.exportExcel(response, "班次学员关联管理", "班次学员关联列表", ClassStudentExcel.class, excelList);
+//    }
 
     /**
      * 批量添加学员到班次
@@ -232,6 +286,8 @@ public class ClassStudentController {
             return R.fail("获取可选学员列表失败：" + e.getMessage());
         }
     }
+
+
 
     /**
      * 转换学员状态枚举

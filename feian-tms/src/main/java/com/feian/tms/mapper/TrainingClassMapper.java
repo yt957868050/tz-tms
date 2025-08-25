@@ -21,4 +21,8 @@ public interface TrainingClassMapper extends MPJBaseMapper<TrainingClass> {
     Integer getStudentCountById(Long trainingClassId);
     @Select("select * from tms_training_class where is_deleted=0")
     List<TrainingClass> trainingClassList();
+    @Select("select class_code from tms_training_class where training_class_id=#{trainingClassId}")
+    String getClassCode(Long trainingClassId);
+    @Select("select class_name from tms_training_class where training_class_id=#{trainingClassId}")
+    String getClassName(Long trainingClassId);
 }

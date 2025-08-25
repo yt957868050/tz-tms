@@ -114,6 +114,14 @@ public class ClassStudentServiceImpl extends MPJBaseServiceImpl<ClassStudentMapp
         classStudentMapper.removeByClassIds(idList);
     }
 
+    /**
+     * 获取学生关联列表
+     * @return
+     */
+    public List<ClassStudent> classStudentList() {
+        return classStudentMapper.classStudentList();
+    }
+
 
     /**
      * 转换学员状态枚举

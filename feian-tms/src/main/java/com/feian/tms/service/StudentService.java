@@ -21,4 +21,8 @@ public interface StudentService extends MPJBaseService<Student> {
     List<Student> studentListByIds(List<Long> idList);
 
     List<Student> studentList();
+
+    String getStudentName(Long StudentId);
+
+    String getStudentCode(Long StudentId);
 }

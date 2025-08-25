@@ -50,6 +50,10 @@ public class ClassStudent extends BaseEntity {
     @TableField(exist = false)
     private String studentName;
 
+    /** 学生编号 */
+    @TableField(exist = false)
+    private String studentCode;
+
     /** 班次名称 */
     @TableField(exist = false)
     private String className;

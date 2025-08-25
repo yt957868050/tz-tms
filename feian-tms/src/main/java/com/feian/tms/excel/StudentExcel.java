@@ -87,4 +87,8 @@ public class StudentExcel {
     @ExcelProperty(value = "工作经历", index = 17)
     @ColumnWidth(30)
     private String workExperience;
+
+    @ExcelProperty(value = "状态", index = 18)
+    @ColumnWidth(20)
+    private String status;
 }
