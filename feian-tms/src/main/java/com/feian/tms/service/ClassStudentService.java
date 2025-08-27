@@ -3,6 +3,7 @@ package com.feian.tms.service;
 import com.feian.tms.domain.ClassStudent;
 import com.feian.tms.dto.response.ClassStudentResponse;
 import com.github.yulichang.base.MPJBaseService;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -42,4 +43,11 @@ public interface ClassStudentService extends MPJBaseService<ClassStudent> {
     void removeByClassIds(List<Long> idList);
 
     List<ClassStudent> classStudentList();
+
+    /**
+     * 根据学生id查找班级id
+     * @param studentId
+     * @return
+     */
+    Long getClassIdByStudent(@NotNull(message = "学生ID不能为空") Long studentId);
 }

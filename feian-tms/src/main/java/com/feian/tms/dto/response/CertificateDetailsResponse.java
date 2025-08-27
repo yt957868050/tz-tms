@@ -19,57 +19,46 @@ public class CertificateDetailsResponse {
     @Schema(description = "证书ID", example = "1")
     private Long certificateId;
 
-    @Schema(description = "证书编号", example = "CERT2024001", requiredMode = Schema.RequiredMode.REQUIRED)
+    /** 证书编号 */
+    @Schema(description = "证书编号", example = "CERT001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "证书编号不能为空")
-    private String certificateNumber;
+    private String certificateCode;
 
-    @Schema(description = "证书名称", example = "Bell-206飞行员培训证书", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "证书名称不能为空")
-    private String certificateName;
-
-    @Schema(description = "学员ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "学员ID不能为空")
+    /** 学生ID */
+    @Schema(description = "学生ID", example = "81", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "学生ID不能为空")
     private Long studentId;
 
-    @Schema(description = "培训班次ID", example = "1")
-    private Long trainingClassId;
+    /** 学生编号 */
+    @Schema(description = "学生编号", example = "ST001", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "学生编号不能为空")
+    private String studentCode;
 
-    @Schema(description = "机型ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "机型ID不能为空")
-    private Long machineTypeId;
+    /** 学生姓名 */
+    @Schema(description = "学生姓名", example = "小明", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "学生姓名不能为空")
+    private String studentName;
 
-    @Schema(description = "专业ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "专业ID不能为空")
-    private Long majorId;
+    /** 学生英文姓名 */
+    @Schema(description = "学生英文姓名", example = "Xiao Ming")
+    private String engStudentName;
 
-    @Schema(description = "培训能力ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "培训能力ID不能为空")
-    private Long trainingAbilityId;
+    /** 课程名称 */
+    @Schema(description = "课程名称", example = "H425-100(ARRIEL2H)型直升机维修培训课程", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "课程名称不能为空")
+    private String trainingCourse;
 
-    @Schema(description = "证书类型", example = "1", allowableValues = {"1", "2", "3"}, requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "证书类型不能为空")
-    private String certificateType;
+    /** 课程英文姓名 */
+    @Schema(description = "课程英文姓名", example = "H425-100(ARRIEL 2H) Helicopter Maintenance Training Course")
+    private String engTrainingCourse;
 
-    @Schema(description = "颁发日期", example = "2024-06-30", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "颁发日期不能为空")
-    private Date issueDate;
+    /** 开始日期 */
+    @Schema(description = "开始日期", example = "2025-08-13", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "开始日期不能为空")
+    private Date startDate;
 
-
-    @Schema(description = "有效期结束", example = "2026-06-30", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "有效期结束不能为空")
-    private Date expiryDate;
-
-    @Schema(description = "颁发机构", example = "飞行培训中心")
-    private String issuingAuthority;
-
-    @Schema(description = "证书状态", example = "0", allowableValues = {"0", "1", "2", "3"})
-    private String status;
-
-
-
-    @Schema(description = "备注", example = "备注信息")
-    private String remark;
-
-    @Schema(description = "证书描述", example = "该证书用于证明学员完成Bell-206直升机培训。")
-    private String certificateDescription;
+    /** 结束日期 */
+    @Schema(description = "结束日期", example = "2025-08-13", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "结束日期不能为空")
+    private Date endDate;
 }

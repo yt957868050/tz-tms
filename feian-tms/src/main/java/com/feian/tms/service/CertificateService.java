@@ -17,11 +17,11 @@ import java.util.List;
 public interface CertificateService extends MPJBaseService<Certificate> {
 
 
-    /**
-     * 新增证书
-     * @param entity
-     */
-    void saveCertificate(Certificate entity);
+//    /**
+//     * 新增证书
+//     * @param entity
+//     */
+//    void saveCertificate(Certificate entity);
 
     /**
      * 证书分页查询

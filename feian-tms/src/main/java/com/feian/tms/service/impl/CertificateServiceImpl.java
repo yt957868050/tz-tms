@@ -5,7 +5,10 @@ import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.request.CertificateRequest;
 import com.feian.tms.dto.response.CertificatePageQueryResponse;
 import com.feian.tms.dto.response.CertificatePageResponse;
+import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.mapper.CertificateMapper;
+import com.feian.tms.mapper.ClassStudentMapper;
+import com.feian.tms.mapper.TrainingPlanMapper;
 import com.feian.tms.service.CertificateService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -29,14 +32,18 @@ import java.util.stream.Collectors;
 public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper, Certificate> implements CertificateService {
     @Autowired
     public CertificateMapper certificateMapper;
+    @Autowired
+    public ClassStudentMapper classStudentMapper;
+    @Autowired
+    public TrainingPlanMapper trainingPlanMapper;
 
-    /**
-     * 新增证书
-     * @param entity
-     */
-    public void saveCertificate(Certificate entity) {
-        certificateMapper.insertCertificate(entity);
-    }
+//    /**
+//     * 新增证书
+//     * @param entity
+//     */
+//    public void saveCertificate(Certificate entity) {
+//        certificateMapper.insertCertificate(entity);
+//    }
 
     /**
      * 证书分页查询
@@ -47,30 +54,31 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
         //设置分页页数等
         PageHelper.startPage(certificatePageQuery.getPageNum(), certificatePageQuery.getPageSize());
         // 查询列表
-        List<Certificate> certificates = certificateMapper.cerPageQueryList(certificatePageQuery);
+        List<Certificate> certificates = certificateMapper.cerPageQueryList(certificatePageQuery.getQuery());
         // 将查询的列表转为 分页
         PageInfo<Certificate> pageList = new PageInfo<>(certificates);
 
         //========
 
         // 组装返回结果实体
-        List<CertificatePageQueryResponse> records = pageList.getList().stream()
+        List<CertificateResponse> records = pageList.getList().stream()
                 .map(entity -> {
-                    CertificatePageQueryResponse dto = new CertificatePageQueryResponse();
+                    CertificateResponse dto = new CertificateResponse();
+                    Long classId=classStudentMapper.getClassIdByStudent(entity.getStudentId());
+                    Long planId=trainingPlanMapper.getPlanIdByClass(classId);
                     dto.setCertificateId(entity.getCertificateId());
-                    dto.setCertificateNumber(entity.getCertificateCode());
-                    dto.setStudentName(entity.getStudentName());
-                    dto.setMachineTypeName(entity.getMachineTypeName());
-                    dto.setMajorName(entity.getMajorName());
-                    dto.setCertificateType(entity.getCertificateType());
-                    dto.setIssueDate(entity.getIssueDate());
-                    dto.setExpiryDate(entity.getValidUntil());
-                    dto.setStatus(entity.getCertificateStatus());
-                    dto.setIssuingAuthority(entity.getIssueOrganization());
-                    dto.setRemark(entity.getRemark());
+                    dto.setCertificateCode(entity.getCertificateCode());
                     dto.setStudentId(entity.getStudentId());
-                    dto.setMachineTypeId(entity.getMachineTypeId());
-                    dto.setMajorId(entity.getMajorId());
+                    dto.setStudentCode(entity.getStudentCode());
+                    dto.setStudentName(entity.getStudentName());
+                    dto.setEngStudentName(entity.getEngStudentName());
+                    dto.setTrainingCourse(entity.getTrainingCourse());
+                    dto.setEngTrainingCourse(entity.getEngTrainingCourse());
+                    dto.setStartDate(entity.getStartDate());
+                    dto.setEndDate(entity.getEndDate());
+                    dto.setTotalHours(trainingPlanMapper.getTotalHoursById(planId));
+                    dto.setTheoryHours(trainingPlanMapper.getTheoryHoursById(planId));
+                    dto.setPracticeHours(trainingPlanMapper.getPracticeHoursById(planId));
                     return dto;
                 })
                 .collect(Collectors.toList());

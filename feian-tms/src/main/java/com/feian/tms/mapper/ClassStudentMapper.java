@@ -25,4 +25,7 @@ public interface ClassStudentMapper extends MPJBaseMapper<ClassStudent> {
 
     @Select("select * from tms_class_student")
     List<ClassStudent> classStudentList();
+
+    @Select("select training_class_id from tms_class_student where student_id=#{studentId}")
+    Long getClassIdByStudent(Long studentId);
 }

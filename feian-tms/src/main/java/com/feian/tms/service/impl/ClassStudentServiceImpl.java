@@ -124,6 +124,16 @@ public class ClassStudentServiceImpl extends MPJBaseServiceImpl<ClassStudentMapp
 
 
     /**
+     * 根据学生id查找班级id
+     * @param studentId
+     * @return
+     */
+    public Long getClassIdByStudent(Long studentId) {
+        return classStudentMapper.getClassIdByStudent(studentId);
+    }
+
+
+    /**
      * 转换学员状态枚举
      */
     private String convertStudentStatus(String studentStatus) {

@@ -16,4 +16,17 @@ public interface TrainingPlanService extends MPJBaseService<TrainingPlan> {
     boolean deleteBatch(List<Long> idList);
 
     String getClassNameById(Long trainingClassId);
+
+    /**
+     * 根据班级Id查询计划id
+     * @param classId
+     * @return
+     */
+    Long getPlanIdByClass(Long classId);
+
+    Integer getTotalHoursById(Long planId);
+
+    Integer getTheoryHoursById(Long planId);
+
+    Integer getPracticeHoursById(Long planId);
 }

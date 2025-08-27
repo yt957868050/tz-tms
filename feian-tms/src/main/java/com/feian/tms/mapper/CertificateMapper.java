@@ -20,14 +20,14 @@ import java.util.List;
  */
 @Mapper
 public interface CertificateMapper extends MPJBaseMapper<Certificate> {
-    /**
-     * 新增证书
-     * @param entity
-     */
-    @Insert("insert into tms_certificate(certificate_description,certificate_code,certificate_type,valid_until,issue_date,issue_organization,machine_type_id,major_id,remark,certificate_status,student_id,training_class_id,training_ability_id,create_time,update_time,certificate_name,student_name,machine_type_name,major_name)"+
-            " values" +
-            " (#{certificateDescription},#{certificateCode},#{certificateType},#{validUntil},#{issueDate},#{issueOrganization},#{machineTypeId},#{majorId},#{remark},#{certificateStatus},#{studentId},#{trainingClassId},#{trainingAbilityId},#{createTime},#{updateTime},#{certificateName},#{studentName},#{machineTypeName},#{majorName})")
-    void insertCertificate(Certificate entity);
+//    /**
+//     * 新增证书
+//     * @param entity
+//     */
+//    @Insert("insert into tms_certificate(certificate_code, student_id, student_code, student_name, e_student_name, training_course, e_training_course, start_date, end_date, total_hours, theory_hours, practice_hours)"+
+//            " values" +
+//            " (#{certificateCode},#{studentId},#{studentCode},#{studentName},#{eStudentName},#{trainingCourse},#{eTrainingCourse},#{},#{remark},#{certificateStatus},#{studentId},#{trainingClassId},#{trainingAbilityId},#{createTime},#{updateTime},#{certificateName},#{studentName},#{machineTypeName},#{majorName})")
+//    void insertCertificate(Certificate entity);
 
 
     /**
@@ -36,7 +36,7 @@ public interface CertificateMapper extends MPJBaseMapper<Certificate> {
      * @return
      */
 
-    List<Certificate> cerPageQueryList(CertificatePageQuery certificatePageQuery);
+    List<Certificate> cerPageQueryList(CertificatePageQuery.Query certificatePageQuery);
 
     /**
      * 证书批量删除

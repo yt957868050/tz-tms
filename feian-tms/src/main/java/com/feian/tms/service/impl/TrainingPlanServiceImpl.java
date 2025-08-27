@@ -31,4 +31,28 @@ public class TrainingPlanServiceImpl extends MPJBaseServiceImpl<TrainingPlanMapp
     public String getClassNameById(Long trainingClassId) {
         return trainingPlanMapper.getClassNameById(trainingClassId);
     }
+
+    /**
+     * 根据班级Id查询计划Id
+     * @param classId
+     * @return
+     */
+    public Long getPlanIdByClass(Long classId) {
+        return trainingPlanMapper.getPlanIdByClass(classId);
+    }
+
+    @Override
+    public Integer getTotalHoursById(Long planId) {
+        return trainingPlanMapper.getTotalHoursById(planId);
+    }
+
+    @Override
+    public Integer getTheoryHoursById(Long planId) {
+        return trainingPlanMapper.getTheoryHoursById(planId);
+    }
+
+    @Override
+    public Integer getPracticeHoursById(Long planId) {
+        return trainingPlanMapper.getPracticeHoursById(planId);
+    }
 }
