@@ -3,6 +3,8 @@ package com.feian.tms.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.*;
+import com.feian.tms.dto.certificateDto.CertificateEvidence;
+import com.feian.tms.dto.certificateDto.CertificateOfCompliance;
 import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
 import com.feian.tms.dto.request.IdRequest;
@@ -25,8 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 证书管理Controller
@@ -51,6 +59,8 @@ public class CertificateController {
     private TrainingPlanService trainingPlanService;
     @Autowired
     private ClassStudentService classStudentService;
+    @Autowired
+    private TrainingRecordService trainingRecordService;
 
     /**
      * 查询证书管理列表
@@ -129,6 +139,7 @@ public class CertificateController {
         entity.setTotalHours(trainingPlanService.getTotalHoursById(planId));
         entity.setTheoryHours(trainingPlanService.getTheoryHoursById(planId));
         entity.setPracticeHours(trainingPlanService.getPracticeHoursById(planId));
+        entity.setTotalScore(trainingRecordService.getTotalScoreByStuId(request.getStudentId()));
         certificateService.save(entity);
         return R.success();
 //        Certificate entity =Certificate.builder()
@@ -308,4 +319,275 @@ public class CertificateController {
             default -> "";
         };
     }
+
+    @PostMapping("/exportWord")
+    @Operation(summary = "导出培训合格证Word")
+    public void exportWord(HttpServletResponse response, @RequestBody CertificateRequest request) {
+        CertificateOfCompliance data = new CertificateOfCompliance();
+        BeanUtils.copyProperties(request,data);
+        //获取时间年月日
+        LocalDateTime localStartTime = LocalDateTime.ofInstant(request.getStartDate().toInstant(), ZoneId.systemDefault());
+        LocalDateTime localEndTime = LocalDateTime.ofInstant(request.getEndDate().toInstant(), ZoneId.systemDefault());
+        String startYear = String.valueOf(localStartTime.getYear());
+        String startMonth = String.format("%02d", localStartTime.getMonthValue());
+        String startDay = String.format("%02d", localStartTime.getDayOfMonth());
+        String engStartDate = startYear + "." + startMonth + "." + startDay;
+        String endYear = String.valueOf(localEndTime.getYear());
+        String endMonth = String.format("%02d", localEndTime.getMonthValue());
+        String endDay = String.format("%02d", localEndTime.getDayOfMonth());
+        String engEndDate = endYear + "." + endMonth + "." + endDay;
+
+        //获取时长
+        Long classId=classStudentService.getClassIdByStudent(request.getStudentId());
+        Long planId=trainingPlanService.getPlanIdByClass(classId);
+        String engTotalHours = trainingPlanService.getTotalHoursById(planId) + "h";
+        String engTheoryHours = trainingPlanService.getTheoryHoursById(planId) + "h";
+        String engPracticeHours = trainingPlanService.getPracticeHoursById(planId) + "h";
+
+        //对dto进行赋值
+        data.setIdCard(studentService.getIdCardById(request.getStudentId()));
+        data.setStartYear(startYear);
+        data.setStartMonth(startMonth);
+        data.setStartDay(startDay);
+        data.setEngStartDate(engStartDate);
+        data.setEndYear(endYear);
+        data.setEndMonth(endMonth);
+        data.setEndDay(endDay);
+        data.setEngEndDate(engEndDate);
+        data.setEngTotalHours(engTotalHours);
+        data.setEngTheoryHours(engTheoryHours);
+        data.setEngPracticeHours(engPracticeHours);
+
+        //转换成Map
+        Map<String, String> vars = new HashMap<>();
+        vars.put("certificateCode", data.getCertificateCode());
+        vars.put("studentName", nz(data.getStudentName()));
+        vars.put("engStudentName", nz(data.getEngStudentName()));
+        vars.put("idCard",nz(data.getIdCard()));
+        vars.put("trainingCourse", nz(data.getTrainingCourse()));
+        vars.put("engTrainingCourse", nz(data.getEngTrainingCourse()));
+        vars.put("startYear",nz(data.getStartYear()));
+        vars.put("startMonth",nz(data.getStartMonth()));
+        vars.put("startDay",nz(data.getStartDay()));
+        vars.put("engStartDate", nz(data.getEngStartDate()));
+        vars.put("endYear",nz(data.getEndYear()));
+        vars.put("endMonth",nz(data.getEndMonth()));
+        vars.put("endDay",nz(data.getEndDay()));
+        vars.put("engEndDate", nz(data.getEngEndDate()));
+        vars.put("engTotalHours", nz(data.getEngTotalHours()));
+        vars.put("engTheoryHours", nz(data.getEngTheoryHours()));
+        vars.put("engPracticeHours", nz(data.getEngPracticeHours()));
+
+        String templatePath = "CertificateTemplate.docx"; //word模板路径
+        try (InputStream in = new org.springframework.core.io.ClassPathResource(templatePath).getInputStream();
+             org.apache.poi.xwpf.usermodel.XWPFDocument doc = new org.apache.poi.xwpf.usermodel.XWPFDocument(in)) {
+
+            replacePlaceholdersDocx(doc, vars);
+
+            String fileName = "培训合格证-" + java.net.URLEncoder.encode(data.getStudentName(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + ".docx";
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + fileName);
+            try (OutputStream os = response.getOutputStream()) {
+                doc.write(os);
+                os.flush();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("导出Word失败: " + e.getMessage(), e);
+        }
+    }
+
+
+    @PostMapping("/exportEvidence")
+    @Operation(summary = "导出培训证明Word")
+    public void exportEvidence(HttpServletResponse response, @RequestBody CertificateRequest request) {
+        CertificateEvidence data = new CertificateEvidence();
+        BeanUtils.copyProperties(request,data);
+        //获取时间年月日
+        LocalDateTime localStartTime = LocalDateTime.ofInstant(request.getStartDate().toInstant(), ZoneId.systemDefault());
+        LocalDateTime localEndTime = LocalDateTime.ofInstant(request.getEndDate().toInstant(), ZoneId.systemDefault());
+        String startYear = String.valueOf(localStartTime.getYear());
+        String startMonth = String.format("%02d", localStartTime.getMonthValue());
+        String startDay = String.format("%02d", localStartTime.getDayOfMonth());
+        String engStartDate = startYear + "." + startMonth + "." + startDay;
+        String endYear = String.valueOf(localEndTime.getYear());
+        String endMonth = String.format("%02d", localEndTime.getMonthValue());
+        String endDay = String.format("%02d", localEndTime.getDayOfMonth());
+        String engEndDate = endYear + "." + endMonth + "." + endDay;
+
+        //获取时长
+        Long classId=classStudentService.getClassIdByStudent(request.getStudentId());
+        Long planId=trainingPlanService.getPlanIdByClass(classId);
+        String engTotalHours = trainingPlanService.getTotalHoursById(planId) + "h";
+        String engTheoryHours = trainingPlanService.getTheoryHoursById(planId) + "h";
+        String engPracticeHours = trainingPlanService.getPracticeHoursById(planId) + "h";
+
+        //对dto进行赋值
+        data.setIdCard(studentService.getIdCardById(request.getStudentId()));
+        data.setStartYear(startYear);
+        data.setStartMonth(startMonth);
+        data.setStartDay(startDay);
+        data.setEngStartDate(engStartDate);
+        data.setEndYear(endYear);
+        data.setEndMonth(endMonth);
+        data.setEndDay(endDay);
+        data.setEngEndDate(engEndDate);
+        data.setEngTotalHours(engTotalHours);
+        data.setEngTheoryHours(engTheoryHours);
+        data.setEngPracticeHours(engPracticeHours);
+
+        //转换成Map
+        Map<String, String> vars = new HashMap<>();
+        vars.put("studentName", nz(data.getStudentName()));
+        vars.put("engStudentName", nz(data.getEngStudentName()));
+        vars.put("idCard",nz(data.getIdCard()));
+        vars.put("trainingCourse", nz(data.getTrainingCourse()));
+        vars.put("engTrainingCourse", nz(data.getEngTrainingCourse()));
+        vars.put("startYear",nz(data.getStartYear()));
+        vars.put("startMonth",nz(data.getStartMonth()));
+        vars.put("startDay",nz(data.getStartDay()));
+        vars.put("engStartDate", nz(data.getEngStartDate()));
+        vars.put("endYear",nz(data.getEndYear()));
+        vars.put("endMonth",nz(data.getEndMonth()));
+        vars.put("endDay",nz(data.getEndDay()));
+        vars.put("engEndDate", nz(data.getEngEndDate()));
+        vars.put("engTotalHours", nz(data.getEngTotalHours()));
+        vars.put("engTheoryHours", nz(data.getEngTheoryHours()));
+        vars.put("engPracticeHours", nz(data.getEngPracticeHours()));
+
+        String templatePath = "EvidenceTemplate.docx"; //word模板路径
+        try (InputStream in = new org.springframework.core.io.ClassPathResource(templatePath).getInputStream();
+             org.apache.poi.xwpf.usermodel.XWPFDocument doc = new org.apache.poi.xwpf.usermodel.XWPFDocument(in)) {
+
+            replacePlaceholdersDocx(doc, vars);
+
+            String fileName = "培训证明-" + java.net.URLEncoder.encode(data.getStudentName(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20") + ".docx";
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + fileName);
+            try (OutputStream os = response.getOutputStream()) {
+                doc.write(os);
+                os.flush();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("导出Word失败: " + e.getMessage(), e);
+        }
+    }
+
+    private String nz(String v) { return v == null ? "" : v; }
+
+    private void replacePlaceholdersDocx(org.apache.poi.xwpf.usermodel.XWPFDocument doc, Map<String, String> vars) {
+        for (var p : doc.getParagraphs()) {
+            replaceInRuns(p.getRuns(), vars);
+        }
+        for (var table : doc.getTables()) {
+            for (var row : table.getRows()) {
+                for (var cell : row.getTableCells()) {
+                    for (var p : cell.getParagraphs()) {
+                        replaceInRuns(p.getRuns(), vars);
+                    }
+                }
+            }
+        }
+    }
+
+    private void replaceInRuns(List<org.apache.poi.xwpf.usermodel.XWPFRun> runs, Map<String, String> vars) {
+        if (runs == null || runs.isEmpty()) return;
+
+        // 预取每个 run 的文本
+        List<String> texts = new ArrayList<>(runs.size());
+        for (var r : runs) texts.add(r.toString());
+
+        // 扫描跨 Run 的 {{key}} 片段
+        int i = 0;
+        while (i < texts.size()) {
+            // 寻找 "{{"
+            int startRun = -1, startIdx = -1;
+            for (; i < texts.size(); i++) {
+                String t = texts.get(i);
+                if (t == null) t = "";
+                int idx = t.indexOf("{{");
+                if (idx >= 0) { startRun = i; startIdx = idx; break; }
+            }
+            if (startRun == -1) break;
+
+            // 从 startRun 开始寻找 "}}"
+            int endRun = -1, endIdx = -1;
+            StringBuilder placeholder = new StringBuilder();
+            // 先拼接 startRun 这一段 "{{" 后面的部分
+            String ts = texts.get(startRun);
+            placeholder.append(ts.substring(startIdx));
+            int j = startRun;
+            for (; j < texts.size(); j++) {
+                String t = texts.get(j);
+                if (t == null) t = "";
+                int searchFrom = (j == startRun) ? startIdx + 2 : 0;
+                int end = t.indexOf("}}", searchFrom);
+                if (j != startRun) placeholder.append(t);
+                if (end >= 0) {
+                    endRun = j; endIdx = end + 1; // 第二个 } 的位置
+                    break;
+                }
+            }
+            if (endRun == -1) {
+                // 没有匹配到 "}}": 终止（避免误替换）
+                break;
+            }
+
+            // 解析 key：去掉外层 {{ }}
+            String raw = placeholder.toString();
+            int open = raw.indexOf("{{");
+            int close = raw.indexOf("}}");
+            String key = (open >= 0 && close > open) ? raw.substring(open + 2, close).trim() : null;
+
+            String replacement = (key != null && vars.containsKey(key)) ? (vars.get(key) == null ? "" : vars.get(key)) : null;
+            if (replacement != null) {
+                // 执行替换：只在 startRun 写入替换后文本，其它涉及的 run 清空相关内容
+                // 1) startRun：保留 "{{" 前面的前缀 + replacement + (若 endRun 与 startRun 同一 run，保留 "}}" 之后的后缀)
+                String startText = texts.get(startRun);
+                String prefix = startText.substring(0, startIdx);
+                String suffixStartRun = "";
+                if (startRun == endRun) {
+                    String endText = texts.get(endRun);
+                    suffixStartRun = endText.substring(endIdx + 1); // endIdx 指向第二个 '}', 再 +1 取之后内容
+                }
+                String newStart = prefix + replacement + suffixStartRun;
+                runs.get(startRun).setText(newStart, 0);
+                texts.set(startRun, newStart);
+
+                // 2) 中间的 run（startRun+1 .. endRun-1）清空
+                for (int k = startRun + 1; k < endRun; k++) {
+                    runs.get(k).setText("", 0);
+                    texts.set(k, "");
+                }
+
+                // 3) endRun：仅保留 "}}" 后的后缀（如果 endRun != startRun）
+                if (endRun != startRun) {
+                    String endText = texts.get(endRun);
+                    String suffix = (endIdx + 1 < endText.length()) ? endText.substring(endIdx + 1) : "";
+                    runs.get(endRun).setText(suffix, 0);
+                    texts.set(endRun, suffix);
+                }
+
+                // 移动 i 到 endRun 之后继续
+                i = endRun + 1;
+            } else {
+                // 未命中变量表：跳过这个 "{{...}}"，继续向后
+                i = endRun + 1;
+            }
+        }
+
+        // 最后，对每个 run 内的“非跨 run”占位符（完整在单个 run 内）做一次直替
+        for (int r = 0; r < runs.size(); r++) {
+            String t = runs.get(r).toString();
+            if (t == null || t.isEmpty()) continue;
+            String replaced = t;
+            for (var e : vars.entrySet()) {
+                replaced = replaced.replace("{{" + e.getKey() + "}}", e.getValue() == null ? "" : e.getValue());
+            }
+            if (!replaced.equals(t)) runs.get(r).setText(replaced, 0);
+        }
+    }
+
+
 }

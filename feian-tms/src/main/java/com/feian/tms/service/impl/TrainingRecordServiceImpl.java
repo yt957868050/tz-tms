@@ -7,6 +7,7 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -24,5 +25,14 @@ public class TrainingRecordServiceImpl extends MPJBaseServiceImpl<TrainingRecord
     @Override
     public List<TrainingRecord> trainingRecordList() {
         return trainingRecordMapper.trainingRecordList();
+    }
+
+    /**
+     * 根据学生ID获取总成绩
+     * @param studentId
+     * @return
+     */
+    public BigDecimal getTotalScoreByStuId(Long studentId) {
+        return trainingRecordMapper.getTotalScoreByStuId(studentId);
     }
 }

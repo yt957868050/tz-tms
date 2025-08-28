@@ -2,6 +2,7 @@ package com.feian.tms.service;
 
 import com.feian.tms.domain.Student;
 import com.github.yulichang.base.MPJBaseService;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -25,4 +26,6 @@ public interface StudentService extends MPJBaseService<Student> {
     String getStudentName(Long StudentId);
 
     String getStudentCode(Long StudentId);
+
+    String getIdCardById(@NotNull(message = "学生ID不能为空") Long studentId);
 }

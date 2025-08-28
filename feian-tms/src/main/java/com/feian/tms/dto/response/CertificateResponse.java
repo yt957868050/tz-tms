@@ -3,6 +3,7 @@ package com.feian.tms.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -53,4 +54,6 @@ public class CertificateResponse {
     @Schema(description = "实作课时", example = "40")
     private Integer practiceHours;
 
+    @Schema(description = "综合评分")
+    private BigDecimal totalScore;
 }

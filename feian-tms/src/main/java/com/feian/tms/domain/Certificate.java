@@ -9,6 +9,7 @@ import com.feian.common.annotation.Excel;
 import com.feian.tms.common.BaseEntity;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -76,6 +77,9 @@ public class Certificate extends BaseEntity {
     /** 实作课时 */
     @Excel(name = "实作课时")
     private Integer practiceHours;
+
+    @Excel(name = "综合评分")
+    private BigDecimal totalScore;
 
 
 }

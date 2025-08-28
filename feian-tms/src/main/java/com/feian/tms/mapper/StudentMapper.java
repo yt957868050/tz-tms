@@ -30,4 +30,6 @@ public interface StudentMapper extends MPJBaseMapper<Student> {
     String getStudentName(Long StudentId);
     @Select("select student_code from tms_student where student_id=#{StudentId}")
     String getStudentCode(Long StudentId);
+   @Select("select id_card from tms_student where student_id=#{studentId}")
+    String getIdCardById(Long studentId);
 }

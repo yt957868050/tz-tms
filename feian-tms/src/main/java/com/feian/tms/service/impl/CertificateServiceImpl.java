@@ -9,6 +9,7 @@ import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.mapper.CertificateMapper;
 import com.feian.tms.mapper.ClassStudentMapper;
 import com.feian.tms.mapper.TrainingPlanMapper;
+import com.feian.tms.mapper.TrainingRecordMapper;
 import com.feian.tms.service.CertificateService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -36,6 +37,8 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
     public ClassStudentMapper classStudentMapper;
     @Autowired
     public TrainingPlanMapper trainingPlanMapper;
+    @Autowired
+    private TrainingRecordMapper trainingRecordMapper;
 
 //    /**
 //     * 新增证书
@@ -79,6 +82,7 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
                     dto.setTotalHours(trainingPlanMapper.getTotalHoursById(planId));
                     dto.setTheoryHours(trainingPlanMapper.getTheoryHoursById(planId));
                     dto.setPracticeHours(trainingPlanMapper.getPracticeHoursById(planId));
+                    dto.setTotalScore(trainingRecordMapper.getTotalScoreByStuId(entity.getStudentId()));
                     return dto;
                 })
                 .collect(Collectors.toList());
