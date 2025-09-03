@@ -3,6 +3,7 @@ package com.feian.tms.controller;
 import com.feian.common.utils.PageUtils;
 import com.feian.tms.domain.TrainingClass;
 import com.feian.tms.dto.request.IdsRequest;
+import com.feian.tms.service.*;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingRecord;
@@ -11,11 +12,6 @@ import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.dto.request.TrainingRecordRequest;
 import com.feian.tms.dto.response.TrainingRecordResponse;
 import com.feian.tms.excel.TrainingRecordExcel;
-import com.feian.tms.service.TrainingRecordService;
-import com.feian.tms.service.StudentService;
-import com.feian.tms.service.TrainingClassService;
-import com.feian.tms.service.CoursewareService;
-import com.feian.tms.service.InstructorService;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +42,11 @@ public class TrainingRecordController {
     private final TrainingClassService trainingClassService;
     private final CoursewareService coursewareService;
     private final InstructorService instructorService;
+    private final MachineTypeService machineTypeService;
+    private final MajorService majorService;
+    private final TrainingAbilityService trainingAbilityService;
+    private final ClassStudentService classStudentService;
+    private final TrainingPlanService trainingPlanService;
 
     /**
      * 查询培训记录列表
@@ -64,13 +65,10 @@ public class TrainingRecordController {
         var queryWrapper = trainingRecordService.lambdaQuery()
                 .eq(query.getStudentId() != null, TrainingRecord::getStudentId, query.getStudentId())
                 .eq(query.getTrainingClassId() != null, TrainingRecord::getTrainingClassId, query.getTrainingClassId())
-                .eq(query.getCoursewareId() != null, TrainingRecord::getCoursewareId, query.getCoursewareId())
-                .eq(query.getInstructorId() != null, TrainingRecord::getInstructorId, query.getInstructorId())
-                .ge(query.getTrainingDate() != null, TrainingRecord::getTrainingDate, query.getTrainingDate())
-                .eq(query.getTrainingMethod() != null, TrainingRecord::getTrainingMethod, query.getTrainingMethod())
-                .eq(query.getAttendanceStatus() != null, TrainingRecord::getAttendanceStatus, query.getAttendanceStatus())
-                .eq(query.getTrainingEffect() != null, TrainingRecord::getTrainingEffect, query.getTrainingEffect())
-                .orderByDesc(TrainingRecord::getTrainingDate);
+                .eq(query.getMachineTypeId() != null, TrainingRecord::getMachineTypeId, query.getMachineTypeId())
+                .eq(query.getMajorId() != null, TrainingRecord::getMajorId, query.getMajorId())
+                .ge(query.getTrainingAbilityId() != null, TrainingRecord::getTrainingAbilityId, query.getTrainingAbilityId())
+                .orderByDesc(TrainingRecord::getTrainingRecordId);
         
         List<TrainingRecord> list = queryWrapper.list();
         PageInfo<TrainingRecord> pageInfo = new PageInfo<>(list);
@@ -84,6 +82,7 @@ public class TrainingRecordController {
                     if (entity.getStudentId() != null) {
                         var student = studentService.getById(entity.getStudentId());
                         if (student != null) {
+                            response.setStudentId(entity.getStudentId());
                             response.setStudentName(student.getStudentName());
                             response.setStudentCode(student.getStudentCode());
                         }
@@ -96,19 +95,30 @@ public class TrainingRecordController {
                         }
                     }
                     
-                    if (entity.getCoursewareId() != null) {
-                        var courseware = coursewareService.getById(entity.getCoursewareId());
-                        if (courseware != null) {
-                            response.setCourseName(courseware.getCourseName());
+                    if (entity.getMachineTypeId() != null) {
+                        var machineType = machineTypeService.getById(entity.getMachineTypeId());
+                        if (machineType != null) {
+                            response.setMachineTypeName(machineType.getMachineTypeName());
                         }
                     }
                     
-                    if (entity.getInstructorId() != null) {
-                        var instructor = instructorService.getById(entity.getInstructorId());
-                        if (instructor != null) {
-                            response.setInstructorName(instructor.getInstructorName());
+                    if (entity.getMajorId() != null) {
+                        var major = majorService.getById(entity.getMajorId());
+                        if (major != null) {
+                            response.setMajorName(major.getMajorName());
                         }
                     }
+                    if (entity.getTrainingAbilityId() != null) {
+                        var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+                        if (trainingAbility != null) {
+                            response.setAbilityName(trainingAbility.getAbilityName());
+                        }
+                    }
+                    Long classId=classStudentService.getClassIdByStudent(entity.getStudentId());
+                    Long planId=trainingPlanService.getPlanIdByClass(classId);
+                    response.setTotalHour(trainingPlanService.getTotalHoursById(planId));
+                    response.setTheoryHour(trainingPlanService.getTheoryHoursById(planId));
+                    response.setPracticeHour(trainingPlanService.getPracticeHoursById(planId));
                     
                     return response;
                 })
@@ -149,20 +159,31 @@ public class TrainingRecordController {
                 response.setClassName(trainingClass.getClassName());
             }
         }
-        
-        if (entity.getCoursewareId() != null) {
-            var courseware = coursewareService.getById(entity.getCoursewareId());
-            if (courseware != null) {
-                response.setCourseName(courseware.getCourseName());
+
+        if (entity.getMachineTypeId() != null) {
+            var machineType = machineTypeService.getById(entity.getMachineTypeId());
+            if (machineType != null) {
+                response.setMachineTypeName(machineType.getMachineTypeName());
             }
         }
-        
-        if (entity.getInstructorId() != null) {
-            var instructor = instructorService.getById(entity.getInstructorId());
-            if (instructor != null) {
-                response.setInstructorName(instructor.getInstructorName());
+
+        if (entity.getMajorId() != null) {
+            var major = majorService.getById(entity.getMajorId());
+            if (major != null) {
+                response.setMajorName(major.getMajorName());
             }
         }
+        if (entity.getTrainingAbilityId() != null) {
+            var trainingAbility = trainingAbilityService.getById(entity.getTrainingAbilityId());
+            if (trainingAbility != null) {
+                response.setAbilityName(trainingAbility.getAbilityName());
+            }
+        }
+        Long classId=classStudentService.getClassIdByStudent(entity.getStudentId());
+        Long planId=trainingPlanService.getPlanIdByClass(classId);
+        response.setTotalHour(trainingPlanService.getTotalHoursById(planId));
+        response.setTheoryHour(trainingPlanService.getTheoryHoursById(planId));
+        response.setPracticeHour(trainingPlanService.getPracticeHoursById(planId));
         
         return R.success(response);
     }
@@ -271,9 +292,9 @@ public class TrainingRecordController {
                     TrainingRecordExcel excel = new TrainingRecordExcel();
                     BeanUtils.copyProperties(entity, excel);
                     // 转换枚举值为中文显示
-                    excel.setTrainingMethodName(convertTrainingMethod(entity.getTrainingMethod()));
-                    excel.setAttendanceStatusName(convertAttendanceStatus(entity.getAttendanceStatus()));
-                    excel.setTrainingEffectName(convertTrainingEffect(entity.getTrainingEffect()));
+//                    excel.setTrainingMethodName(convertTrainingMethod(entity.getTrainingMethod()));
+//                    excel.setAttendanceStatusName(convertAttendanceStatus(entity.getAttendanceStatus()));
+//                    excel.setTrainingEffectName(convertTrainingEffect(entity.getTrainingEffect()));
                     return excel;
                 })
                 .toList();

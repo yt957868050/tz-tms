@@ -82,7 +82,8 @@ public class CertificateServiceImpl extends MPJBaseServiceImpl<CertificateMapper
                     dto.setTotalHours(trainingPlanMapper.getTotalHoursById(planId));
                     dto.setTheoryHours(trainingPlanMapper.getTheoryHoursById(planId));
                     dto.setPracticeHours(trainingPlanMapper.getPracticeHoursById(planId));
-                    dto.setTotalScore(trainingRecordMapper.getTotalScoreByStuId(entity.getStudentId()));
+                    dto.setTheoryScore(trainingRecordMapper.getTheoryScoreByStuId(entity.getStudentId()));
+                    dto.setPracticeScore(trainingRecordMapper.getPracticeScoreByStuId(entity.getStudentId()));
                     return dto;
                 })
                 .collect(Collectors.toList());

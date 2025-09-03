@@ -78,8 +78,15 @@ public class Certificate extends BaseEntity {
     @Excel(name = "实作课时")
     private Integer practiceHours;
 
-    @Excel(name = "综合评分")
-    private BigDecimal totalScore;
+    /** 理论成绩 */
+    @Excel(name = "理论成绩")
+    @TableField(exist = false)
+    private Integer theoryScore;
+
+    /** 实作成绩（1合格 0不合格） */
+    @Excel(name = "实作成绩")
+    @TableField(exist = false)
+    private Integer practiceScore;
 
 
 }

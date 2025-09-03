@@ -28,11 +28,22 @@ public class TrainingRecordServiceImpl extends MPJBaseServiceImpl<TrainingRecord
     }
 
     /**
-     * 根据学生ID获取总成绩
+     * 根据学员ID获取理论成绩
      * @param studentId
      * @return
      */
-    public BigDecimal getTotalScoreByStuId(Long studentId) {
-        return trainingRecordMapper.getTotalScoreByStuId(studentId);
+    public Integer getTheoryScoreByStuId(Long studentId) {
+        return trainingRecordMapper.getTheoryScoreByStuId(studentId);
     }
+
+    /**
+     * 根据学员ID获取实作成绩
+     * @param studentId
+     * @return
+     */
+    public Integer getPracticeScoreByStuId(Long studentId) {
+        return trainingRecordMapper.getPracticeScoreByStuId(studentId);
+    }
+
+
 }

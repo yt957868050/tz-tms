@@ -24,115 +24,63 @@ public class TrainingRecordResponse {
     @Schema(description = "学员ID")
     private Long studentId;
 
-    /** 培训班次ID */
-    @Schema(description = "培训班次ID")
-    private Long trainingClassId;
-
-    /** 课件ID */
-    @Schema(description = "课件ID")
-    private Long coursewareId;
-
-    /** 教员ID */
-    @Schema(description = "教员ID")
-    private Long instructorId;
-
-    /** 培训日期 */
-    @Schema(description = "培训日期")
-    private Date trainingDate;
-
-    /** 培训类型（1理论 2实践） */
-    @Schema(description = "培训类型")
-    private String trainingMethod;
-
-    /** 培训类型名称 */
-    @Schema(description = "培训类型名称")
-    private String trainingMethodName;
-
-    /** 培训时长(小时) */
-    @Schema(description = "培训时长(小时)")
-    private BigDecimal trainingHours;
-
-    /** 出勤状态（1正常 2迟到 3早退 4请假 5缺勤） */
-    @Schema(description = "出勤状态")
-    private String attendanceStatus;
-
-    /** 出勤状态名称 */
-    @Schema(description = "出勤状态名称")
-    private String attendanceStatusName;
-
-    /** 课堂表现评分 */
-    @Schema(description = "课堂表现评分")
-    private BigDecimal performanceScore;
-
-    /** 作业成绩 */
-    @Schema(description = "作业成绩")
-    private BigDecimal homeworkScore;
-
-    /** 考试成绩 */
-    @Schema(description = "考试成绩")
-    private BigDecimal examScore;
-
-    /** 综合评分 */
-    @Schema(description = "综合评分")
-    private BigDecimal totalScore;
-
-    /** 培训内容 */
-    @Schema(description = "培训内容")
-    private String trainingContent;
-
-    /** 学习心得 */
-    @Schema(description = "学习心得")
-    private String learningNotes;
-
-    /** 教员评价 */
-    @Schema(description = "教员评价")
-    private String instructorComment;
-
-    /** 培训效果（1优秀 2良好 3一般 4较差） */
-    @Schema(description = "培训效果")
-    private String trainingEffect;
-
-    /** 培训效果名称 */
-    @Schema(description = "培训效果名称")
-    private String trainingEffectName;
-
     /** 学员姓名 */
     @Schema(description = "学员姓名")
     private String studentName;
 
     /** 学员编号 */
-    @Schema(description = "学员编号")
+    @Schema(description = "学员工号", example = "S001")
     private String studentCode;
+
+    /** 机型ID */
+    @Schema(description = "机型ID")
+    private Long machineTypeId;
+
+    /** 机型名称 */
+    @Schema(description = "机型名称")
+    private String machineTypeName;
+
+    /** 专业ID */
+    @Schema(description = "专业ID")
+    private Long majorId;
+
+    /** 专业名称 */
+    @Schema(description = "专业名称")
+    private String majorName;
+
+    /** 培训能力ID */
+    @Schema(description = "培训能力ID")
+    private Long trainingAbilityId;
+
+    /** 培训能力名称 */
+    @Schema(description = "培训能力名称")
+    private String abilityName;
+
+    /** 培训班次ID */
+    @Schema(description = "培训班次ID")
+    private Long trainingClassId;
 
     /** 班次名称 */
     @Schema(description = "班次名称")
     private String className;
 
-    /** 课程名称 */
-    @Schema(description = "课程名称")
-    private String courseName;
+    /** 理论培训时长 */
+    @Schema(description = "理论培训时长")
+    private Integer theoryHour;
 
-    /** 教员姓名 */
-    @Schema(description = "教员姓名")
-    private String instructorName;
+    /** 实作培训时长 */
+    @Schema(description = "实作培训时长")
+    private Integer practiceHour;
 
-    /** 创建者 */
-    @Schema(description = "创建者")
-    private String createBy;
+    /** 培训总时长 */
+    @Schema(description = "培训总时长")
+    private Integer totalHour;
 
-    /** 创建时间 */
-    @Schema(description = "创建时间")
-    private Date createTime;
+    /** 理论成绩 */
+    @Schema(description = "理论成绩")
+    private Integer theoryScore;
 
-    /** 更新者 */
-    @Schema(description = "更新者")
-    private String updateBy;
-
-    /** 更新时间 */
-    @Schema(description = "更新时间")
-    private Date updateTime;
-
-    /** 备注 */
-    @Schema(description = "备注")
-    private String remark;
+    /** 实作成绩（1合格 0不合格） */
+    @Schema(description = "实作成绩")
+    private Integer practiceScore;
 }

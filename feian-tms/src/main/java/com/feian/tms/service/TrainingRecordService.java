@@ -18,9 +18,16 @@ public interface TrainingRecordService extends MPJBaseService<TrainingRecord> {
     List<TrainingRecord> trainingRecordList();
 
     /**
-     * 根据学生ID获取总成绩
+     * 根据学员ID获取理论成绩
      * @param studentId
      * @return
      */
-    BigDecimal getTotalScoreByStuId(@NotNull(message = "学生ID不能为空") Long studentId);
+    Integer getTheoryScoreByStuId(@NotNull(message = "学生ID不能为空") Long studentId);
+
+    /**
+     * 根据学员ID获取实作成绩
+     * @param studentId
+     * @return
+     */
+    Integer getPracticeScoreByStuId(@NotNull(message = "学生ID不能为空") Long studentId);
 }

@@ -43,11 +43,11 @@ public class CoursewareRequest {
     @NotNull(message = "培训类型不能为空")
     private Long trainingTypeId;
 
-    /** 理论培训时长(小时) */
-    private BigDecimal theoryHours;
+    /** 理论培训时长(分钟) */
+    private BigDecimal theoryMinutes;
 
-    /** 实践培训时长(小时) */
-    private BigDecimal practiceHours;
+    /** 实践培训时长(分钟) */
+    private BigDecimal practiceMinutes;
 
     /** 课程描述 */
     private String courseDesc;

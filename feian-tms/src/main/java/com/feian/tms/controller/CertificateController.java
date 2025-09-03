@@ -139,7 +139,8 @@ public class CertificateController {
         entity.setTotalHours(trainingPlanService.getTotalHoursById(planId));
         entity.setTheoryHours(trainingPlanService.getTheoryHoursById(planId));
         entity.setPracticeHours(trainingPlanService.getPracticeHoursById(planId));
-        entity.setTotalScore(trainingRecordService.getTotalScoreByStuId(request.getStudentId()));
+        entity.setTheoryScore(trainingRecordService.getTheoryScoreByStuId(request.getStudentId()));
+        entity.setPracticeScore(trainingRecordService.getPracticeScoreByStuId(request.getStudentId()));
         certificateService.save(entity);
         return R.success();
 //        Certificate entity =Certificate.builder()

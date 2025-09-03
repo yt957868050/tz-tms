@@ -54,6 +54,11 @@ public class CertificateResponse {
     @Schema(description = "实作课时", example = "40")
     private Integer practiceHours;
 
-    @Schema(description = "综合评分")
-    private BigDecimal totalScore;
+    /** 理论成绩 */
+    @Schema(description = "理论成绩")
+    private Integer theoryScore;
+
+    /** 实作成绩（1合格 0不合格） */
+    @Schema(description = "实作成绩")
+    private Integer practiceScore;
 }

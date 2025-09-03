@@ -18,6 +18,8 @@ import java.util.List;
 public interface TrainingRecordMapper extends MPJBaseMapper<TrainingRecord> {
     @Select("select * from tms_training_record where is_deleted=0")
     List<TrainingRecord> trainingRecordList();
-    @Select("select total_score from tms_training_record where student_id=#{studentId} and is_deleted=0")
-    BigDecimal getTotalScoreByStuId(Long studentId);
+    @Select("select theory_score from tms_training_record where student_id=#{studentId} and is_deleted=0")
+    Integer getTheoryScoreByStuId(Long studentId);
+    @Select("select practice_score from tms_training_record where student_id=#{studentId} and is_deleted=0")
+    Integer getPracticeScoreByStuId(Long studentId);
 }
