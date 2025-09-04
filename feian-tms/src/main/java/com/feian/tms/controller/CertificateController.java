@@ -1,5 +1,7 @@
 package com.feian.tms.controller;
 
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.read.listener.ReadListener;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.*;
@@ -16,6 +18,7 @@ import com.feian.tms.dto.response.CertificatePageQueryResponse;
 import com.feian.tms.dto.response.CertificatePageResponse;
 import com.feian.tms.dto.response.CertificateResponse;
 import com.feian.tms.excel.CertificateExcel;
+import com.feian.tms.excel.StudentExcel;
 import com.feian.tms.service.*;
 import com.feian.tms.utils.EasyExcelUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +27,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.InputStream;
@@ -284,7 +289,15 @@ public class CertificateController {
         List<CertificateExcel> excelList = list.stream()
                 .map(entity -> {
                     CertificateExcel excel = new CertificateExcel();
-                    BeanUtils.copyProperties(entity, excel);
+                    excel.setCertificateCode(entity.getCertificateCode());
+                    excel.setStudentCode(entity.getStudentCode());
+                    excel.setStudentName(entity.getStudentName());
+                    excel.setEngStudentName(entity.getEngStudentName());
+                    excel.setTrainingCourse(entity.getTrainingCourse());
+                    excel.setEngTrainingCourse(entity.getEngTrainingCourse());
+                    excel.setStartDate(formatDate(entity.getStartDate()));
+                    excel.setEndDate(formatDate(entity.getEndDate()));
+
                     // 转换枚举值为中文显示
                     return excel;
                 })
@@ -292,6 +305,100 @@ public class CertificateController {
 
         // 使用EasyExcel导出
         EasyExcelUtil.exportExcel(response, "证书管理", "证书列表", CertificateExcel.class, excelList);
+    }
+
+    /**
+     * 下载证书导入模板
+     */
+    @PostMapping("/importTemplate")
+    @Operation(summary = "下载证书导入模板", description = "下载证书信息Excel导入模板")
+    public void importTemplate(HttpServletResponse response) {
+        // 生成空数据模板
+        List<CertificateExcel> emptyList = java.util.Collections.emptyList();
+        EasyExcelUtil.exportExcel(response, "学员信息导入模板", "学员信息", CertificateExcel.class, emptyList);
+    }
+
+
+
+    /**
+     * 导入证书信息
+     */
+    @PostMapping("/importData")
+    @Operation(summary = "导入证书信息", description = "通过Excel批量导入证书信息")
+    @Transactional(rollbackFor = Exception.class) // 添加事务注解，确保异常时回滚
+    public R<String> importData(@RequestParam("file") MultipartFile file) {
+        try {
+            ReadListener<CertificateExcel> listener = new ReadListener<CertificateExcel>() {
+                // 存储从Excel读取的数据
+                private final List<CertificateExcel> dataList = new ArrayList<>();
+
+                @Override
+                public void invoke(CertificateExcel data, AnalysisContext context) {
+                    dataList.add(data);
+                }
+
+                @Override
+                public void doAfterAllAnalysed(AnalysisContext context) {
+                    // 收集所有需要保存的实体
+                    List<Certificate> entities = new ArrayList<>();
+                    for (CertificateExcel excel : dataList) {
+                        Long studentId=studentService.getStudentIdByCode(excel.getStudentCode());
+                        Long classId=classStudentService.getClassIdByStudent(studentId);
+                        Long planId=trainingPlanService.getPlanIdByClass(classId);
+                        Certificate entity = new Certificate();
+                        entity.setCertificateCode(excel.getCertificateCode());
+                        entity.setStudentId(studentId);
+                        entity.setStudentCode(excel.getStudentCode());
+                        entity.setStudentName(excel.getStudentName());
+                        entity.setEngStudentName(excel.getEngStudentName());
+                        entity.setTrainingCourse(excel.getTrainingCourse());
+                        entity.setEngTrainingCourse(excel.getEngTrainingCourse());
+                        entity.setStartDate(parseDate(excel.getStartDate()));
+                        entity.setEndDate(parseDate(excel.getEndDate()));
+                        entity.setTotalHours(trainingPlanService.getTotalHoursById(planId));
+                        entity.setTheoryHours(trainingPlanService.getTheoryHoursById(planId));
+                        entity.setPracticeHours(trainingPlanService.getPracticeHoursById(planId));
+
+                        entities.add(entity);
+                    }
+                    // 批量保存到数据库
+                    certificateService.saveBatch(entities);
+                }
+            };
+            EasyExcelUtil.readExcel(file.getInputStream(), CertificateExcel.class, listener);
+            return R.success("导入成功");
+        } catch (Exception e) {
+            // 捕获异常，抛出运行时异常，让Spring事务管理器进行回滚
+            // 提示：你可能需要根据业务逻辑，对 e.getMessage() 进行更友好的封装
+            throw new RuntimeException("导入失败: " + e.getMessage(), e);
+        }
+    }
+
+
+
+
+
+    /**
+     * 格式化日期为 yyyy/M/d 格式
+     */
+    private String formatDate(java.util.Date date) {
+        if (date == null) return "";
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/M/d");
+        return sdf.format(date);
+    }
+
+    /**
+     * 解析日期字符串为Date对象
+     */
+    private java.util.Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy/M/d");
+            return sdf.parse(dateStr);
+        } catch (java.text.ParseException e) {
+            // 如果解析失败，返回null
+            return null;
+        }
     }
 
     /**

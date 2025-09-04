@@ -12,4 +12,5 @@ import com.github.yulichang.base.MPJBaseService;
 public interface TrainingAbilityService extends MPJBaseService<TrainingAbility> {
 
 
+    String gettrainingAbilityName(Long trainingAbilityId);
 }

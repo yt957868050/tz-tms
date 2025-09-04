@@ -28,4 +28,6 @@ public interface StudentService extends MPJBaseService<Student> {
     String getStudentCode(Long StudentId);
 
     String getIdCardById(@NotNull(message = "学生ID不能为空") Long studentId);
+
+    Long getStudentIdByCode(String studentCode);
 }

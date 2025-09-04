@@ -26,4 +26,9 @@ public class MajorServiceImpl extends MPJBaseServiceImpl<MajorMapper, Major> imp
         majorMapper.deleteIds(idList);
         return true;
     }
+
+    @Override
+    public String getMajorName(Long majorId) {
+        return majorMapper.getMajorName(majorId);
+    }
 }

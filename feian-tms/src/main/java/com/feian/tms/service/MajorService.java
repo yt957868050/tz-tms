@@ -14,4 +14,6 @@ import java.util.List;
 public interface MajorService extends MPJBaseService<Major> {
 
     boolean removeIds(List<Long> idList);
+
+    String getMajorName(Long majorId);
 }

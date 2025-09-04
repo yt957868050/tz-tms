@@ -289,8 +289,21 @@ public class TrainingRecordController {
         // 转换为导出对象
         List<TrainingRecordExcel> excelList = list.stream()
                 .map(entity -> {
-                    TrainingRecordExcel excel = new TrainingRecordExcel();
-                    BeanUtils.copyProperties(entity, excel);
+                    Long classId=classStudentService.getClassIdByStudent(entity.getStudentId());
+                    Long planId=trainingPlanService.getPlanIdByClass(classId);
+                    TrainingRecordExcel excel = TrainingRecordExcel.builder()
+                            .className(trainingClassService.getClassName(entity.getTrainingClassId()))
+                            .studentName(studentService.getStudentName(entity.getStudentId()))
+                            .machineTypeName(machineTypeService.getMachineTypeName(entity.getMachineTypeId()))
+                            .majorName(majorService.getMajorName(entity.getMajorId()))
+                            .trainingAbilityName(trainingAbilityService.gettrainingAbilityName(entity.getTrainingAbilityId()))
+                            .theoryHour(trainingPlanService.getTheoryHoursById(planId))
+                            .practiceHour(trainingPlanService.getPracticeHoursById(planId))
+                            .totalHour(trainingPlanService.getTotalHoursById(planId))
+                            .theoryScore(entity.getTheoryScore())
+                            .practiceScore(convertPracticeScore(entity.getPracticeScore()))
+                            .build();
+
                     // 转换枚举值为中文显示
 //                    excel.setTrainingMethodName(convertTrainingMethod(entity.getTrainingMethod()));
 //                    excel.setAttendanceStatusName(convertAttendanceStatus(entity.getAttendanceStatus()));
@@ -342,5 +355,22 @@ public class TrainingRecordController {
             case "4" -> "较差";
             default -> "";
         };
+
+
+    }
+
+    /**
+     * 转换培训效果枚举
+     */
+    private String convertPracticeScore(Integer practiceScore) {
+
+        return switch (practiceScore) {
+            case 1 -> "合格";
+            case 0 -> "不合格";
+
+            default -> "";
+        };
+
+
     }
 }

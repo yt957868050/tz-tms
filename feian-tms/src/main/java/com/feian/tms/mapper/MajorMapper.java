@@ -3,6 +3,7 @@ package com.feian.tms.mapper;
 import com.feian.tms.domain.Major;
 import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ import java.util.List;
 public interface MajorMapper extends MPJBaseMapper<Major> {
 
     void deleteIds(List<Long> idList);
+
+    @Select("select major_name from tms_major where major_id=#{majorId} and is_deleted=0")
+    String getMajorName(Long majorId);
 }

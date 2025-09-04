@@ -306,9 +306,7 @@ public class StudentController {
         EasyExcelUtil.exportExcel(response, "学员信息导入模板", "学员信息", StudentExcel.class, emptyList);
     }
 
-    /**
-     * 导入学员信息
-     */
+
     /**
      * 导入学员信息
      */
@@ -351,7 +349,7 @@ public class StudentController {
                         entity.setLicenseNumber(excel.getLicenseNumber());
                         entity.setAircraftEndorsement(excel.getAircraftEndorsement());
                         entity.setRemark(excel.getWorkExperience());
-                        entity.setStatus(convertStatus(excel.getStatus()));
+                        entity.setStatus(reConvertStatus(excel.getStatus()));
                         entities.add(entity);
                     }
                     // 批量保存到数据库
@@ -473,6 +471,18 @@ public class StudentController {
         return switch (status) {
             case "0" -> "正常";
             case "1" -> "停用";
+            default -> "";
+        };
+    }
+
+    /**
+     * 导出转换性别枚举
+     */
+    private String reConvertStatus(String status) {
+        if (status == null) return "";
+        return switch (status) {
+            case "正常" -> "0";
+            case "停用" -> "1";
             default -> "";
         };
     }

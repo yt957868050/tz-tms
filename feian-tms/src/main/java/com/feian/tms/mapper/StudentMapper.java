@@ -26,10 +26,16 @@ public interface StudentMapper extends MPJBaseMapper<Student> {
     List<Student> studentListByIds(List<Long> idList);
 
     List<Student> studentList();
+
     @Select("select student_name from tms_student where student_id=#{StudentId}")
     String getStudentName(Long StudentId);
+
     @Select("select student_code from tms_student where student_id=#{StudentId}")
     String getStudentCode(Long StudentId);
+
    @Select("select id_card from tms_student where student_id=#{studentId}")
     String getIdCardById(Long studentId);
+
+    @Select("select student_id from tms_student where student_code=#{studentCode} and is_deleted=0")
+    Long getStudentIdByCode(String studentCode);
 }

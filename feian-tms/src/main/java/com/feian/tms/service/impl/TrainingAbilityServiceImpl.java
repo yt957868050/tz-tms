@@ -5,6 +5,7 @@ import com.feian.tms.mapper.TrainingAbilityMapper;
 import com.feian.tms.service.TrainingAbilityService;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,5 +17,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class TrainingAbilityServiceImpl extends MPJBaseServiceImpl<TrainingAbilityMapper, TrainingAbility> implements TrainingAbilityService {
-
+   @Autowired
+    TrainingAbilityMapper trainingAbilityMapper;
+    @Override
+    public String gettrainingAbilityName(Long trainingAbilityId) {
+        return trainingAbilityMapper.gettrainingAbilityName(trainingAbilityId);
+    }
 }

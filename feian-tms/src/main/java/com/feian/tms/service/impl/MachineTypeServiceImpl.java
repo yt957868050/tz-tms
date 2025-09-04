@@ -27,4 +27,9 @@ public class MachineTypeServiceImpl extends MPJBaseServiceImpl<MachineTypeMapper
         machineTypeMapper.deleteIds(idList);
         return true;
     }
+
+    @Override
+    public String getMachineTypeName(Long machineTypeId) {
+        return machineTypeMapper.getMachineTypeName(machineTypeId);
+    }
 }
