@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -46,4 +47,6 @@ public class TrainingClassServiceImpl extends MPJBaseServiceImpl<TrainingClassMa
     public String getClassName(Long trainingClassId) {
         return trainingClassMapper.getClassName(trainingClassId);
     }
+
+
 }

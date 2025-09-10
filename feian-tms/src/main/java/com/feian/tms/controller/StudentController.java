@@ -270,6 +270,7 @@ public class StudentController {
                     StudentExcel excel = new StudentExcel();
                     excel.setStudentName(entity.getStudentName());
                     excel.setStudentCode(entity.getStudentCode());
+                    excel.setEngStudentName(entity.getEngStudentName());
                     excel.setGender(convertGender(entity.getGender()));
                     excel.setPrimaryMajor(convertPrimaryMajor(String.valueOf(entity.getPrimaryMajorId())));
                     excel.setNation(entity.getNation());
@@ -332,6 +333,7 @@ public class StudentController {
                         Student entity = new Student();
                         entity.setStudentName(excel.getStudentName());
                         entity.setStudentCode(excel.getStudentCode());
+                        entity.setEngStudentName(excel.getEngStudentName());
                         entity.setGender(convertIGender(excel.getGender()));
                         entity.setPrimaryMajorId(convertIPrimaryMajor(excel.getPrimaryMajor()));
                         entity.setPrimaryMajorName(excel.getPrimaryMajor());

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,5 +55,15 @@ public class TrainingPlanServiceImpl extends MPJBaseServiceImpl<TrainingPlanMapp
     @Override
     public Integer getPracticeHoursById(Long planId) {
         return trainingPlanMapper.getPracticeHoursById(planId);
+    }
+
+    @Override
+    public Date getStartDateById(Long planId) {
+        return trainingPlanMapper.getStartDateById(planId);
+    }
+
+    @Override
+    public Date getEndDate(Long planId) {
+        return trainingPlanMapper.getEndDate(planId);
     }
 }

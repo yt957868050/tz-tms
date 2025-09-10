@@ -22,7 +22,6 @@ public class CertificateRequest {
     private Long certificateId;
     /** 证书编号 */
     @Schema(description = "证书编号", example = "CERT001", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "证书编号不能为空")
     private String certificateCode;
 
     /** 学生ID */
@@ -46,7 +45,6 @@ public class CertificateRequest {
 
     /** 课程名称 */
     @Schema(description = "课程名称", example = "H425-100(ARRIEL2H)型直升机维修培训课程", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "课程名称不能为空")
     private String trainingCourse;
 
     /** 课程英文姓名 */
@@ -55,12 +53,10 @@ public class CertificateRequest {
 
     /** 开始日期 */
     @Schema(description = "开始日期", example = "2025-08-13", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "开始日期不能为空")
     private Date startDate;
 
     /** 结束日期 */
     @Schema(description = "结束日期", example = "2025-08-13", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "结束日期不能为空")
     private Date endDate;
 
 

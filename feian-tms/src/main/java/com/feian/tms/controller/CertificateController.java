@@ -9,10 +9,7 @@ import com.feian.tms.dto.certificateDto.CertificateEvidence;
 import com.feian.tms.dto.certificateDto.CertificateOfCompliance;
 import com.feian.tms.dto.query.CertificatePageQuery;
 import com.feian.tms.dto.query.CertificateQuery;
-import com.feian.tms.dto.request.IdRequest;
-import com.feian.tms.dto.request.CertificateRequest;
-import com.feian.tms.dto.request.IdsDeleteRequest;
-import com.feian.tms.dto.request.IdsRequest;
+import com.feian.tms.dto.request.*;
 import com.feian.tms.dto.response.CertificateDetailsResponse;
 import com.feian.tms.dto.response.CertificatePageQueryResponse;
 import com.feian.tms.dto.response.CertificatePageResponse;
@@ -66,6 +63,8 @@ public class CertificateController {
     private ClassStudentService classStudentService;
     @Autowired
     private TrainingRecordService trainingRecordService;
+    @Autowired
+    private TrainingClassService trainingClassService;
 
     /**
      * 查询证书管理列表
@@ -137,10 +136,18 @@ public class CertificateController {
     @PostMapping("/create")
     @Operation(summary = "新增证书", description = "创建新的证书信息")
     public R create( @RequestBody CertificateRequest request) {
+        Student student = studentService.getById(request.getStudentId());
         Certificate entity=new Certificate();
         BeanUtils.copyProperties(request,entity);
+        entity.setCertificateCode(request.getStudentCode());
+        entity.setEngStudentName(student.getEngStudentName());
         Long classId=classStudentService.getClassIdByStudent(request.getStudentId());
+        TrainingClass trainingClass=trainingClassService.getById(classId);
+        entity.setTrainingCourse(trainingClass.getClassName());
+        entity.setEngTrainingCourse(trainingClass.getEngTrainingCourse());
         Long planId=trainingPlanService.getPlanIdByClass(classId);
+        entity.setStartDate(trainingPlanService.getStartDateById(planId));
+        entity.setEndDate(trainingPlanService.getEndDate(planId));
         entity.setTotalHours(trainingPlanService.getTotalHoursById(planId));
         entity.setTheoryHours(trainingPlanService.getTheoryHoursById(planId));
         entity.setPracticeHours(trainingPlanService.getPracticeHoursById(planId));
@@ -191,16 +198,23 @@ public class CertificateController {
     @PostMapping("/update")
     @Operation(summary = "修改证书", description = "更新现有证书信息")
     public R<CertificateResponse> update(@Valid @RequestBody CertificateRequest request) {
-        if (request.getCertificateId() == null) {
-            return R.fail("证书ID不能为空");
-        }
+        Student student = studentService.getById(request.getStudentId());
         Certificate entity=new Certificate();
         BeanUtils.copyProperties(request,entity);
+        entity.setCertificateCode(request.getStudentCode());
+        entity.setEngStudentName(student.getEngStudentName());
         Long classId=classStudentService.getClassIdByStudent(request.getStudentId());
+        TrainingClass trainingClass=trainingClassService.getById(classId);
+        entity.setTrainingCourse(trainingClass.getClassName());
+        entity.setEngTrainingCourse(trainingClass.getEngTrainingCourse());
         Long planId=trainingPlanService.getPlanIdByClass(classId);
+        entity.setStartDate(trainingPlanService.getStartDateById(planId));
+        entity.setEndDate(trainingPlanService.getEndDate(planId));
         entity.setTotalHours(trainingPlanService.getTotalHoursById(planId));
         entity.setTheoryHours(trainingPlanService.getTheoryHoursById(planId));
         entity.setPracticeHours(trainingPlanService.getPracticeHoursById(planId));
+        entity.setTheoryScore(trainingRecordService.getTheoryScoreByStuId(request.getStudentId()));
+        entity.setPracticeScore(trainingRecordService.getPracticeScoreByStuId(request.getStudentId()));
 
         boolean result = certificateService.updateById(entity);
         if (result) {
@@ -222,6 +236,71 @@ public class CertificateController {
             return R.success();
         }
         return R.fail("删除证书失败");
+    }
+
+
+    /**
+     * 批量添加学员证书
+     */
+    @PostMapping("/batch-add-certificates")
+    @Operation(summary = "批量添加学员证书", description = "批量添加学员证书")
+    public R<String> batchAddStudents(@jakarta.validation.Valid @RequestBody CertificateBatchAddRequest request) {
+        try {
+            int successCount = 0;
+            int failCount = 0;
+            StringBuilder failMessages = new StringBuilder();
+
+            for (Long studentId : request.getStudentIds()) {
+                Student student = studentService.getById(studentId);
+                // 检查学员是否已在班次中
+                Certificate existing = certificateService.lambdaQuery()
+                        .eq(Certificate::getStudentId, studentId)
+                        .one();
+
+                if (existing != null) {
+                    failCount++;
+                    failMessages.append("学员[").append(student.getStudentCode()).append(student.getStudentName()).append("]已经存在证书; ");
+                    continue;
+                }
+
+                // 创建对应学员证书
+                Certificate entity=new Certificate();
+                entity.setStudentId(studentId);
+                entity.setCertificateCode(student.getStudentCode());
+                entity.setStudentName(student.getStudentName());
+                entity.setStudentCode(student.getStudentCode());
+                entity.setEngStudentName(student.getEngStudentName());
+                Long classId=classStudentService.getClassIdByStudent(studentId);
+                TrainingClass trainingClass=trainingClassService.getById(classId);
+                entity.setTrainingCourse(trainingClass.getClassName());
+                entity.setEngTrainingCourse(trainingClass.getEngTrainingCourse());
+                Long planId=trainingPlanService.getPlanIdByClass(classId);
+                entity.setStartDate(trainingPlanService.getStartDateById(planId));
+                entity.setEndDate(trainingPlanService.getEndDate(planId));
+                entity.setTotalHours(trainingPlanService.getTotalHoursById(planId));
+                entity.setTheoryHours(trainingPlanService.getTheoryHoursById(planId));
+                entity.setPracticeHours(trainingPlanService.getPracticeHoursById(planId));
+                entity.setTheoryScore(trainingRecordService.getTheoryScoreByStuId(studentId));
+                entity.setPracticeScore(trainingRecordService.getPracticeScoreByStuId(studentId));
+
+                boolean result = certificateService.save(entity);
+                if (result) {
+                    successCount++;
+                } else {
+                    failCount++;
+                    failMessages.append("学员ID[").append(studentId).append("]添加失败; ");
+                }
+            }
+
+            String message = String.format("批量添加完成！成功：%d人，失败：%d人", successCount, failCount);
+            if (failCount > 0) {
+                message += "。失败原因：" + failMessages.toString();
+            }
+
+            return R.success(message);
+        } catch (Exception e) {
+            return R.fail("批量添加学员失败：" + e.getMessage());
+        }
     }
 
 

@@ -29,6 +29,10 @@ public class TrainingClassRequest {
     @NotBlank(message = "班次名称不能为空")
     private String className;
 
+    /** 课程英文姓名 */
+    @Schema(description = "课程英文姓名", example = "H425-100(ARRIEL 2H) Helicopter Maintenance Training Course")
+    private String engTrainingCourse;
+
     @Schema(description = "培训计划ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "培训计划ID不能为空")
     private Long trainingPlanId;

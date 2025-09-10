@@ -3,6 +3,7 @@ package com.feian.tms.service;
 import com.feian.tms.domain.TrainingClass;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,4 +23,6 @@ public interface TrainingClassService extends MPJBaseService<TrainingClass> {
     String getClassCode(Long trainingClassId);
 
     String getClassName(Long trainingClassId);
+
+
 }

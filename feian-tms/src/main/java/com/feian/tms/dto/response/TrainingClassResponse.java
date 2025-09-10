@@ -25,6 +25,9 @@ public class TrainingClassResponse {
     @Schema(description = "班次名称", example = "第一期Bell-206飞行员培训班")
     private String className;
 
+    @Schema(description = "课程英文姓名", example = "H425-100(ARRIEL 2H) Helicopter Maintenance Training Course")
+    private String engTrainingCourse;
+
     @Schema(description = "培训计划ID", example = "1")
     private Long trainingPlanId;
 

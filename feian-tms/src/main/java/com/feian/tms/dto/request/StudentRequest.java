@@ -29,6 +29,10 @@ public class StudentRequest {
     @NotBlank(message = "学员姓名不能为空")
     private String studentName;
 
+    /** 学生英文姓名 */
+    @Schema(description = "学生英文姓名", example = "Xiao Ming")
+    private String engStudentName;
+
     @Schema(description = "性别", example = "0", allowableValues = {"0", "1", "2"})
     private String gender;
 

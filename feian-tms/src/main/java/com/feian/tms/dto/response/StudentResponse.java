@@ -25,6 +25,9 @@ public class StudentResponse {
     @Schema(description = "学员姓名", example = "张三")
     private String studentName;
 
+    @Schema(description = "学生英文姓名", example = "Xiao Ming")
+    private String engStudentName;
+
     @Schema(description = "性别（0男 1女 2未知）", example = "0")
     private String gender;
 

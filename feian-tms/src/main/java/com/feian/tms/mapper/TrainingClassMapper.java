@@ -5,6 +5,7 @@ import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,4 +26,6 @@ public interface TrainingClassMapper extends MPJBaseMapper<TrainingClass> {
     String getClassCode(Long trainingClassId);
     @Select("select class_name from tms_training_class where training_class_id=#{trainingClassId}")
     String getClassName(Long trainingClassId);
+
+
 }

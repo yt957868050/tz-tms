@@ -5,6 +5,7 @@ import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,4 +30,10 @@ public interface TrainingPlanMapper extends MPJBaseMapper<TrainingPlan> {
     Integer getTheoryHoursById(Long planId);
     @Select("select practice_hours from tms_training_plan where plan_id=#{planId}")
     Integer getPracticeHoursById(Long planId);
+
+    @Select("select  start_date from tms_training_plan where plan_id=#{planId} and is_deleted=0")
+    Date getStartDateById(Long planId);
+
+    @Select("select  end_date from tms_training_plan where plan_id=#{planId} and is_deleted=0")
+    Date getEndDate(Long planId);
 }

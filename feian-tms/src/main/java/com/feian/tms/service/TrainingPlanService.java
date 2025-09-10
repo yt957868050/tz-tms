@@ -3,6 +3,7 @@ package com.feian.tms.service;
 import com.feian.tms.domain.TrainingPlan;
 import com.github.yulichang.base.MPJBaseService;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,4 +30,8 @@ public interface TrainingPlanService extends MPJBaseService<TrainingPlan> {
     Integer getTheoryHoursById(Long planId);
 
     Integer getPracticeHoursById(Long planId);
+
+    Date getStartDateById(Long planId);
+
+    Date getEndDate(Long planId);
 }

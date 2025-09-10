@@ -35,6 +35,10 @@ public class TrainingClass extends BaseEntity {
     @Excel(name = "班次名称")
     private String className;
 
+    /** 课程英文姓名 */
+    @Excel(name = "课程英文姓名")
+    private String engTrainingCourse;
+
     /** 培训计划ID */
     @Excel(name = "培训计划ID")
     private Long trainingPlanId;
