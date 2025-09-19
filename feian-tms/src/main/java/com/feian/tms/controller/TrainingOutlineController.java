@@ -1,15 +1,16 @@
 package com.feian.tms.controller;
 
 import com.feian.common.utils.PageUtils;
+import com.feian.tms.domain.Courseware;
 import com.feian.tms.domain.Student;
-import com.feian.tms.dto.request.IdsDeleteRequest;
-import com.feian.tms.dto.request.IdsRequest;
+import com.feian.tms.dto.request.*;
+import com.feian.tms.dto.response.CoursewareResponse;
+import com.feian.tms.service.CoursewareFileService;
+import com.feian.tms.service.CoursewareService;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.TrainingOutline;
 import com.feian.tms.common.PageRequest;
-import com.feian.tms.dto.request.IdRequest;
-import com.feian.tms.dto.request.TrainingOutlineRequest;
 import com.feian.tms.dto.response.TrainingOutlineResponse;
 import com.feian.tms.excel.TrainingOutlineExcel;
 import com.feian.tms.service.TrainingOutlineService;
@@ -46,18 +47,23 @@ import java.util.List;
 public class TrainingOutlineController {
     
     private final TrainingOutlineService trainingOutlineService;
+    private final CoursewareService coursewareService;
+    private final CoursewareFileService coursewareFileService;
 
     /**
      * 查询培训大纲列表
      */
     @PostMapping("/list")
     @Operation(summary = "查询培训大纲列表", description = "根据查询条件分页查询培训大纲列表")
-    public R<PageInfo<TrainingOutlineResponse>> list(@RequestBody PageRequest<TrainingOutlineRequest> pageRequest) {
+    public R<PageInfo<CoursewareResponse>> list(@RequestBody PageRequest<CoursewareRequest> pageRequest) {
 
-        PageInfo<TrainingOutlineResponse> page = trainingOutlineService.selectTrainingOutlineList(pageRequest);
-        
+
+        // 使用service的新方法，包含关联查询
+        PageInfo<CoursewareResponse> result = coursewareService.selectCoursewareList(pageRequest);
+
+
         // 返回分页信息
-        return R.success(page);
+        return R.success(result);
     }
 
     /**
@@ -65,11 +71,16 @@ public class TrainingOutlineController {
      */
     @PostMapping("/detail")
     @Operation(summary = "获取培训大纲详细信息", description = "根据ID获取培训大纲详细信息")
-    public R<TrainingOutlineResponse> detail(@Valid @RequestBody IdRequest request) {
-        TrainingOutlineResponse response = trainingOutlineService.selectTrainingOutlineById(request.getId());
+    public R<CoursewareResponse> detail(@Valid @RequestBody IdRequest request) {
+        CoursewareResponse response = coursewareService.selectCoursewareById(request.getId());
         if (response == null) {
             return R.fail("培训大纲信息不存在");
         }
+
+//        TrainingOutlineResponse response = trainingOutlineService.selectTrainingOutlineById(request.getId());
+//        if (response == null) {
+//            return R.fail("培训大纲信息不存在");
+//        }
         return R.success(response);
     }
 
@@ -78,15 +89,20 @@ public class TrainingOutlineController {
      */
     @PostMapping("/create")
     @Operation(summary = "新增培训大纲", description = "创建新的培训大纲信息")
-    public R<TrainingOutlineResponse> create(@Valid @RequestBody TrainingOutlineRequest request) {
+    public R<CoursewareResponse> create(@Valid @RequestBody CoursewareRequest request) {
         // 检查唯一性
-        if (!trainingOutlineService.checkUniqueness(request.getMachineTypeId(), 
-                request.getMajorId(), request.getTrainingAbilityId(), null)) {
-            return R.fail("该机型、专业、培训能力组合的大纲已存在");
-        }
-        
-        TrainingOutlineResponse response = trainingOutlineService.insertTrainingOutline(request);
-        if (response != null) {
+//        if (!trainingOutlineService.checkUniqueness(request.getMachineTypeId(),
+//                request.getMajorId(), request.getTrainingAbilityId(), null)) {
+//            return R.fail("该机型、专业、培训能力组合的大纲已存在");
+//        }
+
+//        TrainingOutlineResponse response = trainingOutlineService.insertTrainingOutline(request);
+        Courseware entity = new Courseware();
+        BeanUtils.copyProperties(request, entity);
+        boolean result = coursewareService.save(entity);
+        if (result) {
+            CoursewareResponse response = new CoursewareResponse();
+            BeanUtils.copyProperties(entity, response);
             return R.success(response);
         }
         return R.fail("新增培训大纲失败");
@@ -97,22 +113,34 @@ public class TrainingOutlineController {
      */
     @PostMapping("/update")
     @Operation(summary = "修改培训大纲", description = "更新现有培训大纲信息")
-    public R<TrainingOutlineResponse> update(@Valid @RequestBody TrainingOutlineRequest request) {
-        if (request.getOutlineId() == null) {
-            return R.fail("大纲ID不能为空");
+    public R<CoursewareResponse> update(@Valid @RequestBody CoursewareRequest request) {
+        if (request.getCoursewareId() == null) {
+            return R.fail("课件ID不能为空");
         }
-        
-        // 检查唯一性
-        if (!trainingOutlineService.checkUniqueness(request.getMachineTypeId(), 
-                request.getMajorId(), request.getTrainingAbilityId(), request.getOutlineId())) {
-            return R.fail("该机型、专业、培训能力组合的大纲已存在");
-        }
-        
-        TrainingOutlineResponse response = trainingOutlineService.updateTrainingOutline(request);
-        if (response != null) {
+        Courseware entity = new Courseware();
+        BeanUtils.copyProperties(request, entity);
+        boolean result = coursewareService.updateById(entity);
+        if (result) {
+            CoursewareResponse response = new CoursewareResponse();
+            BeanUtils.copyProperties(entity, response);
             return R.success(response);
         }
         return R.fail("更新培训大纲失败");
+//        if (request.getOutlineId() == null) {
+//            return R.fail("大纲ID不能为空");
+//        }
+//
+//        // 检查唯一性
+//        if (!trainingOutlineService.checkUniqueness(request.getMachineTypeId(),
+//                request.getMajorId(), request.getTrainingAbilityId(), request.getOutlineId())) {
+//            return R.fail("该机型、专业、培训能力组合的大纲已存在");
+//        }
+//
+//        TrainingOutlineResponse response = trainingOutlineService.updateTrainingOutline(request);
+//        if (response != null) {
+//            return R.success(response);
+//        }
+//        return R.fail("更新培训大纲失败");
     }
 
     /**
@@ -121,7 +149,8 @@ public class TrainingOutlineController {
     @PostMapping("/delete")
     @Operation(summary = "删除培训大纲", description = "根据ID删除培训大纲信息")
     public R<Void> delete(@Valid @RequestBody IdsDeleteRequest idsDeleteRequest) {
-        boolean result = trainingOutlineService.removeByIds(idsDeleteRequest.getIdList());
+        boolean result = coursewareService.removeByIds(idsDeleteRequest.getIdList());
+        coursewareFileService.removeByCoursewareIds(idsDeleteRequest.getIdList());
         if (result) {
             return R.success();
         }
