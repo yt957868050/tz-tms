@@ -6,9 +6,9 @@ spring:
         druid:
             # 主库数据源
             master:
-                url: jdbc:mysql://192.168.1.165:3306/tms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                url: jdbc:mysql://101.126.128.135:11120/tz_tms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
                 username: root
-                password: 123456
+                password: Zz12084327,.!@
             # 从库数据源
             slave:
                 # 从数据源开关/默认关闭
@@ -59,3 +59,11 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+exam:
+    minio:
+        endpoint: http://your-minio:9000
+        access-key: xxxx
+        secret-key: xxxx
+        bucket: exam
+        base-url: http://cdn.example.com   # 可选，用于拼接返回 url
+        expiry-seconds: 3600               # 可选

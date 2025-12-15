@@ -7,6 +7,7 @@ import com.feian.framework.web.service.TokenService;
 import com.feian.system.service.ISysUserService;
 import com.feian.tms.common.R;
 import com.feian.tms.domain.MachineType;
+import com.feian.tms.mapper.MachineTypeMapper;
 import com.feian.tms.service.IStudentMachineTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,7 @@ public class MachineTypeSelectionController extends BaseController {
     private final IStudentMachineTypeService studentMachineTypeService;
     private final ISysUserService userService;
     private final TokenService tokenService;
+    private final MachineTypeMapper machineTypeMapper;
 
     /**
      * 获取当前用户可选择的机型列表
@@ -38,7 +40,13 @@ public class MachineTypeSelectionController extends BaseController {
     @PostMapping("/availableMachineTypes")
     public R<List<MachineType>> getAvailableMachineTypes() {
         Long userId = SecurityUtils.getUserId();
-        List<MachineType> machineTypes = studentMachineTypeService.getAvailableMachineTypesByUserId(userId);
+        SysUser user = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
+        List<MachineType> machineTypes;
+        if (user != null && user.isAdmin()) {
+            machineTypes = machineTypeMapper.selectList(null);
+        } else {
+            machineTypes = studentMachineTypeService.getAvailableMachineTypesByUserId(userId);
+        }
         return R.success(machineTypes);
     }
 
@@ -49,21 +57,34 @@ public class MachineTypeSelectionController extends BaseController {
     @PostMapping("/selectMachineType")
     public R<Void> selectMachineType(@RequestBody MachineTypeSelectionRequest request) {
         Long userId = SecurityUtils.getUserId();
+        SysUser loginUser = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
+        if (loginUser == null) {
+            return R.fail("未登录");
+        }
+        if (request == null || request.getMachineTypeId() == null) {
+            return R.fail("机型ID不能为空");
+        }
+
+        MachineType machineType = machineTypeMapper.selectById(request.getMachineTypeId());
+        if (machineType == null) {
+            return R.fail("机型不存在");
+        }
         
         // 验证用户是否有权限选择该机型
-        List<MachineType> availableMachineTypes = studentMachineTypeService.getAvailableMachineTypesByUserId(userId);
-        boolean hasPermission = availableMachineTypes.stream()
-                .anyMatch(mt -> mt.getMachineTypeId().equals(request.getMachineTypeId()));
-        
-        if (!hasPermission) {
-            return R.fail("您没有权限选择该机型");
+        if (!loginUser.isAdmin()) {
+            List<MachineType> availableMachineTypes = studentMachineTypeService.getAvailableMachineTypesByUserId(userId);
+            boolean hasPermission = availableMachineTypes.stream()
+                    .anyMatch(mt -> mt.getMachineTypeId().equals(request.getMachineTypeId()));
+            if (!hasPermission) {
+                return R.fail("您没有权限选择该机型");
+            }
         }
         
         // 更新用户的当前机型选择
         SysUser user = new SysUser();
         user.setUserId(userId);
         user.setCurrentMachineTypeId(request.getMachineTypeId());
-        user.setCurrentMachineTypeName(request.getMachineTypeName());
+        user.setCurrentMachineTypeName(machineType.getMachineTypeName());
         
         userService.updateUser(user);
         
