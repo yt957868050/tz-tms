@@ -20,4 +20,7 @@ public interface MachineTypeMapper extends MPJBaseMapper<MachineType> {
 
     @Select("select machine_type_name from tms_machine_type where machine_type_id=#{machineTypeId} and is_deleted=0")
     String getMachineTypeName(Long machineTypeId);
+
+    @Select("select machine_type_id from tms_machine_type where machine_type_name like concat('%',#{part},'%') and is_deleted=0")
+    Long getIdByName(String part);
 }

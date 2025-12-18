@@ -31,4 +31,9 @@ public class MajorServiceImpl extends MPJBaseServiceImpl<MajorMapper, Major> imp
     public String getMajorName(Long majorId) {
         return majorMapper.getMajorName(majorId);
     }
+
+    @Override
+    public Long getIdByName(String part) {
+        return majorMapper.getIdByName(part);
+    }
 }

@@ -17,4 +17,10 @@ public interface MachineTypeService extends MPJBaseService<MachineType> {
     boolean deleteBatch(List<Long> idList);
 
     String getMachineTypeName(Long machineTypeId);
+    /**
+     * 根据名称获取ID
+     * @param part
+     * @return
+     */
+    Long getIdByName(String part);
 }

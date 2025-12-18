@@ -5,6 +5,7 @@ import com.feian.tms.domain.Courseware;
 import com.feian.tms.domain.Student;
 import com.feian.tms.dto.request.*;
 import com.feian.tms.dto.response.CoursewareResponse;
+import com.feian.tms.exam.service.ExamCategoryService;
 import com.feian.tms.service.CoursewareFileService;
 import com.feian.tms.service.CoursewareService;
 import com.github.pagehelper.PageInfo;
@@ -49,6 +50,7 @@ public class TrainingOutlineController {
     private final TrainingOutlineService trainingOutlineService;
     private final CoursewareService coursewareService;
     private final CoursewareFileService coursewareFileService;
+    private final ExamCategoryService examCategoryService;
 
     /**
      * 查询培训大纲列表
@@ -101,6 +103,9 @@ public class TrainingOutlineController {
         BeanUtils.copyProperties(request, entity);
         boolean result = coursewareService.save(entity);
         if (result) {
+            if(entity.getTheoryMinutes()!=null) {
+                examCategoryService.saveCategory(entity);
+            }
             CoursewareResponse response = new CoursewareResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);

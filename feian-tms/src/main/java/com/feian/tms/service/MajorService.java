@@ -16,4 +16,11 @@ public interface MajorService extends MPJBaseService<Major> {
     boolean removeIds(List<Long> idList);
 
     String getMajorName(Long majorId);
+
+    /**
+     * 根据名称获取ID
+     * @param part
+     * @return
+     */
+    Long getIdByName(String part);
 }

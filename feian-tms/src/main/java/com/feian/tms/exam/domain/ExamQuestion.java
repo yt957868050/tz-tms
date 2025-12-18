@@ -3,6 +3,7 @@ package com.feian.tms.exam.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.feian.tms.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,9 +19,11 @@ public class ExamQuestion extends BaseEntity {
 
     /** 题目ID（沿用旧ID） */
     @TableId(type = IdType.INPUT)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long questionId;
 
     /** 机型ID（TMS机型） */
+
     private Long machineTypeId;
 
     /** 分类/章节ID */

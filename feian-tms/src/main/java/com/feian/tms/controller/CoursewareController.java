@@ -5,6 +5,7 @@ import com.feian.tms.domain.Instructor;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.response.ClassStudentResponse;
 import com.feian.tms.dto.response.InstructorResponse;
+import com.feian.tms.exam.service.ExamCategoryService;
 import com.github.pagehelper.PageInfo;
 import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
@@ -41,6 +42,7 @@ public class CoursewareController {
     
     private final CoursewareService coursewareService;
     private final CoursewareFileService coursewareFileService;
+    private final ExamCategoryService examCategoryService;
 
     /**
      * 查询课件管理列表
@@ -94,6 +96,9 @@ public class CoursewareController {
         coursewareFileService.saveBatch(request.getFiles());
 
         if (result) {
+            if(entity.getTheoryMinutes()!=null) {
+                examCategoryService.saveCategory(entity);
+            }
             CoursewareResponse response = new CoursewareResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);

@@ -32,4 +32,9 @@ public class MachineTypeServiceImpl extends MPJBaseServiceImpl<MachineTypeMapper
     public String getMachineTypeName(Long machineTypeId) {
         return machineTypeMapper.getMachineTypeName(machineTypeId);
     }
+
+    @Override
+    public Long getIdByName(String part) {
+        return machineTypeMapper.getIdByName(part);
+    }
 }

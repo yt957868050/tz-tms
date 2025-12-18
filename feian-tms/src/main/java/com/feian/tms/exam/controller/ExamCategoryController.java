@@ -7,6 +7,7 @@ import com.feian.common.core.domain.entity.SysUser;
 import com.feian.common.utils.SecurityUtils;
 import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.exam.domain.ExamCategory;
+import com.feian.tms.exam.dto.ExamCategoryTree;
 import com.feian.tms.exam.service.ExamCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,6 +37,12 @@ public class ExamCategoryController {
     @Operation(summary = "分页查询章节")
     public R<Page<ExamCategory>> list(@RequestBody PageRequest<ExamCategory> pageRequest) {
         return R.success(examCategoryService.pageQuery(pageRequest));
+    }
+
+    @GetMapping("/tree")
+    @Operation(summary = "获取章节树")
+    public R<ExamCategoryTree> tree() {
+        return R.success(examCategoryService.pageExamCategoryTree());
     }
 
     @GetMapping("/machine/{machineTypeId}")
