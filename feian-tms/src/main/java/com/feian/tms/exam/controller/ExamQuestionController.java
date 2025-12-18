@@ -9,6 +9,8 @@ import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.exam.domain.ExamQuestion;
 import com.feian.tms.exam.dto.ExamPaperDetailResponse;
 import com.feian.tms.exam.dto.ExamQuestionRequest;
+import com.feian.tms.exam.dto.ExamQuestionUiRequest;
+import com.feian.tms.exam.dto.ExamQuestionUiResponse;
 import com.feian.tms.exam.service.ExamQuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,6 +64,31 @@ public class ExamQuestionController {
             return R.fail("无权限操作题库");
         }
         Long id = examQuestionService.saveOrUpdateQuestion(request);
+        return R.success(id);
+    }
+
+    @PostMapping("/ui/detail")
+    @Operation(summary = "题目详情（界面化）", description = "用于题库界面编辑，前端无需直接操作 contentJson")
+    public R<ExamQuestionUiResponse> uiDetail(@Valid @RequestBody IdRequest request) {
+        SysUser user = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
+        if (user != null && user.getStudentId() != null && !user.isAdmin()) {
+            return R.fail("无权限访问题库");
+        }
+        ExamQuestionUiResponse detail = examQuestionService.getUiDetail(request.getId());
+        if (detail == null) {
+            return R.fail("题目不存在");
+        }
+        return R.success(detail);
+    }
+
+    @PostMapping("/ui/save")
+    @Operation(summary = "保存题目（界面化）", description = "后端组装 contentJson 后落库；questionId 为空则新增")
+    public R<Long> uiSave(@Valid @RequestBody ExamQuestionUiRequest request) {
+        SysUser user = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
+        if (user != null && user.getStudentId() != null && !user.isAdmin()) {
+            return R.fail("无权限操作题库");
+        }
+        Long id = examQuestionService.saveOrUpdateUi(request);
         return R.success(id);
     }
 

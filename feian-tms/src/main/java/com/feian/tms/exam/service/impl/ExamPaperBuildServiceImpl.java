@@ -31,6 +31,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ExamPaperBuildServiceImpl implements ExamPaperBuildService {
 
+    /**
+     * 当前考试系统仅使用选择题题型（含判断/不定项）。
+     * 1 单选，2 多选，3 判断，6 不定项选择
+     */
+    private static final List<Integer> DEFAULT_CHOICE_TYPES = List.of(1, 2, 3, 6);
+
     private final ExamCategoryMapper examCategoryMapper;
     private final ExamQuestionMapper examQuestionMapper;
     private final ExamPaperTemplateMapper examPaperTemplateMapper;
@@ -43,6 +49,8 @@ public class ExamPaperBuildServiceImpl implements ExamPaperBuildService {
         if (request.getMachineTypeId() == null) {
             throw new IllegalArgumentException("机型不能为空");
         }
+
+        List<Integer> questionTypes = normalizeChoiceTypes(request.getQuestionTypes());
 
         List<ExamPaperBuildRequest.CategoryQuota> quotas = resolveCategories(request);
         if (CollectionUtils.isEmpty(quotas)) {
@@ -62,7 +70,7 @@ public class ExamPaperBuildServiceImpl implements ExamPaperBuildService {
             desired.put(categoryId, Math.max(0, Objects.requireNonNullElse(defaultQuota, 0)));
 
             Integer availableCount = examQuestionMapper.countAvailable(
-                    request.getMachineTypeId(), categoryId, request.getQuestionTypes(), request.getDifficultList());
+                    request.getMachineTypeId(), request.getIfCheck(), categoryId, questionTypes, request.getDifficultList());
             available.put(categoryId, Objects.requireNonNullElse(availableCount, 0));
         }
 
@@ -77,7 +85,7 @@ public class ExamPaperBuildServiceImpl implements ExamPaperBuildService {
                 continue;
             }
             List<ExamQuestion> picked = examQuestionMapper.selectRandomByCategory(
-                    request.getMachineTypeId(), categoryId, request.getQuestionTypes(), request.getDifficultList(), limit);
+                    request.getMachineTypeId(), request.getIfCheck(), categoryId, questionTypes, request.getDifficultList(), limit);
             for (ExamQuestion question : picked) {
                 ExamPaperTemplateItem item = new ExamPaperTemplateItem();
                 item.setPaperId(null); // set after template insert
@@ -122,6 +130,19 @@ public class ExamPaperBuildServiceImpl implements ExamPaperBuildService {
             return stat;
         }).collect(Collectors.toList()));
         return response;
+    }
+
+    private List<Integer> normalizeChoiceTypes(List<Integer> input) {
+        if (CollectionUtils.isEmpty(input)) {
+            return DEFAULT_CHOICE_TYPES;
+        }
+        // 明确指定题型时：仅允许选择题题型，避免引入需要人工批改的题型
+        for (Integer t : input) {
+            if (t == null || !DEFAULT_CHOICE_TYPES.contains(t)) {
+                throw new IllegalArgumentException("仅支持选择题题型（1单选/2多选/3判断/6不定项）");
+            }
+        }
+        return input;
     }
 
     private List<ExamPaperBuildRequest.CategoryQuota> resolveCategories(ExamPaperBuildRequest request) {

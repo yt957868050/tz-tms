@@ -9,8 +9,12 @@ import com.feian.tms.dto.request.IdRequest;
 import com.feian.tms.exam.domain.ExamSession;
 import com.feian.tms.exam.dto.ExamMySessionRequest;
 import com.feian.tms.exam.dto.ExamMySessionResponse;
+import com.feian.tms.exam.dto.ExamSessionPublishRequest;
+import com.feian.tms.exam.dto.ExamSessionPublishResponse;
 import com.feian.tms.exam.mapper.ExamSessionMapper;
+import com.feian.tms.exam.service.ExamSessionDispatchService;
 import com.feian.tms.exam.service.ExamSessionService;
+import com.feian.common.core.context.MachineTypeContextHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,6 +38,7 @@ public class ExamSessionController {
 
     private final ExamSessionService examSessionService;
     private final ExamSessionMapper examSessionMapper;
+    private final ExamSessionDispatchService examSessionDispatchService;
 
     @PostMapping("/list")
     @Operation(summary = "场次列表")
@@ -51,9 +56,12 @@ public class ExamSessionController {
 
         // 非管理员默认按当前选择机型过滤，避免机型上下文缺失导致“全量可见”
         if (currentUser != null && !currentUser.isAdmin()) {
-            Long currentMachineTypeId = currentUser.getCurrentMachineTypeId();
+            Long currentMachineTypeId = MachineTypeContextHolder.getMachineTypeId();
             if (currentMachineTypeId != null) {
                 machineTypeId = currentMachineTypeId;
+            }
+            if (machineTypeId == null) {
+                return R.fail("请先选择机型");
             }
         }
 
@@ -76,7 +84,7 @@ public class ExamSessionController {
         SysUser currentUser = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
         Long machineTypeId = request != null ? request.getMachineTypeId() : null;
         if (currentUser != null && !currentUser.isAdmin()) {
-            Long currentMachineTypeId = currentUser.getCurrentMachineTypeId();
+            Long currentMachineTypeId = MachineTypeContextHolder.getMachineTypeId();
             if (currentMachineTypeId == null) {
                 return R.fail("请先选择机型");
             }
@@ -103,6 +111,12 @@ public class ExamSessionController {
             return R.fail("无权限操作场次");
         }
         request.setSessionId(null);
+        if (request.getPublishStatus() == null) {
+            request.setPublishStatus(1);
+        }
+        if (request.getRangeType() == null) {
+            request.setRangeType(2);
+        }
         examSessionService.save(request);
         return R.success(request);
     }
@@ -116,6 +130,9 @@ public class ExamSessionController {
         }
         if (request.getSessionId() == null) {
             return R.fail("场次ID不能为空");
+        }
+        if (request.getRangeType() == null) {
+            request.setRangeType(2);
         }
         examSessionService.updateById(request);
         return R.success(request);
@@ -133,5 +150,27 @@ public class ExamSessionController {
             return R.success();
         }
         return R.fail("删除失败");
+    }
+
+    @PostMapping("/publish")
+    @Operation(summary = "发布/下发场次（按班级生成考生名单）")
+    public R<ExamSessionPublishResponse> publish(@Valid @RequestBody ExamSessionPublishRequest request) {
+        SysUser currentUser = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
+        if (currentUser != null && currentUser.getStudentId() != null && !currentUser.isAdmin()) {
+            return R.fail("无权限发布场次");
+        }
+        ExamSessionPublishResponse resp = examSessionDispatchService.publish(request);
+        return R.success(resp);
+    }
+
+    @PostMapping("/unpublish")
+    @Operation(summary = "撤回发布（隐藏学员端可见）", description = "仅更新发布状态，不清理考生名单")
+    public R<Void> unpublish(@Valid @RequestBody IdRequest request) {
+        SysUser currentUser = SecurityUtils.getLoginUser() != null ? SecurityUtils.getLoginUser().getUser() : null;
+        if (currentUser != null && currentUser.getStudentId() != null && !currentUser.isAdmin()) {
+            return R.fail("无权限撤回场次");
+        }
+        examSessionDispatchService.unpublish(request.getId());
+        return R.success();
     }
 }

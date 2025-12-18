@@ -17,7 +17,7 @@ public class ExamAnswerSubmitRequest {
     /** 作答耗时（秒） */
     private Integer durationSec;
 
-    /** 用户自评分（如果需要人工评阅时填充） */
+    /** 用户自评分（保留字段，当前考试仅自动判分） */
     private Integer scoreUser;
 
     /** 答题明细 */

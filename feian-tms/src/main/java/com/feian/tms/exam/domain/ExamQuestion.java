@@ -44,6 +44,11 @@ public class ExamQuestion extends BaseEntity {
     /** 原题内容ID（便于对照） */
     private String questionFrameId;
 
+    /**
+     * 是否考核: 0=否(可自测练习) 1=是(仅供考试)
+     */
+    private Integer ifCheck;
+
     /** 原机型名称（迁移对账用） */
     private String rawMachineType;
 

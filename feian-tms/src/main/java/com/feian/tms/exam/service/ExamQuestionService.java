@@ -5,6 +5,8 @@ import com.feian.tms.common.PageRequest;
 import com.feian.tms.exam.domain.ExamQuestion;
 import com.feian.tms.exam.dto.ExamPaperDetailResponse;
 import com.feian.tms.exam.dto.ExamQuestionRequest;
+import com.feian.tms.exam.dto.ExamQuestionUiRequest;
+import com.feian.tms.exam.dto.ExamQuestionUiResponse;
 import com.github.yulichang.base.MPJBaseService;
 
 public interface ExamQuestionService extends MPJBaseService<ExamQuestion> {
@@ -14,6 +16,10 @@ public interface ExamQuestionService extends MPJBaseService<ExamQuestion> {
     ExamPaperDetailResponse.Item getDetail(Long questionId);
 
     Long saveOrUpdateQuestion(ExamQuestionRequest request);
+
+    ExamQuestionUiResponse getUiDetail(Long questionId);
+
+    Long saveOrUpdateUi(ExamQuestionUiRequest request);
 
     void deleteQuestion(Long questionId);
 }

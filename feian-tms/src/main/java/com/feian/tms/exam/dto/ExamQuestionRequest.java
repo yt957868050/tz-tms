@@ -23,6 +23,9 @@ public class ExamQuestionRequest {
     private String source;
     private String questionFrameId;
 
+    /** 是否考核: 0=否(可自测练习) 1=是(仅供考试) */
+    private Integer ifCheck;
+
     /** 原始题目 JSON 快照 */
     private String rawJson;
 

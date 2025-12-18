@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 import com.feian.common.annotation.DataScope;
 import com.feian.common.constant.UserConstants;
+import com.feian.common.core.context.MachineTypeContextHolder;
 import com.feian.common.core.domain.BaseEntity;
 import com.feian.common.core.domain.entity.SysRole;
 import com.feian.common.core.domain.entity.SysUser;
@@ -189,7 +190,7 @@ public class DataScopeAspect
      */
     public static void machineTypeScopeFilter(JoinPoint joinPoint, SysUser user, String machineTypeAlias, String studentAlias)
     {
-        Long currentMachineTypeId = user.getCurrentMachineTypeId();
+        Long currentMachineTypeId = MachineTypeContextHolder.getMachineTypeId();
         if (currentMachineTypeId == null) {
             // 如果用户没有选择机型，不显示任何数据
             Object params = joinPoint.getArgs()[0];

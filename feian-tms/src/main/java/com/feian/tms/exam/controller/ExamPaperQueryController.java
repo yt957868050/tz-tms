@@ -10,6 +10,7 @@ import com.feian.tms.exam.dto.ExamPaperSessionViewResponse;
 import com.feian.tms.exam.mapper.ExamCandidateMapper;
 import com.feian.tms.exam.mapper.ExamSessionMapper;
 import com.feian.tms.exam.service.ExamPaperQueryService;
+import com.feian.common.core.context.MachineTypeContextHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -66,12 +67,10 @@ public class ExamPaperQueryController {
             if (candidate == null) {
                 return R.fail("无权查看该场次试卷");
             }
-            Long currentMachineTypeId = user.getCurrentMachineTypeId();
-            if (currentMachineTypeId != null) {
-                ExamSession session = examSessionMapper.selectById(sessionId);
-                if (session != null && session.getMachineTypeId() != null && !currentMachineTypeId.equals(session.getMachineTypeId())) {
-                    return R.fail("当前机型与考试场次不匹配，请切换机型后再进入");
-                }
+            Long currentMachineTypeId = MachineTypeContextHolder.requireMachineTypeId();
+            ExamSession session = examSessionMapper.selectById(sessionId);
+            if (session != null && session.getMachineTypeId() != null && !currentMachineTypeId.equals(session.getMachineTypeId())) {
+                return R.fail("当前机型与考试场次不匹配，请切换机型后再进入");
             }
         }
         ExamPaperSessionViewResponse resp = examPaperQueryService.loadPaperForSession(sessionId);

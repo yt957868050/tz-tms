@@ -17,6 +17,9 @@ public interface ExamQuestionMapper extends MPJBaseMapper<ExamQuestion> {
         from exam_question
         where is_deleted = 0
           and machine_type_id = #{machineTypeId}
+          <if test="ifCheck != null">
+            and if_check = #{ifCheck}
+          </if>
           <if test="categoryId != null">
             and category_id = #{categoryId}
           </if>
@@ -31,6 +34,7 @@ public interface ExamQuestionMapper extends MPJBaseMapper<ExamQuestion> {
         </script>
         """)
     Integer countAvailable(@Param("machineTypeId") Long machineTypeId,
+                           @Param("ifCheck") Integer ifCheck,
                            @Param("categoryId") Long categoryId,
                            @Param("questionTypes") List<Integer> questionTypes,
                            @Param("difficultList") List<Integer> difficultList);
@@ -41,6 +45,9 @@ public interface ExamQuestionMapper extends MPJBaseMapper<ExamQuestion> {
         from exam_question
         where is_deleted = 0
           and machine_type_id = #{machineTypeId}
+          <if test="ifCheck != null">
+            and if_check = #{ifCheck}
+          </if>
           <if test="categoryId != null">
             and category_id = #{categoryId}
           </if>
@@ -57,6 +64,7 @@ public interface ExamQuestionMapper extends MPJBaseMapper<ExamQuestion> {
         </script>
         """)
     List<ExamQuestion> selectRandomByCategory(@Param("machineTypeId") Long machineTypeId,
+                                              @Param("ifCheck") Integer ifCheck,
                                               @Param("categoryId") Long categoryId,
                                               @Param("questionTypes") List<Integer> questionTypes,
                                               @Param("difficultList") List<Integer> difficultList,

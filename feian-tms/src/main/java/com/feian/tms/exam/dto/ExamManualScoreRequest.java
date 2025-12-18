@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 人工批改请求
+ * 人工批改请求（已废弃：当前考试仅选择题自动判分）
  */
 @Data
 public class ExamManualScoreRequest {

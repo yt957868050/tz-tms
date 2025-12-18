@@ -27,7 +27,7 @@ public class ExamAnswerSheet extends BaseEntity {
     private Integer scoreUser;
     private Integer correctCount;
     private Integer passFlag;
-    private Integer status;        // 1待批改 2完成
+    private Integer status;        // 1进行中 2完成
     private Integer durationSec;
     private Long judgeUser;
 

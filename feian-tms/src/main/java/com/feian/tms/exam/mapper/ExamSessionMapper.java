@@ -22,6 +22,8 @@ public interface ExamSessionMapper extends MPJBaseMapper<ExamSession> {
                 s.window_start         as windowStart,
                 s.window_end           as windowEnd,
                 s.suggest_time_min     as suggestTimeMin,
+                s.publish_status       as publishStatus,
+                s.publish_time         as publishTime,
                 s.pass_rule_type       as passRuleType,
                 s.pass_score           as passScore,
                 s.pass_question_num    as passQuestionNum,
@@ -39,6 +41,7 @@ public interface ExamSessionMapper extends MPJBaseMapper<ExamSession> {
             join exam_session s on s.session_id = c.session_id and s.is_deleted = 0
             where c.is_deleted = 0
               and c.user_id = #{userId}
+              and (s.publish_status is null or s.publish_status = 2)
               <if test="machineTypeId != null">
                 and s.machine_type_id = #{machineTypeId}
               </if>

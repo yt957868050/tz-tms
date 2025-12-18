@@ -17,4 +17,7 @@ public class ExamAnswerStartRequest {
 
     /** 试卷ID（可空，优先取场次绑定） */
     private Long paperId;
+
+    /** 场次密码（如设置了 password 则必填） */
+    private String password;
 }

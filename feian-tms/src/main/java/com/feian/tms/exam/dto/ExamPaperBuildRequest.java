@@ -23,6 +23,14 @@ public class ExamPaperBuildRequest {
     /** 允许的难度 */
     private List<Integer> difficultList;
 
+    /**
+     * 题目范围筛选：
+     *  - null：不限（包含可自测与仅考试）
+     *  - 0：可自测练习
+     *  - 1：仅供考试
+     */
+    private Integer ifCheck;
+
     /** 分数通过线 */
     private Integer passScore;
 

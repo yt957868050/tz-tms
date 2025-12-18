@@ -19,17 +19,75 @@ import java.util.stream.Collectors;
  *  - 支持从用户作答 JSON 中提取用户答案（同名键或纯字符串）
  *  - 比较时忽略顺序与空白，完全匹配则得分，否则 0 分
  * 说明：
- *  - 内容格式未知时返回 null，调用方可回落到用户上传的得分/正确标记或人工批改
+ *  - 本系统考试题型仅为选择题（含判断/多选/不定项），不提供人工批改流程
+ *  - 内容格式未知/无法提取正确答案时，按答错处理（0 分/错误）
  */
 @Component
 public class ExamAutoScoringService {
 
     public ScoreResult autoScore(String contentJson, String answerJson, Integer defaultScore) {
-        Set<String> correctSet = extract(contentJson);
-        Set<String> userSet = extract(answerJson);
-        if (CollectionUtils.isEmpty(correctSet) || CollectionUtils.isEmpty(userSet)) {
-            return null;
+        Integer questionType = null;
+        if (StringUtils.hasText(contentJson)) {
+            try {
+                JSONObject obj = JSON.parseObject(contentJson);
+                questionType = obj.getInteger("questionType");
+            } catch (Exception ignore) {
+            }
         }
+        return autoScore(contentJson, answerJson, defaultScore, questionType);
+    }
+
+    /**
+     * 自动判分（支持传入题型以匹配旧系统规则）。
+     * <p>
+     * 规则：
+     * <ul>
+     *   <li>2 多选题、6 不定项：全对满分；选错 0 分；少选按比例给分</li>
+     *   <li>其他题型：全对满分，否则 0</li>
+     * </ul>
+     */
+    public ScoreResult autoScore(String contentJson, String answerJson, Integer defaultScore, Integer questionType) {
+        Integer type = questionType;
+        Set<String> correctSet = extract(contentJson, true);
+        // 无法提取正确答案：按答错处理（避免进入“待批改”流程）
+        if (CollectionUtils.isEmpty(correctSet)) {
+            ScoreResult result = new ScoreResult();
+            result.setCorrectFlag(0);
+            result.setScore(0);
+            return result;
+        }
+        Set<String> userSet = extract(answerJson, false);
+        // 未作答：不需要人工批改，直接记 0 分
+        if (CollectionUtils.isEmpty(userSet)) {
+            ScoreResult result = new ScoreResult();
+            result.setCorrectFlag(0);
+            result.setScore(0);
+            return result;
+        }
+
+        // 多选/不定项：支持少选按比例给分
+        if (type != null && (type == 2 || type == 6)) {
+            boolean hasWrong = userSet.stream().anyMatch(u -> !correctSet.contains(u));
+            ScoreResult result = new ScoreResult();
+            if (hasWrong) {
+                result.setCorrectFlag(0);
+                result.setScore(0);
+                return result;
+            }
+            if (correctSet.equals(userSet)) {
+                result.setCorrectFlag(1);
+                result.setScore(defaultScore != null ? defaultScore : 0);
+                return result;
+            }
+            int base = defaultScore != null ? defaultScore : 0;
+            int correctCount = correctSet.size();
+            int rightCount = userSet.size();
+            int partial = correctCount <= 0 ? 0 : Math.round((float) base / correctCount * rightCount);
+            result.setCorrectFlag(0);
+            result.setScore(partial);
+            return result;
+        }
+
         boolean match = correctSet.equals(userSet);
         ScoreResult result = new ScoreResult();
         result.setCorrectFlag(match ? 1 : 0);
@@ -37,7 +95,7 @@ public class ExamAutoScoringService {
         return result;
     }
 
-    private Set<String> extract(String jsonOrString) {
+    private Set<String> extract(String jsonOrString, boolean strictJsonObject) {
         if (!StringUtils.hasText(jsonOrString)) {
             return Collections.emptySet();
         }
@@ -50,14 +108,29 @@ public class ExamAutoScoringService {
             // 优先解析对象
             if (trimmed.startsWith("{")) {
                 JSONObject obj = JSON.parseObject(trimmed);
-                // 常见键集合
-                String[] keys = {"answer", "answers", "rightAnswer", "correctAnswer", "correct"};
+                // 常见键集合（兼容题目内容与作答内容）
+                String[] keys = {
+                        // 题库 QuestionFrame / 本系统：正确答案 key
+                        "correctArrayKey", "correctKey",
+                        // 旧系统作答：用户答案 key
+                        "contentArrayKey", "contentKey",
+                        // 常见/通用字段
+                        "answer", "answers", "rightAnswer", "correctAnswer", "correct",
+                        // 兼容旧题库：前缀（多选用空格分隔）
+                        "correctPrefix"
+                };
                 for (String key : keys) {
                     if (obj.containsKey(key)) {
                         Object val = obj.get(key);
+                        if ("correctPrefix".equals(key) && val instanceof String s) {
+                            // 旧系统多选 correctPrefix 使用空格分隔（如 "A B"）
+                            String[] parts = s.trim().split("\\s+");
+                            return normalize(List.of(parts));
+                        }
                         return normalize(val);
                     }
                 }
+                return strictJsonObject ? Collections.emptySet() : normalizeSingle(trimmed);
             }
             // 再尝试数组
             if (trimmed.startsWith("[")) {
@@ -65,9 +138,9 @@ public class ExamAutoScoringService {
                 return normalize(arr);
             }
         } catch (Exception ignore) {
-            // 不可解析时忽略
+            return strictJsonObject ? Collections.emptySet() : normalizeSingle(trimmed);
         }
-        return normalizeSingle(trimmed);
+        return strictJsonObject ? Collections.emptySet() : normalizeSingle(trimmed);
     }
 
     private Set<String> normalize(Object val) {

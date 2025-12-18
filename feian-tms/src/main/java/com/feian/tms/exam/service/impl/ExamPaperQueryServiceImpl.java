@@ -112,7 +112,12 @@ public class ExamPaperQueryServiceImpl implements ExamPaperQueryService {
         }
         try {
             JSONObject obj = JSON.parseObject(item.getContentJson());
-            JSONArray options = obj.getJSONArray("options");
+            // 兼容两种题目内容格式：options / questionItemFrames（旧系统 QuestionFrame）
+            String field = obj.containsKey("options") ? "options" : (obj.containsKey("questionItemFrames") ? "questionItemFrames" : null);
+            if (field == null) {
+                return item;
+            }
+            JSONArray options = obj.getJSONArray(field);
             if (options == null || options.isEmpty()) {
                 return item;
             }
@@ -125,7 +130,7 @@ public class ExamPaperQueryServiceImpl implements ExamPaperQueryService {
             for (Integer i : idx) {
                 shuffled.add(options.get(i));
             }
-            obj.put("options", shuffled);
+            obj.put(field, shuffled);
             item.setContentJson(obj.toJSONString());
             item.setOptionOrder(idx);
         } catch (Exception ignore) {

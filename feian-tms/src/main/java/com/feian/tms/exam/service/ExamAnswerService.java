@@ -6,6 +6,7 @@ import com.feian.tms.exam.dto.ExamAnswerStartRequest;
 import com.feian.tms.exam.dto.ExamAnswerStartResponse;
 import com.feian.tms.exam.dto.ExamAnswerSubmitRequest;
 import com.feian.tms.exam.dto.ExamManualScoreRequest;
+import com.feian.tms.exam.dto.ExamPaperSessionViewResponse;
 import com.feian.tms.common.PageRequest;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -25,6 +26,9 @@ public interface ExamAnswerService {
     ExamAnswerSheet submit(ExamAnswerSubmitRequest request);
 
     ExamAnswerSheet manualScore(ExamManualScoreRequest request);
+
+    /** 按答卷ID获取当次考试试卷视图（快照优先） */
+    ExamPaperSessionViewResponse loadPaperViewForSheet(Long sheetId);
 
     void recordProctorEvent(ExamProctorEvent event);
 

@@ -38,6 +38,10 @@ public class ExamSession extends BaseEntity {
     private String password;
     private Integer rangeType;
     private Integer credentialTemplateId;
+    /** 发布状态：1草稿 2已发布 3已撤回 */
+    private Integer publishStatus;
+    /** 发布时间 */
+    private Date publishTime;
 
     /** 原机型名称（迁移对账） */
     private String rawMachineType;

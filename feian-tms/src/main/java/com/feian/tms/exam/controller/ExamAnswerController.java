@@ -13,6 +13,7 @@ import com.feian.tms.exam.dto.ExamAnswerStartRequest;
 import com.feian.tms.exam.dto.ExamAnswerStartResponse;
 import com.feian.tms.exam.dto.ExamAnswerSubmitRequest;
 import com.feian.tms.exam.dto.ExamManualScoreRequest;
+import com.feian.tms.exam.dto.ExamPaperSessionViewResponse;
 import com.feian.tms.exam.dto.ExamProctorEventRequest;
 import com.feian.tms.exam.mapper.ExamAnswerItemMapper;
 import com.feian.tms.exam.mapper.ExamAnswerSheetMapper;
@@ -93,16 +94,22 @@ public class ExamAnswerController {
         List<ExamAnswerItem> items = examAnswerItemMapper.selectList(new LambdaQueryWrapper<ExamAnswerItem>()
                 .eq(ExamAnswerItem::getSheetId, sheetId)
                 .orderByAsc(ExamAnswerItem::getId));
+        ExamPaperSessionViewResponse paperView = null;
+        try {
+            paperView = examAnswerService.loadPaperViewForSheet(sheetId);
+        } catch (Exception ignore) {
+        }
         Map<String, Object> data = new HashMap<>();
         data.put("sheet", sheet);
         data.put("items", items);
+        data.put("paperView", paperView);
         return R.success(data);
     }
 
     @PostMapping("/manualScore")
-    @Operation(summary = "人工批改答卷")
+    @Operation(summary = "人工批改答卷（已禁用）")
     public R<ExamAnswerSheet> manualScore(@Valid @RequestBody ExamManualScoreRequest request) {
-        return R.success(examAnswerService.manualScore(request));
+        return R.fail("当前考试仅支持选择题自动判分，无需人工批改");
     }
 
     @PostMapping("/proctor")

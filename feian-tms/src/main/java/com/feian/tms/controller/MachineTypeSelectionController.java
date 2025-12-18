@@ -3,15 +3,15 @@ package com.feian.tms.controller;
 import com.feian.common.core.controller.BaseController;
 import com.feian.common.core.domain.entity.SysUser;
 import com.feian.common.utils.SecurityUtils;
-import com.feian.framework.web.service.TokenService;
-import com.feian.system.service.ISysUserService;
 import com.feian.tms.common.R;
+import com.feian.common.core.context.MachineTypeContextHolder;
 import com.feian.tms.domain.MachineType;
 import com.feian.tms.mapper.MachineTypeMapper;
 import com.feian.tms.service.IStudentMachineTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +29,6 @@ import java.util.List;
 public class MachineTypeSelectionController extends BaseController {
 
     private final IStudentMachineTypeService studentMachineTypeService;
-    private final ISysUserService userService;
-    private final TokenService tokenService;
     private final MachineTypeMapper machineTypeMapper;
 
     /**
@@ -79,18 +77,8 @@ public class MachineTypeSelectionController extends BaseController {
                 return R.fail("您没有权限选择该机型");
             }
         }
-        
-        // 更新用户的当前机型选择
-        SysUser user = new SysUser();
-        user.setUserId(userId);
-        user.setCurrentMachineTypeId(request.getMachineTypeId());
-        user.setCurrentMachineTypeName(machineType.getMachineTypeName());
-        
-        userService.updateUser(user);
-        
-        // 刷新token中的用户信息
-        tokenService.refreshToken(SecurityUtils.getLoginUser());
-        
+
+        // 机型上下文由前端保存并随请求传递；后端仅校验，不落库、不刷新 token
         return R.success();
     }
 
@@ -99,13 +87,21 @@ public class MachineTypeSelectionController extends BaseController {
      */
     @Operation(summary = "获取当前用户选择的机型")
     @PostMapping("/currentMachineType")
-    public R<MachineTypeSelectionResponse> getCurrentMachineType() {
-        SysUser user = SecurityUtils.getLoginUser().getUser();
-        
+    public R<MachineTypeSelectionResponse> getCurrentMachineType(
+            @RequestHeader(value = MachineTypeContextHolder.HEADER_MACHINE_TYPE_ID, required = false) String headerMachineTypeId) {
+        Long machineTypeId = null;
+        if (StringUtils.hasText(headerMachineTypeId)) {
+            try {
+                machineTypeId = Long.valueOf(headerMachineTypeId.trim());
+            } catch (Exception ignore) {
+            }
+        }
         MachineTypeSelectionResponse response = new MachineTypeSelectionResponse();
-        response.setMachineTypeId(user.getCurrentMachineTypeId());
-        response.setMachineTypeName(user.getCurrentMachineTypeName());
-        
+        response.setMachineTypeId(machineTypeId);
+        if (machineTypeId != null) {
+            MachineType machineType = machineTypeMapper.selectById(machineTypeId);
+            response.setMachineTypeName(machineType != null ? machineType.getMachineTypeName() : null);
+        }
         return R.success(response);
     }
 
@@ -115,15 +111,7 @@ public class MachineTypeSelectionController extends BaseController {
     @Operation(summary = "清除当前用户的机型选择")
     @PostMapping("/clearMachineType")
     public R<Void> clearMachineType() {
-        Long userId = SecurityUtils.getUserId();
-        
-        SysUser user = new SysUser();
-        user.setUserId(userId);
-        user.setCurrentMachineTypeId(null);
-        user.setCurrentMachineTypeName(null);
-        
-        userService.updateUser(user);
-        
+        // 机型上下文由前端维护（localStorage），后端无需清理
         return R.success();
     }
 
