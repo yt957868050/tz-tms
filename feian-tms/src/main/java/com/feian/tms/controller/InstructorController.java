@@ -1,6 +1,9 @@
 package com.feian.tms.controller;
 
+import com.feian.common.core.domain.entity.SysUser;
 import com.feian.common.utils.PageUtils;
+import com.feian.common.utils.SecurityUtils;
+import com.feian.system.service.impl.SysUserServiceImpl;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.request.IdsRequest;
 import com.github.pagehelper.PageInfo;
@@ -37,6 +40,7 @@ import java.util.List;
 public class InstructorController {
     
     private final InstructorService instructorService;
+    private final SysUserServiceImpl sysUserServiceImpl;
 
     /**
      * 查询教员信息列表
@@ -111,6 +115,16 @@ public class InstructorController {
         entity.setUserId(UserId);
         boolean result = instructorService.save(entity);
         if (result) {
+            SysUser user = new SysUser();
+            user.setNickName(entity.getInstructorName());
+            user.setEmail(entity.getEmail());
+            user.setPhonenumber(entity.getPhoneNumber());
+            user.setSex(entity.getGender());
+            user.setInstructorId(entity.getInstructorId());
+            user.setRoleIds(new Long[]{3L});
+            user.setUserName(entity.getInstructorCode());
+            user.setPassword(SecurityUtils.encryptPassword("123456"));
+            sysUserServiceImpl.insertUser(user);
             InstructorResponse response = new InstructorResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);

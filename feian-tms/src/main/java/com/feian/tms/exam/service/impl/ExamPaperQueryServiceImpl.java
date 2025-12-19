@@ -4,20 +4,18 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.feian.tms.exam.domain.ExamPaperTemplate;
-import com.feian.tms.exam.domain.ExamPaperTemplateItem;
-import com.feian.tms.exam.domain.ExamQuestionContent;
-import com.feian.tms.exam.domain.ExamSession;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.tms.common.PageRequest;
+import com.feian.tms.exam.domain.*;
 import com.feian.tms.exam.dto.ExamPaperDetailResponse;
 import com.feian.tms.exam.dto.ExamPaperSessionViewResponse;
-import com.feian.tms.exam.mapper.ExamPaperTemplateItemMapper;
-import com.feian.tms.exam.mapper.ExamPaperTemplateMapper;
-import com.feian.tms.exam.mapper.ExamQuestionContentMapper;
-import com.feian.tms.exam.mapper.ExamSessionMapper;
+import com.feian.tms.exam.mapper.*;
 import com.feian.tms.exam.service.ExamPaperQueryService;
+
+import com.github.yulichang.base.MPJBaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ExamPaperQueryServiceImpl implements ExamPaperQueryService {
+public class ExamPaperQueryServiceImpl extends MPJBaseServiceImpl<ExamPaperTemplateMapper, ExamPaperTemplate> implements ExamPaperQueryService {
 
     private final ExamPaperTemplateMapper examPaperTemplateMapper;
     private final ExamPaperTemplateItemMapper examPaperTemplateItemMapper;
@@ -102,6 +100,30 @@ public class ExamPaperQueryServiceImpl implements ExamPaperQueryService {
         }
         return view;
     }
+
+    @Override
+    public List<ExamPaperTemplate> list() {
+        return examPaperTemplateMapper.selectList(new LambdaQueryWrapper<ExamPaperTemplate>()
+                .eq(ExamPaperTemplate::getIsDeleted, 0)
+                .orderByDesc(ExamPaperTemplate::getCreateTime));
+
+    }
+
+    @Override
+    public Page<ExamPaperTemplate> pageQuery(PageRequest<ExamPaperTemplate> pageRequest) {
+        PageRequest<ExamPaperTemplate> req = pageRequest != null ? pageRequest : new PageRequest<>();
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<ExamPaperTemplate> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(req.getPageNum(), req.getPageSize());
+        ExamPaperTemplate query = req.getQuery();
+        Long machineTypeId = query != null ? query.getMachineTypeId() : null;
+        String name = query != null ? query.getName() : null;
+
+        var wrapper = new LambdaQueryWrapper<ExamPaperTemplate>()
+                .eq(machineTypeId != null, ExamPaperTemplate::getMachineTypeId, machineTypeId)
+                .like(StringUtils.hasText(name), ExamPaperTemplate::getName, name)
+                .orderByAsc(ExamPaperTemplate::getPaperId);
+        return this.baseMapper.selectPage(page, wrapper);
+    }
+
 
     /**
      * 按选项乱序标记打乱 contentJson 中的 options 数组，并记录原索引

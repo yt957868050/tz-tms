@@ -17,6 +17,7 @@ import com.feian.tms.exam.domain.ExamSession;
 import com.feian.tms.exam.mapper.ExamAnswerSheetMapper;
 import com.feian.tms.exam.service.ExamCandidateService;
 import com.feian.tms.exam.service.ExamSessionService;
+import com.feian.tms.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,6 +47,7 @@ public class ExamCandidateController {
     private final ExamCandidateService examCandidateService;
     private final ExamAnswerSheetMapper examAnswerSheetMapper;
     private final ExamSessionService examSessionService;
+    private final StudentService studentService;
 
     @PostMapping("/list")
     @Operation(summary = "考生列表（可按场次/用户查询）")
@@ -181,6 +183,7 @@ public class ExamCandidateController {
             return R.fail("场次已发布后不支持补人，请使用补考功能");
         }
         request.setId(null);
+        request.setUserId(studentService.getUserId(request.getUserId()));
         examCandidateService.save(request);
         return R.success(request);
     }

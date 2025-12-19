@@ -1,5 +1,6 @@
 package com.feian.tms.exam.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Data
 public class ExamQuestionUiResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long questionId;
     private Long machineTypeId;
     private Long categoryId;

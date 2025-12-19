@@ -1,23 +1,29 @@
 package com.feian.tms.exam.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.feian.tms.common.PageRequest;
 import com.feian.tms.common.R;
 import com.feian.common.core.domain.entity.SysUser;
 import com.feian.common.utils.SecurityUtils;
 import com.feian.tms.exam.domain.ExamCandidate;
+import com.feian.tms.exam.domain.ExamCategory;
+import com.feian.tms.exam.domain.ExamPaperTemplate;
 import com.feian.tms.exam.domain.ExamSession;
 import com.feian.tms.exam.dto.ExamPaperDetailResponse;
 import com.feian.tms.exam.dto.ExamPaperSessionViewResponse;
 import com.feian.tms.exam.mapper.ExamCandidateMapper;
+import com.feian.tms.exam.mapper.ExamPaperTemplateItemMapper;
 import com.feian.tms.exam.mapper.ExamSessionMapper;
 import com.feian.tms.exam.service.ExamPaperQueryService;
 import com.feian.common.core.context.MachineTypeContextHolder;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/exam/paper")
@@ -28,6 +34,13 @@ public class ExamPaperQueryController {
     private final ExamPaperQueryService examPaperQueryService;
     private final ExamCandidateMapper examCandidateMapper;
     private final ExamSessionMapper examSessionMapper;
+    private final ExamPaperTemplateItemMapper examPaperTemplateItemMapper;
+
+    @PostMapping("/list")
+    @Operation(summary = "获取试卷完整信息（含题目内容）")
+    public R<Page<ExamPaperTemplate>> list(@RequestBody PageRequest<ExamPaperTemplate> pageRequest) {
+        return R.success(examPaperQueryService.pageQuery(pageRequest));
+    }
 
     @GetMapping("/full/{paperId}")
     @Operation(summary = "获取试卷完整信息（含题目内容）")

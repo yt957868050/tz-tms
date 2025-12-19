@@ -38,4 +38,7 @@ public interface StudentMapper extends MPJBaseMapper<Student> {
 
     @Select("select student_id from tms_student where student_code=#{studentCode} and is_deleted=0")
     Long getStudentIdByCode(String studentCode);
+
+    @Select("select user_id from sys_user where student_id= #{studentId}")
+    Long getUserId(Long userId);
 }

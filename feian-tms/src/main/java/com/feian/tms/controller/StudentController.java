@@ -1,8 +1,11 @@
 package com.feian.tms.controller;
 
 import com.feian.common.annotation.DataScope;
+import com.feian.common.core.domain.entity.SysUser;
 import com.feian.common.utils.PageUtils;
+import com.feian.common.utils.SecurityUtils;
 import com.feian.framework.web.service.TokenService;
+import com.feian.system.service.impl.SysUserServiceImpl;
 import com.feian.tms.dto.request.IdsDeleteRequest;
 import com.feian.tms.dto.request.IdsRequest;
 import com.feian.tms.service.ClassStudentService;
@@ -58,6 +61,9 @@ public class StudentController {
     private final ClassStudentService classStudentService;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private SysUserServiceImpl sysUserServiceImpl;
+
     /**
      * 查询学员信息列表
      */
@@ -189,6 +195,16 @@ public class StudentController {
         boolean result = studentService.save(entity);
         studentService.setPrimaryMajor(entity.getStudentId(), entity.getPrimaryMajorId());
         if (result) {
+            SysUser user = new SysUser();
+            user.setNickName(entity.getStudentName());
+            user.setEmail(entity.getEmail());
+            user.setPhonenumber(entity.getPhoneNumber());
+            user.setSex(entity.getGender());
+            user.setStudentId(entity.getStudentId());
+            user.setRoleIds(new Long[]{5L});
+            user.setUserName(entity.getEngStudentName());
+            user.setPassword(SecurityUtils.encryptPassword("123456"));
+            sysUserServiceImpl.insertUser(user);
             StudentResponse response = new StudentResponse();
             BeanUtils.copyProperties(entity, response);
             return R.success(response);

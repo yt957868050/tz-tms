@@ -3,6 +3,7 @@ package com.feian.tms.exam.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.feian.tms.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +25,9 @@ public class ExamSession extends BaseEntity {
     private String name;
     private Long paperId;
     private Long machineTypeId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date windowStart;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date windowEnd;
     private Integer suggestTimeMin;
     private String passRuleType;
