@@ -95,6 +95,9 @@ public class SysUser extends BaseEntity
     /** 学员ID（如果该用户为学员） */
     private Long studentId;
 
+    /** 教员ID（如果该用户为教员） */
+    private Long instructorId;
+
     /** 当前选择的机型ID（登录时选择） */
     private Long currentMachineTypeId;
 
@@ -329,6 +332,16 @@ public class SysUser extends BaseEntity
         this.studentId = studentId;
     }
 
+    public Long getInstructorId()
+    {
+        return instructorId;
+    }
+
+    public void setInstructorId(Long instructorId)
+    {
+        this.instructorId = instructorId;
+    }
+
     public Long getCurrentMachineTypeId()
     {
         return currentMachineTypeId;
@@ -371,6 +384,7 @@ public class SysUser extends BaseEntity
             .append("updateBy", getUpdateBy())
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
+            .append("instructorId", getInstructorId())
             .append("dept", getDept())
             .toString();
     }
